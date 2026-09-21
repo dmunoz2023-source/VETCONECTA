@@ -1,5 +1,6 @@
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 # Dependencias
 node_modules/
 
@@ -21,6 +22,12 @@ npm-debug.log*
 Thumbs.db
 .vscode/*
 !.vscode/extensions.json
+=======
+/*.md
+!README.md
+
+/node_modules
+>>>>>>> 1f463bb2d9df450417702f81cf2451f664f18ac2
 =======
 /*.md
 !README.md
