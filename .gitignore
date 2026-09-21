@@ -1,42 +1,4 @@
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-# Dependencias
-node_modules/
-
-# Archivos de compilación
-dist/
-build/
-
-# Variables de entorno y secretos
-.env
-.env.*
-!.env.example
-
-# Logs y depuración
-*.log
-npm-debug.log*
-
-# Archivos de sistema y editores
-.DS_Store
-Thumbs.db
-.vscode/*
-!.vscode/extensions.json
-=======
 /*.md
 !README.md
 
 /node_modules
->>>>>>> 1f463bb2d9df450417702f81cf2451f664f18ac2
-=======
-/*.md
-!README.md
-
-/node_modules
->>>>>>> 1f463bb2d9df450417702f81cf2451f664f18ac2
-=======
-/*.md
-!README.md
-
-/node_modules
->>>>>>> 1f463bb2d9df450417702f81cf2451f664f18ac2
