@@ -1,6 +1,6 @@
 import { IsEmail, IsString, MinLength } from 'class-validator';
 
-export class RegisterDto {
+export class RegisterDTO {
   @IsEmail({}, { message: 'El formato del correo electrónico no es válido' })
   email!: string;
 
