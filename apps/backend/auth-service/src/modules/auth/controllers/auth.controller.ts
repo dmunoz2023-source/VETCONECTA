@@ -1,6 +1,8 @@
-import { Controller, Post, Body } from '@nestjs/common';
+import { Controller, Post, Get, Body } from '@nestjs/common';
 import { LoginDTO } from '../dto/login.dto';
 import { RegisterDTO } from '../dto/register.dto';
+import { CurrentUser } from '@app/shared/decorators/current-user.decorator';
+import { JwtPayload } from '@app/shared/types/jwt-payload.interface';
 
 // Jeremy: Esta es la linea que debes descomentar para agregar el AuthService
 // import { AuthService } from '../services/auth.service'; 
@@ -24,6 +26,17 @@ export class AuthController {
     return {  // esto es un ejemplo
       token: 'jwt_placeholder',
       message: 'Estructura de login lista para integrar'
+    };
+  }
+
+  // Implemento el decorador @CurrentUser() en el endpoint GET v1/auth/me, esto es deacuerdo los documento de MicroServicios y SRS
+  @Get('me')
+  async getProfile(@CurrentUser() user: JwtPayload) {
+    return {
+      id: user.sub, 
+      correo: user.email, 
+      rol: user.role,
+      clientId: user.clientId // Retornará el ID o undefined según el rol
     };
   }
 }
