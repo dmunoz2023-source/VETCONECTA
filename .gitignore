@@ -1,4 +1,49 @@
+# =============================================================================
+# 1. SEGURIDAD Y VARIABLES DE ENTORNO
+# =============================================================================
+.env
+.env.*
+!.env.example
+
+# =============================================================================
+# 2. COMPILACIÓN Y ARTEFACTOS (NestJS / Vite / TypeScript)
+# =============================================================================
+dist/
+build/
+*.tsbuildinfo
+*.js.map
+*.map
+**/src/**/*.d.ts
+**/src/**/*.js
+**/src/**/*.js.map
+
+# =============================================================================
+# 3. DEPENDENCIAS Y MONOREPO (Workspaces)
+# =============================================================================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+*.log
+
+# Bloquear package-lock en subcarpetas de microservicios
+**/package-lock.json
+# Permitir exclusivamente el package-lock de la raíz
+!/package-lock.json
+
+# Bloquear lockfiles de otros gestores
+**/yarn.lock
+**/pnpm-lock.yaml
+
+# =============================================================================
+# 4. SISTEMA OPERATIVO Y EDITORES
+# =============================================================================
+.DS_Store
+Thumbs.db
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+.idea/
+
+# Archivos de documentación
 /*.md
 !README.md
-
-/node_modules
