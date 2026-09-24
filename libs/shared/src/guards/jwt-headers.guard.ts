@@ -1,10 +1,9 @@
 import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtPayload } from '../types/jwt-payload.interface';
 
-// Lee las cabeceras que el API Gateway ya valido e inyecto (X-User-Id, X-User-Role,
-// X-Client-Id) y las deja en request.user con la forma de JwtPayload, para que
-// @CurrentUser() y RolesGuard/OwnershipGuard las puedan usar. No vuelve a verificar
-// la firma del JWT: eso lo hizo el Gateway una unica vez (NFR-3).
+// Lee las cabeceras que manda el Gateway (X-User-Id, X-User-Role, X-Client-Id) y
+// arma request.user, para que @CurrentUser() y las otras guardas lo puedan usar.
+// Acá no se revisa la firma del JWT, eso ya lo hizo el Gateway (NFR-3).
 @Injectable()
 export class JwtHeadersGuard implements CanActivate {
   canActivate(context: ExecutionContext): boolean {
