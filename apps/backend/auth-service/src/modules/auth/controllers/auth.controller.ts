@@ -1,8 +1,9 @@
-import { Controller, Post, Get, Body } from '@nestjs/common';
+import { Controller, Post, Get, Body, UseGuards } from '@nestjs/common';
 import { LoginDTO } from '../dto/login.dto';
 import { RegisterDTO } from '../dto/register.dto';
 import { CurrentUser } from '@app/shared/decorators/current-user.decorator';
 import { JwtPayload } from '@app/shared/types/jwt-payload.interface';
+import { JwtHeadersGuard } from '@app/shared/guards/jwt-headers.guard';
 
 // Jeremy: Esta es la linea que debes descomentar para agregar el AuthService
 // import { AuthService } from '../services/auth.service'; 
@@ -30,7 +31,9 @@ export class AuthController {
   }
 
   // Implemento el decorador @CurrentUser() en el endpoint GET v1/auth/me, esto es deacuerdo los documento de MicroServicios y SRS
+  // Con JwtHeadersGuard, /me exige las cabeceras del Gateway para saber quién es el usuario (B3)
   @Get('me')
+  @UseGuards(JwtHeadersGuard)
   async getProfile(@CurrentUser() user: JwtPayload) {
     return {
       id: user.sub, 
