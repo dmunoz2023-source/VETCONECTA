@@ -1,0 +1,134 @@
+.vc-dash-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.vc-clients-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #f9fafb;
+  border: 1px solid var(--vc-border);
+  border-radius: 10px;
+  padding: 9px 14px;
+  width: 260px;
+  color: var(--vc-text-muted);
+}
+.vc-clients-search input {
+  border: none;
+  background: transparent;
+  outline: none;
+  width: 100%;
+  font-size: 13px;
+  color: var(--vc-text);
+}
+
+.vc-btn.primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.vc-badge-count {
+  background: var(--vc-primary);
+  color: #fff;
+  min-width: 22px;
+  text-align: center;
+  font-weight: 700;
+}
+
+.vc-empty-row {
+  text-align: center;
+  color: var(--vc-text-muted);
+  padding: 24px 0;
+}
+
+.vc-pagination {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 14px;
+  font-size: 13px;
+  color: var(--vc-text-muted);
+}
+.vc-pagination-controls {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.vc-page-btn {
+  border: 1px solid var(--vc-border);
+  background: #fff;
+  border-radius: 8px;
+  padding: 4px 10px;
+  font-size: 13px;
+  cursor: pointer;
+  color: var(--vc-text);
+}
+.vc-page-btn.active {
+  background: var(--vc-primary);
+  border-color: var(--vc-primary);
+  color: #fff;
+}
+
+/* Modal de crear/editar cliente */
+.vc-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(17, 24, 39, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+}
+.vc-modal {
+  background: #fff;
+  border-radius: 14px;
+  width: 420px;
+  max-width: calc(100vw - 32px);
+  padding: 20px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+}
+.vc-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+.vc-modal-header h2 {
+  font-size: 16px;
+  margin: 0;
+  color: var(--vc-text);
+}
+.vc-modal-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.vc-modal-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--vc-text-muted);
+}
+.vc-modal-form input {
+  border: 1px solid var(--vc-border);
+  border-radius: 8px;
+  padding: 9px 12px;
+  font-size: 14px;
+  color: var(--vc-text);
+  background: #fff;
+  color-scheme: light;
+  outline: none;
+}
+.vc-modal-form input:focus {
+  border-color: var(--vc-primary);
+}
+.vc-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 6px;
+}
