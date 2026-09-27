@@ -4,15 +4,17 @@ import { Appointment } from './entities/appointment.entity';
 import { Rating } from './entities/rating.entity';
 import { AppointmentsRepository } from './repositories/appointments.repository';
 import { RatingsRepository } from './repositories/ratings.repository';
+import { AppointmentsService } from './services/appointments.service';
+import { AppointmentsController } from './controllers/appointments.controller';
 
 /**
- * [A3] Este módulo por ahora solo expone la capa de datos (repositorios).
- * La tarea C3 (GET /citas) agregará aquí su controller, DTOs y service
- * reutilizando AppointmentsRepository tal como quedó.
+ * [A3][C3] Capa de datos (repositorios) mas el endpoint GET /v1/citas
+ * (controller + service) que consume AppointmentsRepository.findByClient.
  */
 @Module({
   imports: [TypeOrmModule.forFeature([Appointment, Rating])],
-  providers: [AppointmentsRepository, RatingsRepository],
+  controllers: [AppointmentsController],
+  providers: [AppointmentsRepository, RatingsRepository, AppointmentsService],
   exports: [AppointmentsRepository, RatingsRepository],
 })
 export class AppointmentsModule {}
