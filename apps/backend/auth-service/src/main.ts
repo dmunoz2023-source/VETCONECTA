@@ -2,7 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
 
-async function bootstrap() {
+(async function () {
   const app = await NestFactory.create(AppModule);
 
   // Validación global de DTOs
@@ -17,5 +17,4 @@ async function bootstrap() {
   const port = process.env.PORT || 3001;
   await app.listen(port);
   console.log(`Microservicio ejecutándose en el puerto: ${port}`);
-}
-bootstrap();
+})();
