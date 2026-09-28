@@ -1,5 +1,6 @@
 import { useState } from 'react';
 
+
 export default function Login() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -7,7 +8,7 @@ export default function Login() {
     const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         try {
-            const response = await fetch('/v1/auth/login', {
+            const response = await fetch(import.meta.env.VITE_ENDPOINT_LOGIN, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email, password })

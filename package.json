@@ -1,0 +1,33 @@
+{
+  "name": "vetconecta",
+  "version": "1.0.0",
+  "description": "",
+  "private": true,
+  "workspaces": [
+    "apps/backend/*",
+    "apps/frontend",
+    "libs/shared"
+  ],
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dmunoz2023-source/VETCONECTA.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/dmunoz2023-source/VETCONECTA/issues"
+  },
+  "homepage": "https://github.com/dmunoz2023-source/VETCONECTA#readme",
+  "devDependencies": {
+    "@nestjs/cli": "^12.0.3",
+    "@types/node": "^24.13.5",
+    "rimraf": "^6.1.3",
+    "ts-node": "^10.9.2",
+    "typescript": "^6.0.3"
+  }
+}
