@@ -17,11 +17,11 @@ export class Rating {
   @Column({ name: 'client_id', type: 'uuid' })
   clientId: string;
 
-  @Column({ type: 'smallint' })
-  estrellas: number;
+  @Column({ name: 'stars', type: 'smallint' })
+  stars: number;
 
-  @Column({ type: 'text', nullable: true })
-  comentario: string | null;
+  @Column({ name: 'comment', type: 'text', nullable: true })
+  comment: string | null;
 
   @Column({ name: 'created_at', type: 'timestamptz', default: () => 'NOW()' })
   createdAt: Date;

@@ -24,13 +24,13 @@ describe('AppointmentsService.findMyCitas', () => {
     (repoMock.findByClient as jest.Mock).mockResolvedValue([[{ id: 'a' }, { id: 'b' }], 2]);
 
     const result = await service.findMyCitas('client-1', {
-      estado: ['reservada'],
+      status: ['booked'],
       page: 1,
       limit: 2,
     });
 
     expect(repoMock.findByClient).toHaveBeenCalledWith('client-1', {
-      estado: ['reservada'],
+      status: ['booked'],
       page: 1,
       limit: 2,
     });

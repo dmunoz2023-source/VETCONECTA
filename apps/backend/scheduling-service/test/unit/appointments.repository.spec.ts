@@ -5,7 +5,7 @@ import { Appointment } from '../../src/modules/appointments/entities/appointment
 
 /**
  * [A3] Prueba de humo: confirma que findByClient arma el WHERE por
- * client_id, aplica el filtro de estado solo cuando se pide, y pagina.
+ * client_id, aplica el filtro de status solo cuando se pide, y pagina.
  * No toca una base real — se mockea el QueryBuilder, como corresponde a
  * una prueba unitaria de la capa de repositorio.
  */
@@ -39,7 +39,7 @@ describe('AppointmentsRepository.findByClient', () => {
   it('filtra siempre por client_id y pagina', async () => {
     await repository.findByClient('client-1', { page: 1, limit: 10 });
 
-    expect(qb.where).toHaveBeenCalledWith('appointment.client_id = :clientId', {
+    expect(qb.where).toHaveBeenCalledWith('appointment.clientId = :clientId', {
       clientId: 'client-1',
     });
     expect(qb.skip).toHaveBeenCalledWith(0);
@@ -47,16 +47,16 @@ describe('AppointmentsRepository.findByClient', () => {
     expect(qb.andWhere).not.toHaveBeenCalled();
   });
 
-  it('agrega el filtro de estado solo si se envía', async () => {
+  it('agrega el filtro de status solo si se envía', async () => {
     await repository.findByClient('client-1', {
       page: 2,
       limit: 5,
-      estado: ['reservada', 'confirmada'],
+      status: ['booked', 'confirmed'],
     });
 
     expect(qb.skip).toHaveBeenCalledWith(5);
-    expect(qb.andWhere).toHaveBeenCalledWith('appointment.estado IN (:...estado)', {
-      estado: ['reservada', 'confirmada'],
+    expect(qb.andWhere).toHaveBeenCalledWith('appointment.status IN (:...status)', {
+      status: ['booked', 'confirmed'],
     });
   });
 });

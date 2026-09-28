@@ -16,9 +16,9 @@ export class AppointmentsService {
       throw new ForbiddenException('El usuario no tiene un client_id asociado (BR-8).');
     }
 
-    const { estado, page, limit } = query;
+    const { status, page, limit } = query;
     const [items, total] = await this.appointmentsRepository.findByClient(clientId, {
-      estado,
+      status,
       page,
       limit,
     });

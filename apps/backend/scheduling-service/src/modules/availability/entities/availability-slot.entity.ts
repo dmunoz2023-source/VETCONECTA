@@ -12,7 +12,7 @@ import { Column, Entity, PrimaryGeneratedColumn, Unique } from 'typeorm';
  * (regla de oro de la arquitectura), nunca con un JOIN ni una FK física.
  */
 @Entity({ name: 'availability_slots', schema: 'scheduling' })
-@Unique('uq_slot_vet_inicio', ['vetUserId', 'inicio'])
+@Unique('uq_slot_vet_start', ['vetUserId', 'startTime'])
 export class AvailabilitySlot {
   @PrimaryGeneratedColumn('uuid')
   id: string;
@@ -23,14 +23,14 @@ export class AvailabilitySlot {
   @Column({ name: 'specialty_id', type: 'uuid' })
   specialtyId: string;
 
-  @Column({ type: 'timestamptz' })
-  inicio: Date;
+  @Column({ name: 'start_time', type: 'timestamptz' })
+  startTime: Date;
 
-  @Column({ type: 'timestamptz' })
-  fin: Date;
+  @Column({ name: 'end_time', type: 'timestamptz' })
+  endTime: Date;
 
-  @Column({ type: 'varchar', length: 20 })
-  estado: 'libre' | 'reservado' | 'bloqueado';
+  @Column({ name: 'status', type: 'varchar', length: 20 })
+  status: 'available' | 'booked' | 'blocked';
 
   @Column({ name: 'created_by', type: 'uuid', nullable: true })
   createdBy: string | null;

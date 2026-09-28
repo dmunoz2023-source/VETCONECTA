@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Appointment, AppointmentEstado } from '../entities/appointment.entity';
+import { Appointment, AppointmentStatus } from '../entities/appointment.entity';
 
 export interface FindByClientOptions {
-  estado?: AppointmentEstado[];
+  status?: AppointmentStatus[];
   page: number;
   limit: number;
 }
@@ -28,17 +28,17 @@ export class AppointmentsRepository {
 
   async findByClient(
     clientId: string,
-    { estado, page, limit }: FindByClientOptions,
+    { status, page, limit }: FindByClientOptions,
   ): Promise<[Appointment[], number]> {
     const qb = this.repo
       .createQueryBuilder('appointment')
-      .where('appointment.client_id = :clientId', { clientId })
-      .orderBy('appointment.inicio', 'DESC')
+      .where('appointment.clientId = :clientId', { clientId })
+      .orderBy('appointment.startTime', 'DESC')
       .skip((page - 1) * limit)
       .take(limit);
 
-    if (estado && estado.length > 0) {
-      qb.andWhere('appointment.estado IN (:...estado)', { estado });
+    if (status && status.length > 0) {
+      qb.andWhere('appointment.status IN (:...status)', { status });
     }
 
     return qb.getManyAndCount();

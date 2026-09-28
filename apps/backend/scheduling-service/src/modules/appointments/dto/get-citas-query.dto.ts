@@ -1,21 +1,21 @@
 import { Transform } from 'class-transformer';
 import { IsArray, IsIn, IsInt, IsOptional, Max, Min } from 'class-validator';
-import { AppointmentEstado } from '../entities/appointment.entity';
+import { AppointmentStatus } from '../entities/appointment.entity';
 
-const ESTADOS_VALIDOS: AppointmentEstado[] = [
-  'reservada',
-  'confirmada',
-  'realizada',
-  'cancelada',
-  'no_asistio',
+const VALID_STATUSES: AppointmentStatus[] = [
+  'booked',
+  'confirmed',
+  'completed',
+  'cancelled',
+  'no_show',
 ];
 
 /**
  * [C3] Query params de GET /v1/citas.
  *
- * `estado` llega como string separado por comas (ej. "reservada,confirmada")
+ * `status` llega como string separado por comas (ej. "booked,confirmed")
  * porque es la forma mas simple de mandar un filtro de arreglo por query string;
- * se transforma a string[] antes de validar cada valor contra AppointmentEstado.
+ * se transforma a string[] antes de validar cada valor contra AppointmentStatus.
  */
 export class GetCitasQueryDto {
   @IsOptional()
@@ -23,8 +23,8 @@ export class GetCitasQueryDto {
     typeof value === 'string' ? value.split(',').map((v) => v.trim()) : value,
   )
   @IsArray()
-  @IsIn(ESTADOS_VALIDOS, { each: true })
-  estado?: AppointmentEstado[];
+  @IsIn(VALID_STATUSES, { each: true })
+  status?: AppointmentStatus[];
 
   @IsOptional()
   @Transform(({ value }) => parseInt(value, 10))

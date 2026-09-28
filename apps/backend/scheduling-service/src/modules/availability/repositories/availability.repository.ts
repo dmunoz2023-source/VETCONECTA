@@ -23,11 +23,11 @@ export class AvailabilityRepository {
   findFreeSlots(vetUserId: string, specialtyId: string): Promise<AvailabilitySlot[]> {
     return this.repo
       .createQueryBuilder('slot')
-      .where('slot.vet_user_id = :vetUserId', { vetUserId })
-      .andWhere('slot.specialty_id = :specialtyId', { specialtyId })
-      .andWhere('slot.estado = :estado', { estado: 'libre' })
-      .andWhere('slot.inicio > NOW()')
-      .orderBy('slot.inicio', 'ASC')
+      .where('slot.vetUserId = :vetUserId', { vetUserId })
+      .andWhere('slot.specialtyId = :specialtyId', { specialtyId })
+      .andWhere('slot.status = :status', { status: 'available' })
+      .andWhere('slot.startTime > NOW()')
+      .orderBy('slot.startTime', 'ASC')
       .getMany();
   }
 

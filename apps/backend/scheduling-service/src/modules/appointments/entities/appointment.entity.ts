@@ -1,12 +1,12 @@
 import { Column, Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { AvailabilitySlot } from '../../availability/entities/availability-slot.entity';
 
-export type AppointmentEstado =
-  | 'reservada'
-  | 'confirmada'
-  | 'realizada'
-  | 'cancelada'
-  | 'no_asistio';
+export type AppointmentStatus =
+  | 'booked'
+  | 'confirmed'
+  | 'completed'
+  | 'cancelled'
+  | 'no_show';
 
 /**
  * [A3] Mapea scheduling.appointments (infra/db/01-tables.sql).
@@ -41,17 +41,17 @@ export class Appointment {
   @Column({ name: 'specialty_id', type: 'uuid' })
   specialtyId: string;
 
-  @Column({ type: 'timestamptz' })
-  inicio: Date;
+  @Column({ name: 'start_time', type: 'timestamptz' })
+  startTime: Date;
 
-  @Column({ type: 'timestamptz' })
-  fin: Date;
+  @Column({ name: 'end_time', type: 'timestamptz' })
+  endTime: Date;
 
-  @Column({ type: 'varchar', length: 20 })
-  estado: AppointmentEstado;
+  @Column({ name: 'status', type: 'varchar', length: 20 })
+  status: AppointmentStatus;
 
-  @Column({ type: 'varchar', length: 20, default: 'app' })
-  canal: string;
+  @Column({ name: 'channel', type: 'varchar', length: 20, default: 'app' })
+  channel: string;
 
   @Column({ name: 'created_by', type: 'uuid', nullable: true })
   createdBy: string | null;
