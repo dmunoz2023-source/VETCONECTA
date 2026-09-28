@@ -1,26 +1,10 @@
 import { Search, Bell } from "lucide-react";
+import { useAuth } from "../../hooks/useAuth";
+import { formatRole, getInitials } from "../../utils/formatters";
 
-interface HeaderProps {
-  userName?: string;
-  role?: "vet" | "reception" | "admin";
-}
-
-const ROLE_LABEL: Record<string, string> = {
-  vet: "Veterinario",
-  reception: "Recepción",
-  admin: "Administrador",
-};
-
-export default function Header({
-  userName = "Dr. Admin Vet",
-  role = "admin",
-}: HeaderProps) {
-  const initials = userName
-    .split(" ")
-    .map((p) => p[0])
-    .slice(0, 2)
-    .join("")
-    .toUpperCase();
+// Lee nombre y rol de la sesión (AuthContext)
+export default function Header() {
+  const { user } = useAuth();
 
   return (
     <header className="vc-header">
@@ -31,11 +15,15 @@ export default function Header({
 
       <div className="vc-header-actions">
         <Bell size={20} />
-        <div className="vc-avatar">{initials}</div>
-        <div className="vc-user-meta">
-          <span>{userName}</span>
-          <span>{ROLE_LABEL[role]}</span>
-        </div>
+        {user && (
+          <>
+            <div className="vc-avatar">{getInitials(user.name)}</div>
+            <div className="vc-user-meta">
+              <span>{user.name}</span>
+              <span>{formatRole(user.role)}</span>
+            </div>
+          </>
+        )}
       </div>
     </header>
   );
