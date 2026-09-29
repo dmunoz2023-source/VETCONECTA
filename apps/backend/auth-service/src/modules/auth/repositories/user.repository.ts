@@ -1,26 +1,21 @@
 import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { User } from '../entities/user.entity';
 
 @Injectable()
 export class UserRepository {
-  private users: User[] = []; // O la conexión a PostgreSQL con TypeORM/Prisma según corresponda
+  constructor(
+    @InjectRepository(User)
+    private readonly repo: Repository<User>,
+  ) {}
 
-  async findByEmail(email: string): Promise<User | undefined> {
-    return this.users.find((u) => u.email === email);
+  async findByEmail(email: string): Promise<User | null> {
+    return this.repo.findOne({ where: { email } });
   }
 
   async create(userData: Partial<User>): Promise<User> {
-    const newUser: User = {
-      id: (this.users.length + 1).toString(),
-      email: userData.email!,
-      password: userData.password!,
-      nombre: userData.nombre || 'Usuario',
-      rol: userData.rol || 'CLIENTE',
-      activo: true,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
-    this.users.push(newUser);
-    return newUser;
+    const newUser = this.repo.create(userData);
+    return await this.repo.save(newUser);
   }
 }

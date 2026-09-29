@@ -1,13 +1,18 @@
 import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { TypeOrmModule } from '@nestjs/typeorm'; //
 import { AuthController } from './controllers/auth.controller';
 import { AuthService } from './services/auth.service';
 import { UserRepository } from './repositories/user.repository';
+import { User } from './entities/user.entity'; // 
 
 // Configuración de JWT para expiración del token en 15 min
 @Module({
   imports: [
+    // AGREGADO: Vincula la entidad User con TypeORM para este módulo
+    TypeOrmModule.forFeature([User]),
+
     JwtModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
@@ -20,6 +25,6 @@ import { UserRepository } from './repositories/user.repository';
   ],
   controllers: [AuthController],
   providers: [AuthService, UserRepository],
-  exports: [AuthService],
+  exports: [AuthService, UserRepository],
 })
 export class AuthModule {}
