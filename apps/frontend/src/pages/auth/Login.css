@@ -225,3 +225,17 @@
   font-size: 13px;
   text-align: center;
 }
+.field-error {
+  margin: 6px 0 0;
+  font-size: 13px;
+  color: #b91c1c;
+}
+
+.form-group input[aria-invalid='true'] {
+  border-color: #ef4444;
+}
+
+.form-group input[aria-invalid='true']:focus {
+  border-color: #ef4444;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15);
+}
