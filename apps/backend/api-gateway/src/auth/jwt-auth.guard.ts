@@ -2,7 +2,6 @@ import {
   CanActivate,
   ExecutionContext,
   Injectable,
-  Logger,
   UnauthorizedException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
@@ -25,8 +24,6 @@ import { JwtPayload } from './jwt-payload.interface';
  */
 @Injectable()
 export class JwtAuthGuard implements CanActivate {
-  private readonly logger = new Logger(JwtAuthGuard.name);
-
   // Cabeceras de identidad que el Gateway controla en exclusiva.
   private static readonly IDENTITY_HEADERS = [
     'x-user-id',
@@ -45,23 +42,22 @@ export class JwtAuthGuard implements CanActivate {
     // 1. Anti-spoofing: descarta lo que el cliente haya intentado inyectar.
     this.stripIdentityHeaders(request);
 
-    // 2. Rutas publicas: no requieren token.
+    // 2. Rutas protegidas: valida el Bearer e inyecta las cabeceras confiables.
+    //    Las rutas de la whitelist se saltan la validacion. Ante un token
+    //    invalido/ausente, verifyToken/extractBearerToken lanzan 401.
     const url = request.originalUrl ?? request.url;
-    if (isPublicRoute(request.method, url)) {
-      return true;
+    if (!isPublicRoute(request.method, url)) {
+      const payload = this.verifyToken(this.extractBearerToken(request));
+
+      request.headers['x-user-id'] = payload.sub;
+      request.headers['x-user-role'] = payload.role;
+      if (payload.role === 'owner' && payload.clientId) {
+        request.headers['x-client-id'] = payload.clientId;
+      }
+
+      (request as Request & { user?: JwtPayload }).user = payload;
     }
 
-    // 3. Extrae y valida el Bearer.
-    const payload = this.verifyToken(this.extractBearerToken(request));
-
-    // 4. Inyecta las cabeceras de identidad confiables.
-    request.headers['x-user-id'] = payload.sub;
-    request.headers['x-user-role'] = payload.role;
-    if (payload.role === 'owner' && payload.clientId) {
-      request.headers['x-client-id'] = payload.clientId;
-    }
-
-    (request as Request & { user?: JwtPayload }).user = payload;
     return true;
   }
 
@@ -73,7 +69,7 @@ export class JwtAuthGuard implements CanActivate {
 
   private extractBearerToken(request: Request): string {
     const authorization = request.headers['authorization'];
-    if (!authorization || !authorization.startsWith('Bearer ')) {
+    if (!authorization?.startsWith('Bearer ')) {
       throw new UnauthorizedException('Falta el token Bearer.');
     }
     const token = authorization.slice('Bearer '.length).trim();
