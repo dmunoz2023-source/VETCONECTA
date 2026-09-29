@@ -1,16 +1,17 @@
 -- auth schema
 CREATE TABLE auth.users (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    email CITEXT UNIQUE NOT NULL,
-    password_hash VARCHAR NOT NULL,
-    role VARCHAR NOT NULL CHECK (role IN ('owner', 'vet', 'reception', 'admin')),
-    status VARCHAR NOT NULL DEFAULT 'active',
-    email_verified_at TIMESTAMPTZ,
-    last_login_at TIMESTAMPTZ,
+    rut VARCHAR(12) UNIQUE NOT NULL,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,
+    role VARCHAR(20) NOT NULL DEFAULT 'owner',
+    full_name VARCHAR(150) NOT NULL,
+    phone VARCHAR(20),
+    address VARCHAR(255),
+    is_active BOOLEAN DEFAULT true,
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
-
 CREATE TABLE auth.refresh_tokens (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
