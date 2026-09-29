@@ -12,11 +12,16 @@
     "skipLibCheck": true,
     "strictNullChecks": true,
     "noImplicitAny": false,
+    //Añadidos para que los archivos compilados (.js, .js.map y .d.ts) se guarden de manera aislada dentro de la carpeta dist/. y no en src.
+    "rootDir": "../../../", //para ampliar y que encuentre los @app que fallan en auth.controllers
+    "outDir": "./dist",
+    "strictPropertyInitialization": false,
 
     "paths": {
       "@app/shared/*": ["../../../libs/shared/src/*"]
     }
   },
   "include": ["src/**/*"],
+  
   "exclude": ["node_modules", "dist"]
 }
