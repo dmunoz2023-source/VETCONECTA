@@ -1,67 +1,74 @@
-import {
-  BadRequestException,
-  Injectable,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { Injectable, UnauthorizedException, ConflictException } from '@nestjs/common';
+import { HttpService } from '@nestjs/axios';
+import { firstValueFrom } from 'rxjs';
 import * as bcrypt from 'bcrypt';
+import { UserRepository } from '../repositories/user.repository';
 import { RegisterDTO } from '../dto/register.dto';
 import { LoginDTO } from '../dto/login.dto';
-import { UserRepository } from '../repositories/user.repository';
+import { UserRole } from '../entities/user.entity';
 import { User } from '../entities/user.entity';
 
 @Injectable()
 export class AuthService {
-  private readonly SALT_ROUNDS = 10;
+  constructor(
+    private readonly userRepository: UserRepository,
+    private readonly httpService: HttpService, // Inyectado para consultar el servicio de clientes por RUT
+  ) {}
 
-  constructor(private readonly userRepository: UserRepository) {}
-
-  // 1. Método de Registro
-  // El tipo de retorno ahora omite 'passwordHash' en lugar de 'password'
-  async register(registerDto: RegisterDTO): Promise<Omit<User, 'passwordHash'>> {
+  async register(registerDto: RegisterDTO) {
+    // 1. Verificar si el correo ya existe
     const existingUser = await this.userRepository.findByEmail(registerDto.email);
     if (existingUser) {
-      throw new BadRequestException('El correo electrónico ya está registrado');
+      throw new ConflictException('El correo electrónico ya se encuentra registrado');
     }
 
-    // Hashear la contraseña en texto plano
-    const hashedPassword = await bcrypt.hash(registerDto.password, this.SALT_ROUNDS);
+    // 2. Hashear contraseña con COST FACTOR = 12 (requerimiento B2.1)
+    const passwordHash = await bcrypt.hash(registerDto.password, 12);
 
-    // se le pasan todos los nuevos campos del DTO al repositorio
-    // y se guarda como passwordHash en lugar de password
+    // 3. Crear usuario con rol por defecto 'owner'
     const newUser = await this.userRepository.create({
-      rut: registerDto.rut,
-      fullName: registerDto.fullName,
-      email: registerDto.email,
-      phone: registerDto.phone,
-      address: registerDto.address,
-      role: registerDto.role,
-      passwordHash: hashedPassword,
+      ...registerDto,
+      passwordHash,
+      role: registerDto.role || UserRole.OWNER, // 'owner' por defecto
     });
 
-    // Excluimos passwordHash en lugar de password por seguridad
-    const { passwordHash, ...userWithoutPassword } = newUser;
-    return userWithoutPassword;
+    const { passwordHash: _, ...result } = newUser;
+    return result;
   }
 
-  // 2. Método de Validación de Credenciales (Login)
-  // MODIFICADO: El tipo de retorno omite 'passwordHash'
-  async validateUser(loginDto: LoginDTO): Promise<Omit<User, 'passwordHash'>> {
-    const user = await this.userRepository.findByEmail(loginDto.identifier);
+  async login(loginDto: LoginDTO) {
+    const { identifier, password } = loginDto;
+    let user: User | null = null;
 
-    // Si el usuario no existe, lanzamos UnauthorizedException
+    // 1. Si es email (contiene @), buscar directamente por correo
+    if (identifier.includes('@')) {
+      user = await this.userRepository.findByEmail(identifier);
+    } else {
+      // 2. Si es RUT, llamar al microservicio interno de clientes (puerto 3002)
+      try {
+        const url = `http://localhost:3002/internal/clients/by-rut/${identifier}`;
+        const response = await firstValueFrom(this.httpService.get(url));
+        const userId = response.data?.user_id;
+
+        if (userId) {
+          user = await this.userRepository.findById(userId);
+        }
+      } catch (error) {
+        throw new UnauthorizedException('Credenciales inválidas');
+      }
+    }
+
+    // 3. Si no existe el usuario, lanzar excepción
     if (!user) {
       throw new UnauthorizedException('Credenciales inválidas');
     }
 
-    // MODIFICADO: Se compara contra user.passwordHash (propiedad real de la entidad)
-    const isPasswordValid = await bcrypt.compare(loginDto.password, user.passwordHash);
-
+    // 4. Validar contraseña con bcrypt.compare
+    const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
     if (!isPasswordValid) {
       throw new UnauthorizedException('Credenciales inválidas');
     }
 
-    // MODIFICADO: Se excluye passwordHash antes de devolver la información
-    const { passwordHash, ...userWithoutPassword } = user;
-    return userWithoutPassword;
+    return user;
   }
 }
