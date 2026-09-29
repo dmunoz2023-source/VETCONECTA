@@ -101,12 +101,3 @@ export async function login(email: string, password: string): Promise<Session> {
   }
   return { role };
 }
-
-/** Cierra la sesión borrando el token guardado. */
-export function logout(): void {
-  try {
-    localStorage.removeItem(TOKEN_STORAGE_KEY);
-  } catch {
-    // Nada que borrar si el almacenamiento no está disponible.
-  }
-}
