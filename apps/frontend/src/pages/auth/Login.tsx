@@ -1,7 +1,7 @@
 import { useId, useState } from 'react';
 import type { FormEvent } from 'react';
-import { login, LoginError } from '../api/auth.api';
-import type { Session } from '../api/auth.api';
+import { login, LoginError } from '../../api/auth.api';
+import type { Session } from '../../api/auth.api';
 import './Login.css';
 
 interface LoginProps {
