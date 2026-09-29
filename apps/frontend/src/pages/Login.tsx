@@ -83,8 +83,14 @@ export default function Login({ onLoginSuccess }: LoginProps) {
           <button type="submit" className="login-btn" disabled={loading}>
             {loading ? 'Ingresando...' : 'Iniciar Sesión'}
           </button>
-        </form>
+              </form>
+
+        <p className="login-help">
+          ¿Problemas para ingresar? Contacta al administrador de tu clínica.
+        </p>
       </div>
+
+      <p className="login-copy">© VetConecta · Gestión clínica veterinaria</p>
     </div>
   );
 }
