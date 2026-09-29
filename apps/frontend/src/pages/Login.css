@@ -1,0 +1,140 @@
+/*
+ * Estilos de la pantalla de inicio de sesión (D2).
+ * Viven aquí y no en index.css para no alterar los estilos globales del panel.
+ * .login-wrapper cubre toda la ventana, así el login se ve igual
+ * sin importar los estilos globales de #root o body.
+ */
+
+.login-wrapper {
+  position: fixed;
+  inset: 0;
+  overflow-y: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  box-sizing: border-box;
+  background-color: #fcfbfe; /* El tono casi blanco/morado del fondo del panel */
+  color: #334155;
+  color-scheme: light;
+  font-family: system-ui, -apple-system, sans-serif;
+  font-size: 16px;
+  line-height: normal;
+  letter-spacing: normal;
+  text-align: left;
+}
+
+.login-card {
+  width: 100%;
+  max-width: 502px;
+  padding: 40px;
+  background-color: #ffffff;
+  border-radius: 16px; /* Bordes suaves como los rectángulos de "Citas Hoy" */
+  box-shadow: 0 10px 30px rgba(139, 92, 246, 0.08); /* Sombra morada súper difuminada */
+  border: 1px solid #f1f5f9;
+  box-sizing: border-box;
+}
+
+.brand-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 32px;
+}
+
+.logo-icon {
+  font-size: 24px;
+}
+
+.logo-text {
+  font-size: 24px;
+  font-weight: 700;
+  color: #8b5cf6; /* El morado exacto de VetConecta */
+}
+
+.login-header {
+  margin-bottom: 32px;
+  text-align: center;
+}
+
+.login-header h2 {
+  margin: 0;
+  color: #8b5cf6;
+  font-family: inherit;
+  font-size: 20px;
+  font-weight: 600;
+  line-height: normal;
+  letter-spacing: normal;
+}
+
+.login-header p {
+  margin: 4px 0 0;
+  color: #64748b;
+  font-size: 14px;
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 6.4px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #475569;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  box-sizing: border-box;
+  font-size: 15.2px;
+  color: #334155;
+  background-color: #ffffff;
+  transition: border-color 0.2s;
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: #8b5cf6;
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.15);
+}
+
+.login-error {
+  margin: 0;
+  padding: 12px 16px;
+  border-radius: 8px;
+  background-color: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #b91c1c;
+  font-size: 14px;
+}
+
+.login-btn {
+  width: 100%;
+  padding: 13.6px;
+  background-color: #8b5cf6; /* El mismo color del botón lateral "Inicio" */
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 16px;
+  cursor: pointer;
+  margin-top: 8px;
+  transition: opacity 0.2s;
+}
+
+.login-btn:hover {
+  opacity: 0.9;
+}
+
+.login-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
