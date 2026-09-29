@@ -39,6 +39,13 @@ function messageForStatus(status: number): string {
   return MESSAGES.server;
 }
 
+/** Lee el `message` del formato de error común (Diseño §3.3). Devuelve null si no viene. */
+async function readErrorMessage(response: Response): Promise<string | null> {
+  const body: unknown = await response.json().catch(() => null);
+  if (typeof body !== 'object' || body === null || !('message' in body)) return null;
+  return typeof body.message === 'string' && body.message.trim() ? body.message : null;
+}
+
 /**
  * Lee el rol dentro del access token (diseño de microservicios, §3.1).
  * No verifica la firma: eso lo hace el API Gateway (NFR-3).
@@ -81,7 +88,10 @@ export async function login(email: string, password: string): Promise<Session> {
     throw new LoginError(MESSAGES.network);
   }
 
-  if (!response.ok) throw new LoginError(messageForStatus(response.status));
+  if (!response.ok) {
+    const serverMessage = await readErrorMessage(response);
+    throw new LoginError(serverMessage ?? messageForStatus(response.status));
+  }
 
   const data: unknown = await response.json().catch(() => null);
   const accessToken =
