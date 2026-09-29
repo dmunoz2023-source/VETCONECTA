@@ -1,23 +1,6 @@
-import { Heart, Home, Users, PawPrint, Calendar, FileText, History, Settings, PanelLeftClose, PanelLeftOpen,
-  type LucideIcon,
-} from "lucide-react";
+import { Heart, PanelLeftClose, PanelLeftOpen } from "lucide-react";
+import { NAV_ITEMS } from "../../utils/navigation";
 import SidebarItem from "./SidebarItem";
-
-interface NavItemConfig {
-  label: string;
-  path: string;
-  icon: LucideIcon;
-}
-
-const NAV_ITEMS: NavItemConfig[] = [
-  { label: "Inicio", path: "/", icon: Home },
-  { label: "Clientes", path: "/clientes", icon: Users },
-  { label: "Mascotas", path: "/mascotas", icon: PawPrint },
-  { label: "Agenda", path: "/agenda", icon: Calendar },
-  { label: "Reportes", path: "/reportes", icon: FileText },
-  { label: "Historial Clínico", path: "/historial", icon: History },
-  { label: "Configuración", path: "/configuracion", icon: Settings },
-];
 
 interface SidebarProps {
   collapsed: boolean;

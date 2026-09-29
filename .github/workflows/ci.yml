@@ -1,0 +1,38 @@
+name: CI
+
+# Corre en cada PR hacia develop o main, y en cada push directo a develop.
+on:
+  pull_request:
+    branches: [develop, main]
+  push:
+    branches: [develop]
+
+jobs:
+  lint-build-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout del código
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: 'npm'
+
+      # Un solo install: los workspaces (apps/backend/*, apps/frontend,
+      # libs/shared) se resuelven todos juntos desde la raiz.
+      - name: Instalar dependencias (todos los workspaces)
+        run: npm ci
+
+      # --if-present evita que falle el job si algún workspace no define
+      # el script (por ejemplo, un microservicio sin "lint" todavía).
+      - name: Lint
+        run: npm run lint --workspaces --if-present
+
+      - name: Build
+        run: npm run build --workspaces --if-present
+
+      - name: Test
+        run: npm test --workspaces --if-present -- --passWithNoTests
