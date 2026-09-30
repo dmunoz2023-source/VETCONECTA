@@ -5,7 +5,7 @@ paths:
       operationId: AuthController_register
       summary: Registrar un dueño
       description: >-
-        Público. Registra un dueño con rol owner (FR-1). Por ahora responde con
+        Público. Registra un dueño con rol owner. Por ahora responde con
         una estructura de ejemplo; la creación real de la cuenta llega con el
         AuthService.
       parameters: []
@@ -35,8 +35,7 @@ paths:
       operationId: AuthController_login
       summary: Iniciar sesión
       description: >-
-        Público. Sirve tanto a dueños como a personal clínico (FR-1, FR-13,
-        BR-14). Por ahora responde con un token de ejemplo; la emisión real del
+        Público. Sirve tanto a dueños como a personal clínico. Por ahora responde con un token de ejemplo; la emisión real del
         JWT llega con el AuthService.
       parameters: []
       requestBody:
@@ -64,7 +63,7 @@ paths:
       summary: Obtener el usuario autenticado
       description: >-
         Todos los roles. Devuelve id, correo, rol y clientId (solo si es owner)
-        del usuario que hace la petición (FR-1).
+        del usuario que hace la petición.
       parameters: []
       responses:
         '200':
