@@ -8,6 +8,8 @@ import { exportOpenApiSpec } from './swagger/export-openapi-spec';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  app.setGlobalPrefix('v1');
+  
   // Validación global de DTOs
   app.useGlobalPipes(
     new ValidationPipe({
@@ -16,6 +18,15 @@ async function bootstrap() {
       transform: true,
     }),
   );
+
+  // Configuración de CORS para Frontend Web y Mobile
+  app.enableCors({
+    origin: ['http://localhost:5173', 'http://127.0.0.1:5173'],
+    methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Authorization', 'Content-Type', 'X-Request-Id'],
+    exposedHeaders: ['X-Request-Id'],
+    credentials: true,
+  });
 
   // Documentación Swagger, se ve en http://localhost:3000/docs
   const swaggerConfig = new DocumentBuilder()
