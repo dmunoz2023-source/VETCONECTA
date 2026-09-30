@@ -1,5 +1,4 @@
 import type { AuthUser } from "../types/auth.types";
-import { AUTH_USER_MOCK } from "../mocks/auth.mock";
 
 interface AuthSession {
   /** Usuario de la sesión activa; `null` si no hay sesión. */

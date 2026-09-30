@@ -44,8 +44,8 @@ export function useClients({ search, page, pageSize }: ClientsQuery) {
    * y vuelve a pedir el listado. Si la API responde con error, la promesa se
    * rechaza para que la página lo muestre.
    */
-  const saveClient = useCallback(async (values: ClientFormValues, identifier?: string) => {
-    await saveClientRequest(values, identifier);
+  const saveClient = useCallback(async (values: ClientFormValues, id?: string) => {
+    await saveClientRequest(values, id);
     setReloadCount((count) => count + 1);
   }, []);
 

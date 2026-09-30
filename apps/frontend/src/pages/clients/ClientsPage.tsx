@@ -74,8 +74,9 @@ export default function ClientsPage() {
 
   // TODO (API real): DELETE /v1/clients/{id} (baja lógica, según el SRS: "nunca borra físico");
   // al terminar, cerrar el diálogo y volver a pedir el listado.
-  const handleConfirmDelete = () => {
+  const handleConfirmDelete = async () => { 
     setDeleting(null);
+   
   };
 
   return (
@@ -116,7 +117,7 @@ export default function ClientsPage() {
       {deleting && (
         <ConfirmDialog
           title="Eliminar cliente"
-          message={`¿Eliminar a ${deleting.nombre}? Esta acción no se puede deshacer.`}
+          message={`¿Eliminar a ${deleting.first_name} ${deleting.last_name}? Esta acción no se puede deshacer.`}
           onCancel={() => setDeleting(null)}
           onConfirm={handleConfirmDelete}
         />

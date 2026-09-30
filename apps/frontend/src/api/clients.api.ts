@@ -27,31 +27,25 @@ interface ClientsPageDto {
 
 function toClient(dto: ClientDto): Client {
   return {
-    nombre: `${dto.first_name} ${dto.last_name}`.trim(),
+    first_name: dto.first_name,
+    last_name: dto.last_name,
     rut: dto.rut,
-    telefono: dto.phone ?? '',
-    correo: dto.email,
+    phone: dto.phone ?? '',
+    email: dto.email,
     // TODO: el listado no informa las mascotas del cliente; confirmar con backend.
-    mascotas: 0,
+    pets: 0,
   };
 }
 
-/**
- * El formulario tiene un solo campo "nombre completo" y la tabla guarda `first_name` y `last_name`.
- * Regla provisional: los dos últimos términos son los apellidos y el resto es el nombre.
- */
-function splitNombre(nombre: string): { first_name: string; last_name: string } {
-  const words = nombre.trim().split(/\s+/);
-  const cut = Math.max(1, words.length - 2);
-  return { first_name: words.slice(0, cut).join(' '), last_name: words.slice(cut).join(' ') };
-}
+
 
 function toPayload(values: ClientFormValues): ClientPayload {
   return {
     rut: values.rut.trim(),
-    ...splitNombre(values.nombre),
-    email: values.correo.trim(),
-    phone: values.telefono.trim(),
+    first_name: values.first_name.trim(),
+    last_name: values.last_name.trim(),
+    email: values.email.trim(),
+    phone: values.phone.trim(),
   };
 }
 
@@ -65,13 +59,17 @@ export async function listClients({ search, page, pageSize }: ClientsQuery): Pro
 
 /**
  * POST /v1/clients (crear) o PATCH /v1/clients/{...} (editar) (FR-5).
- * TODO: confirmar con el Scrum qué identifica al cliente en la URL de edición al no usar `id`.
+
  */
-export async function saveClient(values: ClientFormValues, identifier?: string): Promise<void> {
+export async function saveClient(values: ClientFormValues, id?: string): Promise<void> {
   const payload = toPayload(values);
-  if (identifier) {
-    await api.patch(`/v1/clients/${identifier}`, payload);
+  if (id) {
+    await api.patch(`/v1/clients/${id}`, payload);
   } else {
     await api.post('/v1/clients', payload);
   }
+}
+
+export async function deleteClient(id: string): Promise<void> {
+ //await api.delete(`/v1/clients/${id}`);
 }
