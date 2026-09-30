@@ -1,28 +1,139 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { JwtService } from '@nestjs/jwt';
+import { ConflictException, UnauthorizedException } from '@nestjs/common';
+import { of } from 'rxjs';
+import * as bcrypt from 'bcrypt';
 
-// Modulos a importar una vez estén creados para realizar el test
-// import { AuthService } from './auth.service';
-// import { UsersRepository } from '../repositories/users.repository';
+// 1. Mocks de librerías externas para evitar errores de ESM (Unexpected token 'export')
+jest.mock('@nestjs/typeorm', () => ({
+  InjectRepository: () => () => {},
+  getRepositoryToken: () => 'UserRepositoryToken',
+}));
 
-describe('AuthService (Suite de Pruebas Unitarias - Scaffold)', () => {
-  // NOTA: Suite base preparada para la tarea [E1].
-  // La inyección de dependencias completa (AuthService, UsersRepository, JwtService)
-  // se activará una vez que la tarea [B2] (auth-service) sea integrada en develop.
+jest.mock('@nestjs/axios', () => ({
+  HttpService: class {},
+}));
 
-  it('debe validar que el entorno de pruebas de Jest esté operativo en auth-service', () => {
-    const entornoActivo = true;
-    expect(entornoActivo).toBe(true);
-  });
+jest.mock('bcrypt');
 
-  it('debe contener la estructura mock preparada para el login', () => {
-    const mockAuthPayload = {
-      email: 'test@vetconecta.cl',
-      sub: 'user-uuid-mock',
-      role: 'owner',
+// 2. Importación del servicio una vez que las dependencias conflictivas están mockeadas
+import { AuthService } from './auth.service';
+import { UserRole } from '../entities/user.entity';
+
+describe('AuthService (Pruebas Unitarias [E1])', () => {
+  let service: AuthService;
+  let userRepository: any;
+  let configService: any;
+  let httpService: any;
+
+  const mockUser = {
+    id: 'uuid-1234',
+    email: 'test@vetconecta.cl',
+    passwordHash: 'hashed_password',
+    role: UserRole.OWNER,
+    status: 'active',
+    lastLoginAt: null,
+  };
+
+  beforeEach(() => {
+    userRepository = {
+      findOne: jest.fn(),
+      create: jest.fn(),
+      save: jest.fn(),
     };
 
-    expect(mockAuthPayload).toHaveProperty('email');
-    expect(mockAuthPayload).toHaveProperty('role', 'owner');
+    configService = {
+      get: jest.fn().mockReturnValue('http://mock-clients-service-url'),
+    };
+
+    httpService = {
+      get: jest.fn(),
+    };
+
+    // Instanciación directa y aislada del servicio
+    service = new AuthService(userRepository, configService, httpService);
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  describe('register', () => {
+    it('debe registrar un usuario exitosamente omitiendo la contraseña en el retorno', async () => {
+      userRepository.findOne.mockResolvedValue(null);
+      (bcrypt.hash as jest.Mock).mockResolvedValue('hashed_password');
+
+      const newUser = { ...mockUser };
+      userRepository.create.mockReturnValue(newUser);
+      userRepository.save.mockResolvedValue(newUser);
+
+      const result = await service.register({
+        email: 'test@vetconecta.cl',
+        password: 'password123',
+      });
+
+      expect(userRepository.findOne).toHaveBeenCalledWith({ where: { email: 'test@vetconecta.cl' } });
+      expect(bcrypt.hash).toHaveBeenCalledWith('password123', 12);
+      expect(userRepository.save).toHaveBeenCalledWith(newUser);
+      expect(result).not.toHaveProperty('passwordHash');
+      expect(result.email).toBe('test@vetconecta.cl');
+    });
+
+    it('debe lanzar ConflictException si el correo ya está registrado', async () => {
+      userRepository.findOne.mockResolvedValue(mockUser);
+
+      await expect(
+        service.register({ email: 'test@vetconecta.cl', password: 'password123' })
+      ).rejects.toThrow(ConflictException);
+    });
+  });
+
+  describe('login', () => {
+    it('debe iniciar sesión exitosamente con correo electrónico', async () => {
+      userRepository.findOne.mockResolvedValue(mockUser);
+      (bcrypt.compare as jest.Mock).mockResolvedValue(true);
+      userRepository.save.mockResolvedValue({ ...mockUser, lastLoginAt: new Date() });
+
+      const result = await service.login({
+        identifier: 'test@vetconecta.cl',
+        password: 'password123',
+      });
+
+      expect(userRepository.findOne).toHaveBeenCalledWith({ where: { email: 'test@vetconecta.cl' } });
+      expect(bcrypt.compare).toHaveBeenCalledWith('password123', 'hashed_password');
+      expect(userRepository.save).toHaveBeenCalled();
+      expect(result).not.toHaveProperty('passwordHash');
+    });
+
+    it('debe iniciar sesión exitosamente con RUT mediante HttpService', async () => {
+      userRepository.findOne.mockResolvedValue(mockUser);
+      (bcrypt.compare as jest.Mock).mockResolvedValue(true);
+      httpService.get.mockReturnValue(of({ data: { user_id: 'uuid-1234' } }));
+      userRepository.save.mockResolvedValue(mockUser);
+
+      const result = await service.login({
+        identifier: '12345678-9',
+        password: 'password123',
+      });
+
+      expect(httpService.get).toHaveBeenCalledWith('http://mock-clients-service-url/v1/clients/id/12345678-9');
+      expect(userRepository.findOne).toHaveBeenCalledWith({ where: { id: 'uuid-1234' } });
+      expect(result.email).toBe('test@vetconecta.cl');
+    });
+
+    it('debe lanzar UnauthorizedException si la contraseña es incorrecta', async () => {
+      userRepository.findOne.mockResolvedValue(mockUser);
+      (bcrypt.compare as jest.Mock).mockResolvedValue(false);
+
+      await expect(
+        service.login({ identifier: 'test@vetconecta.cl', password: 'wrongpassword' })
+      ).rejects.toThrow(UnauthorizedException);
+    });
+
+    it('debe lanzar UnauthorizedException si el usuario no existe', async () => {
+      userRepository.findOne.mockResolvedValue(null);
+
+      await expect(
+        service.login({ identifier: 'notfound@vetconecta.cl', password: 'password123' })
+      ).rejects.toThrow(UnauthorizedException);
+    });
   });
 });
