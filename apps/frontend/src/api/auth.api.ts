@@ -82,7 +82,7 @@ export async function login(email: string, password: string): Promise<Session> {
     response = await fetch(LOGIN_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify({identifier: email.trim(), password }),
     });
   } catch {
     throw new LoginError(MESSAGES.network);
@@ -94,8 +94,15 @@ export async function login(email: string, password: string): Promise<Session> {
   }
 
   const data: unknown = await response.json().catch(() => null);
-  const accessToken =
-    typeof data === 'object' && data !== null && 'accessToken' in data ? data.accessToken : null;
+    const accessToken =
+    typeof data === 'object' && data !== null
+      ? 'token' in data
+        ? data.token
+        : 'accessToken' in data
+          ? data.accessToken
+          : null
+      : null;
+      
   if (typeof accessToken !== 'string') throw new LoginError(MESSAGES.invalidResponse);
 
   const role = readRole(accessToken);
