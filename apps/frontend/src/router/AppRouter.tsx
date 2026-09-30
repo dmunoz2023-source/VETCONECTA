@@ -17,7 +17,7 @@ export default function AppRouter() {
     <BrowserRouter>
       <Routes>
         {/* Ruta pública */}
-        <Route path="/login" element={<LoginRoute />} />
+        <Route index path="/login" element={<LoginRoute />} />
 
         {/* Rutas protegidas */}
         <Route element={<ProtectedRoute />}>
@@ -33,7 +33,7 @@ export default function AppRouter() {
           </Route>
         </Route>
 
-        <Route path="*" element={<Navigate to="/" replace />} />
+        <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     </BrowserRouter>
   );
