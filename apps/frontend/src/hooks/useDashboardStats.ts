@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import type { DashboardStat, WeeklyActivityPoint } from "../types/dashboard.types";
+import { DASHBOARD_STATS_MOCK, WEEKLY_ACTIVITY_MOCK } from "../mocks/dashboard.mock";
 
 interface DashboardData {
   stats: DashboardStat[];
