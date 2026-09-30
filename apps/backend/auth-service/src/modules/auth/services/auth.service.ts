@@ -74,7 +74,7 @@ export class AuthService {
       // 2. Si es RUT, consultar al microservicio interno 'clients-service'
       try {
         const baseUrl = this.configService.get<string>('clientsServiceUrl');
-        const url = `${baseUrl}/clients/rut/${identifier}`;
+        const url = `${baseUrl}/v1/clients/id/${identifier}`;
         const response = await firstValueFrom(this.httpService.get(url));
         const userId = response.data?.user_id;
 
