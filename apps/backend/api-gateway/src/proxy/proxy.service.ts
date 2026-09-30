@@ -15,6 +15,7 @@ export class ProxyService {
     { prefix: '/v1/clients', target: 'http://localhost:3002' },
     { prefix: '/v1/pets', target: 'http://localhost:3002' },
     { prefix: '/v1/clinical', target: 'http://localhost:3003' },
+    { prefix: '/v1/citas', target: 'http://localhost:3004' },
     { prefix: '/v1/scheduling', target: 'http://localhost:3004' },
     { prefix: '/v1/notifications', target: 'http://localhost:3005' },
     { prefix: '/v1/catalog', target: 'http://localhost:3006' },
