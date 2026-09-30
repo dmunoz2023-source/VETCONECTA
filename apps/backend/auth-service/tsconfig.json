@@ -10,13 +10,15 @@
     "sourceMap": true,
     "outDir": "./dist",
     "rootDir": "../../../",
-    "paths": {
-      "@app/shared/*": ["../../../libs/shared/src/*"]
-    },
     "incremental": true,
     "skipLibCheck": true,
     "strictNullChecks": true,
-    "noImplicitAny": false
+    "noImplicitAny": false,
+
+    "paths": {
+      "@app/shared/*": ["../../../libs/shared/src/*"]
+    },
+    "types": ["jest", "node"]
   },
   "include": ["src/**/*"],
   
