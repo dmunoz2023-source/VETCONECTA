@@ -7,15 +7,17 @@ import type { Client, ClientFormValues } from "../../types/client.types";
 interface ClientFormModalProps {
   /** Cliente a editar; `null` para crear uno nuevo. */
   client: Client | null;
+  /** Mensaje de error del servidor al guardar; `null` si no hay. */
+  error?: string | null;
   onClose: () => void;
-  onSubmit: (values: ClientFormValues) => void;
+  onSubmit: (values: ClientFormValues) => void | Promise<void>;
 }
 
-export default function ClientFormModal({ client, onClose, onSubmit }: ClientFormModalProps) {
+export default function ClientFormModal({ client, error, onClose, onSubmit }: ClientFormModalProps) {
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const values = Object.fromEntries(new FormData(event.currentTarget)) as unknown as ClientFormValues;
-    onSubmit(values);
+    void onSubmit(values);
   };
 
   return (
@@ -25,6 +27,11 @@ export default function ClientFormModal({ client, onClose, onSubmit }: ClientFor
         <FormField label="RUT" name="rut" type="text" defaultValue={client?.rut} placeholder="17.456.932-1" required />
         <FormField label="Teléfono" name="telefono" type="tel" defaultValue={client?.telefono} placeholder="+56 9 8765 4321" required />
         <FormField label="Correo electrónico" name="correo" type="email" defaultValue={client?.correo} placeholder="correo@ejemplo.com" required />
+        {error && (
+          <p className="vc-modal-error" role="alert">
+            {error}
+          </p>
+        )}
         <div className="vc-modal-actions">
           <Button type="button" onClick={onClose}>
             Cancelar
