@@ -1,5 +1,5 @@
 import type { AuthUser } from "../types/auth.types";
-
+import { AUTH_USER_MOCK } from "../mocks/auth.mock";
 interface AuthSession {
   /** Usuario de la sesión activa; `null` si no hay sesión. */
   user: AuthUser | null;
@@ -14,5 +14,5 @@ interface AuthSession {
  * devuelve; así Header y ProtectedRoute no requieren modificaciones.
  */
 export function useAuth(): AuthSession {
-  return { user: AUTH_USER_MOCK, isAuthenticated: true };
+   return { user: AUTH_USER_MOCK, isAuthenticated: false };
 }
