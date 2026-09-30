@@ -1,7 +1,13 @@
+import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 import { IsEmail, IsNotEmpty, IsString, MaxLength, MinLength } from 'class-validator';
 
 export class RegisterDTO {
+  @ApiProperty({
+    type: String,
+    example: 'dueno@vetconecta.cl',
+    description: 'Correo electrónico del nuevo usuario.',
+  })
   // Se le sacan los espacios de los costados antes de validar el formato
   @Transform(({ value }) => (typeof value === 'string' ? value.trim() : value))
   @IsNotEmpty({ message: 'Debe ingresar su correo electrónico' })
@@ -10,6 +16,12 @@ export class RegisterDTO {
   email!: string;
 
   // bcrypt solo lee los primeros 72 bytes, por eso ese es el máximo
+  @ApiProperty({
+    type: String,
+    example: 'contrasena123',
+    description: 'Contraseña del nuevo usuario.',
+    minLength: 6,
+  })
   @IsString({ message: 'La contraseña debe ser texto' })
   @MinLength(6, { message: 'La contraseña debe tener al menos 6 caracteres' })
   @MaxLength(72, { message: 'La contraseña no puede superar los 72 caracteres' })
