@@ -1,5 +1,9 @@
 import { Controller, Get, Query, UseGuards } from '@nestjs/common';
-import { CurrentUser, Roles, JwtHeadersGuard, RolesGuard, JwtPayload } from '@app/shared';
+import { CurrentUser } from '@app/shared/decorators/current-user.decorator';
+import { Roles } from '@app/shared/decorators/roles.decorator';
+import { JwtHeadersGuard } from '@app/shared/guards/jwt-headers.guard';
+import { RolesGuard } from '@app/shared/guards/roles.guard';
+import { JwtPayload } from '@app/shared/types/jwt-payload.interface';
 import { AppointmentsService } from '../services/appointments.service';
 import { GetCitasQueryDto } from '../dto/get-citas-query.dto';
 
