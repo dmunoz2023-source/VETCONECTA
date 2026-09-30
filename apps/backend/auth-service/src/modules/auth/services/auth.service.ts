@@ -13,6 +13,7 @@ import * as bcrypt from 'bcrypt';
 import { User, UserRole } from '../entities/user.entity';
 import { RegisterDTO } from '../dto/register.dto';
 import { LoginDTO } from '../dto/login.dto';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class AuthService {
@@ -21,6 +22,7 @@ export class AuthService {
     private readonly userRepository: Repository<User>,
     private readonly configService: ConfigService,
     private readonly httpService: HttpService,
+    private readonly jwtService: JwtService,
   ) {}
 
   /**
@@ -105,6 +107,14 @@ export class AuthService {
 
     // 6. Retornar datos de usuario excluyendo el hash de la contraseña
     const { passwordHash: _, ...userWithoutPassword } = user;
-    return userWithoutPassword;
+
+    const payload = {
+      sub: user.id,
+      email: user.email,
+      role: user.role,
+    };
+
+    const accessToken = this.jwtService.sign(payload);
+    return { ...userWithoutPassword, accessToken };
   }
 }

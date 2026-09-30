@@ -2,29 +2,17 @@ import {
   CanActivate,
   ExecutionContext,
   Injectable,
+  NestMiddleware,
   UnauthorizedException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
-import type { Request } from 'express';
+import type { Request, Response, NextFunction } from 'express';
 import { isPublicRoute } from './public-routes';
 import { JwtPayload } from './jwt-payload.interface';
 
-/**
- * Terminacion de autenticacion del API Gateway (NFR-3).
- *
- * Orden de trabajo por cada peticion entrante:
- *  1. Elimina SIEMPRE cualquier cabecera de identidad que traiga el cliente
- *     externo (X-User-Id / X-User-Role / X-Client-Id). El Gateway es la unica
- *     fuente confiable de esas cabeceras; nunca se confia en el cliente.
- *  2. Si la ruta esta en la whitelist publica, deja pasar sin token.
- *  3. Valida firma y expiracion del Bearer con el JWT_SECRET compartido.
- *  4. Con el payload valido, inyecta las cabeceras de identidad confiables que
- *     los microservicios leen via JwtHeadersGuard. X-Client-Id solo si es owner.
- */
 @Injectable()
-export class JwtAuthGuard implements CanActivate {
-  // Cabeceras de identidad que el Gateway controla en exclusiva.
+export class JwtAuthGuard implements CanActivate, NestMiddleware {
   private static readonly IDENTITY_HEADERS = [
     'x-user-id',
     'x-user-role',
@@ -36,29 +24,44 @@ export class JwtAuthGuard implements CanActivate {
     private readonly configService: ConfigService,
   ) {}
 
+  // 1. Soporte para Nest Guard (mantiene los tests unitarios en verde)
   canActivate(context: ExecutionContext): boolean {
     const request = context.switchToHttp().getRequest<Request>();
+    this.processAuthentication(request);
+    return true;
+  }
 
-    // 1. Anti-spoofing: descarta lo que el cliente haya intentado inyectar.
+  // 2. Soporte para Middleware (ejecución real previa al proxy)
+  use(req: Request, res: Response, next: NextFunction) {
+    try {
+      this.processAuthentication(req);
+      next();
+    } catch (err: any) {
+      return res.status(err.getStatus ? err.getStatus() : 401).json({
+        statusCode: 401,
+        error: 'UNAUTHORIZED',
+        message: err.message || 'Token inválido o expirado.',
+        path: req.originalUrl,
+        requestId: (req.headers['x-request-id'] as string) || 'unknown',
+        timestamp: new Date().toISOString(),
+      });
+    }
+  }
+
+  public processAuthentication(request: Request): void {
+    // Anti-spoofing perimetral
     this.stripIdentityHeaders(request);
 
-    // 2. Rutas protegidas: valida el Bearer e inyecta las cabeceras confiables.
-    //    Las rutas de la whitelist se saltan la validacion. Ante un token
-    //    invalido/ausente, verifyToken/extractBearerToken lanzan 401.
     const url = request.originalUrl ?? request.url;
     if (!isPublicRoute(request.method, url)) {
       const payload = this.verifyToken(this.extractBearerToken(request));
-
       request.headers['x-user-id'] = payload.sub;
       request.headers['x-user-role'] = payload.role;
       if (payload.role === 'owner' && payload.clientId) {
         request.headers['x-client-id'] = payload.clientId;
       }
-
       (request as Request & { user?: JwtPayload }).user = payload;
     }
-
-    return true;
   }
 
   private stripIdentityHeaders(request: Request): void {
@@ -85,7 +88,7 @@ export class JwtAuthGuard implements CanActivate {
         secret: this.configService.get<string>('JWT_SECRET'),
       });
     } catch {
-      throw new UnauthorizedException('Token invalido o expirado.');
+      throw new UnauthorizedException('Token inválido o expirado.');
     }
   }
 }
