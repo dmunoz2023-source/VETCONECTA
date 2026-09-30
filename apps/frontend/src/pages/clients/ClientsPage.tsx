@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Plus } from "lucide-react";
 import Button from "../../components/common/Button";
 import Card from "../../components/common/Card";
@@ -12,15 +12,23 @@ import ClientFormModal from "./ClientFormModal";
 import "./ClientsPage.css";
 
 const PAGE_SIZE = 8;
+const SEARCH_DEBOUNCE_MS = 300;
 
 export default function ClientsPage() {
   const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [page, setPage] = useState(1);
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState<Client | null>(null);
   const [deleting, setDeleting] = useState<Client | null>(null);
 
-  const { clients, total, loading, error } = useClients({ search, page, pageSize: PAGE_SIZE });
+  // Espera a que el usuario deje de escribir antes de consultar la API.
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedSearch(search), SEARCH_DEBOUNCE_MS);
+    return () => clearTimeout(timer);
+  }, [search]);
+
+  const { clients, total, loading, error } = useClients({ search: debouncedSearch, page, pageSize: PAGE_SIZE });
 
   const handleSearchChange = (value: string) => {
     setSearch(value);
