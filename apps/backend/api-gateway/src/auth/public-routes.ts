@@ -13,8 +13,8 @@ export const PUBLIC_ROUTES: PublicRoute[] = [
   { method: 'GET', path: '/v1/catalog/clinic' },
 ];
 
-// Prefijos publicos (Swagger y su JSON): cualquier ruta que empiece asi.
-export const PUBLIC_PATH_PREFIXES = ['/docs'];
+// Prefijos publicos (Swagger UI y el JSON del contrato): cualquier ruta que empiece asi.
+export const PUBLIC_PATH_PREFIXES = ['/docs', '/docs-json'];
 
 // Normaliza el path: quita query string y una eventual barra final.
 function normalizePath(url: string): string {
