@@ -25,11 +25,22 @@ export class ProxyService {
       target: route.target,
       changeOrigin: true,
       on: {
-        // req tipado como IncomingMessage para satisfacer la firma de http-proxy-middleware
         proxyReq: (proxyReq: ClientRequest, req: IncomingMessage) => {
-          const traceId = req.headers['x-request-id'];
-          if (traceId) {
-            proxyReq.setHeader('x-request-id', traceId as string);
+          // 1. Inyección de traza y credenciales verificadas
+          const headersToForward = ['x-request-id', 'x-user-id', 'x-user-role', 'x-client-id'];
+          for (const header of headersToForward) {
+            if (req.headers[header]) {
+              proxyReq.setHeader(header, req.headers[header] as string);
+            }
+          }
+
+          // 2. Resolver bloqueo de POST/PATCH: re-escribir req.body si Express lo parseó
+          const expressReq = req as Request;
+          if (expressReq.body && Object.keys(expressReq.body).length > 0) {
+            const bodyData = JSON.stringify(expressReq.body);
+            proxyReq.setHeader('Content-Type', 'application/json');
+            proxyReq.setHeader('Content-Length', Buffer.byteLength(bodyData));
+            proxyReq.write(bodyData);
           }
         },
         error: (err: any, req: any, res: any) => {
