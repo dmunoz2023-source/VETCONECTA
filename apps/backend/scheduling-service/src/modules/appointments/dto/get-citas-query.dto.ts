@@ -27,13 +27,13 @@ export class GetCitasQueryDto {
   status?: AppointmentStatus[];
 
   @IsOptional()
-  @Transform(({ value }) => parseInt(value, 10))
+  @Transform(({ value }) => Number.parseInt(value, 10))
   @IsInt()
   @Min(1)
   page: number = 1;
 
   @IsOptional()
-  @Transform(({ value }) => parseInt(value, 10))
+  @Transform(({ value }) => Number.parseInt(value, 10))
   @IsInt()
   @Min(1)
   @Max(50)
