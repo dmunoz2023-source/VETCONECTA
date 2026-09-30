@@ -2,7 +2,7 @@ import { ConflictException, UnauthorizedException } from '@nestjs/common';
 import { of } from 'rxjs';
 import * as bcrypt from 'bcrypt';
 
-// 1. Mocks de librerías externas para evitar errores de ESM (Unexpected token 'export')
+// 1. Mocks de librerías externas para evitar errores en Jest
 jest.mock('@nestjs/typeorm', () => ({
   InjectRepository: () => () => {},
   getRepositoryToken: () => 'UserRepositoryToken',
@@ -14,7 +14,6 @@ jest.mock('@nestjs/axios', () => ({
 
 jest.mock('bcrypt');
 
-// 2. Importación del servicio una vez que las dependencias conflictivas están mockeadas
 import { AuthService } from './auth.service';
 import { UserRole } from '../entities/user.entity';
 
@@ -23,6 +22,7 @@ describe('AuthService (Pruebas Unitarias [E1])', () => {
   let userRepository: any;
   let configService: any;
   let httpService: any;
+  let jwtService: any; // <-- 1. Declarar mock de jwtService
 
   const mockUser = {
     id: 'uuid-1234',
@@ -48,8 +48,18 @@ describe('AuthService (Pruebas Unitarias [E1])', () => {
       get: jest.fn(),
     };
 
-    // Instanciación directa y aislada del servicio
-    service = new AuthService(userRepository, configService, httpService);
+    // 2. Mockear el método .sign() para que emita un token simulado
+    jwtService = {
+      sign: jest.fn().mockReturnValue('mock_jwt_token'),
+    };
+
+    // 3. Pasar jwtService como 4to argumento
+    service = new AuthService(
+      userRepository,
+      configService,
+      httpService,
+      jwtService,
+    );
   });
 
   afterEach(() => {
@@ -70,7 +80,9 @@ describe('AuthService (Pruebas Unitarias [E1])', () => {
         password: 'password123',
       });
 
-      expect(userRepository.findOne).toHaveBeenCalledWith({ where: { email: 'test@vetconecta.cl' } });
+      expect(userRepository.findOne).toHaveBeenCalledWith({
+        where: { email: 'test@vetconecta.cl' },
+      });
       expect(bcrypt.hash).toHaveBeenCalledWith('password123', 12);
       expect(userRepository.save).toHaveBeenCalledWith(newUser);
       expect(result).not.toHaveProperty('passwordHash');
@@ -81,13 +93,13 @@ describe('AuthService (Pruebas Unitarias [E1])', () => {
       userRepository.findOne.mockResolvedValue(mockUser);
 
       await expect(
-        service.register({ email: 'test@vetconecta.cl', password: 'password123' })
+        service.register({ email: 'test@vetconecta.cl', password: 'password123' }),
       ).rejects.toThrow(ConflictException);
     });
   });
 
   describe('login', () => {
-    it('debe iniciar sesión exitosamente con correo electrónico', async () => {
+    it('debe iniciar sesión exitosamente con correo electrónico y generar accessToken', async () => {
       userRepository.findOne.mockResolvedValue(mockUser);
       (bcrypt.compare as jest.Mock).mockResolvedValue(true);
       userRepository.save.mockResolvedValue({ ...mockUser, lastLoginAt: new Date() });
@@ -97,9 +109,13 @@ describe('AuthService (Pruebas Unitarias [E1])', () => {
         password: 'password123',
       });
 
-      expect(userRepository.findOne).toHaveBeenCalledWith({ where: { email: 'test@vetconecta.cl' } });
+      expect(userRepository.findOne).toHaveBeenCalledWith({
+        where: { email: 'test@vetconecta.cl' },
+      });
       expect(bcrypt.compare).toHaveBeenCalledWith('password123', 'hashed_password');
       expect(userRepository.save).toHaveBeenCalled();
+      expect(jwtService.sign).toHaveBeenCalled();
+      expect(result).toHaveProperty('accessToken', 'mock_jwt_token');
       expect(result).not.toHaveProperty('passwordHash');
     });
 
@@ -114,9 +130,14 @@ describe('AuthService (Pruebas Unitarias [E1])', () => {
         password: 'password123',
       });
 
-      expect(httpService.get).toHaveBeenCalledWith('http://mock-clients-service-url/v1/clients/id/12345678-9');
-      expect(userRepository.findOne).toHaveBeenCalledWith({ where: { id: 'uuid-1234' } });
-      expect(result.email).toBe('test@vetconecta.cl');
+      expect(httpService.get).toHaveBeenCalledWith(
+        'http://mock-clients-service-url/v1/clients/id/12345678-9',
+      );
+      expect(userRepository.findOne).toHaveBeenCalledWith({
+        where: { id: 'uuid-1234' },
+      });
+      expect(jwtService.sign).toHaveBeenCalled();
+      expect(result).toHaveProperty('accessToken', 'mock_jwt_token');
     });
 
     it('debe lanzar UnauthorizedException si la contraseña es incorrecta', async () => {
@@ -124,7 +145,7 @@ describe('AuthService (Pruebas Unitarias [E1])', () => {
       (bcrypt.compare as jest.Mock).mockResolvedValue(false);
 
       await expect(
-        service.login({ identifier: 'test@vetconecta.cl', password: 'wrongpassword' })
+        service.login({ identifier: 'test@vetconecta.cl', password: 'wrongpassword' }),
       ).rejects.toThrow(UnauthorizedException);
     });
 
@@ -132,7 +153,7 @@ describe('AuthService (Pruebas Unitarias [E1])', () => {
       userRepository.findOne.mockResolvedValue(null);
 
       await expect(
-        service.login({ identifier: 'notfound@vetconecta.cl', password: 'password123' })
+        service.login({ identifier: 'notfound@vetconecta.cl', password: 'password123' }),
       ).rejects.toThrow(UnauthorizedException);
     });
   });
