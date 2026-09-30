@@ -1,5 +1,4 @@
 export interface Client {
-  id: string;
   nombre: string;
   rut: string;
   telefono: string;
