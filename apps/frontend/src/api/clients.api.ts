@@ -71,5 +71,6 @@ export async function saveClient(values: ClientFormValues, id?: string): Promise
 }
 
 export async function deleteClient(id: string): Promise<void> {
- //await api.delete(`/v1/clients/${id}`);
+  // TODO: DELETE /v1/clients/{id} (baja lógica); el endpoint no está en la documentación.
+  void id;
 }
