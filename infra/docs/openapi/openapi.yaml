@@ -1,0 +1,128 @@
+openapi: 3.0.0
+paths:
+  /v1/auth/register:
+    post:
+      operationId: AuthController_register
+      summary: Registrar un dueño
+      description: >-
+        Público. Registra un dueño con rol owner. Por ahora responde con
+        una estructura de ejemplo; la creación real de la cuenta llega con el
+        AuthService.
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterDTO'
+      responses:
+        '201':
+          description: Estructura de registro lista para integrar.
+          content:
+            application/json:
+              schema:
+                example:
+                  message: Estructura de registro lista para integrar
+                  dataRecibida:
+                    email: dueno@vetconecta.cl
+                    password: contrasena123
+        '400':
+          description: Cuerpo mal formado o campos inválidos.
+      tags:
+        - auth
+  /v1/auth/login:
+    post:
+      operationId: AuthController_login
+      summary: Iniciar sesión
+      description: >-
+        Público. Sirve tanto a dueños como a personal clínico. Por ahora responde con un token de ejemplo; la emisión real del
+        JWT llega con el AuthService.
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginDTO'
+      responses:
+        '201':
+          description: Estructura de login lista para integrar.
+          content:
+            application/json:
+              schema:
+                example:
+                  token: jwt_placeholder
+                  message: Estructura de login lista para integrar
+        '400':
+          description: Cuerpo mal formado o campos inválidos.
+      tags:
+        - auth
+  /v1/auth/me:
+    get:
+      operationId: AuthController_getProfile
+      summary: Obtener el usuario autenticado
+      description: >-
+        Todos los roles. Devuelve id, correo, rol y clientId (solo si es owner)
+        del usuario que hace la petición.
+      parameters: []
+      responses:
+        '200':
+          description: Datos del usuario autenticado.
+          content:
+            application/json:
+              schema:
+                example:
+                  id: 3fa85f64-5717-4562-b3fc-2c963f66afa6
+                  correo: dueno@vetconecta.cl
+                  rol: owner
+                  clientId: 22222222-2222-2222-2222-222222222222
+        '401':
+          description: Falta el token o venció.
+      tags:
+        - auth
+      security:
+        - bearer: []
+info:
+  title: VetConecta API
+  description: Contrato de la API de VetConecta para las apps web y mobile.
+  version: 0.1.0
+  contact: {}
+tags: []
+servers: []
+components:
+  securitySchemes:
+    bearer:
+      scheme: bearer
+      bearerFormat: JWT
+      type: http
+  schemas:
+    RegisterDTO:
+      type: object
+      properties:
+        email:
+          type: string
+          example: dueno@vetconecta.cl
+          description: Correo electrónico del nuevo usuario.
+        password:
+          type: string
+          example: contrasena123
+          description: Contraseña del nuevo usuario.
+          minLength: 6
+      required:
+        - email
+        - password
+    LoginDTO:
+      type: object
+      properties:
+        identifier:
+          type: string
+          example: vet@vetconecta.cl
+          description: RUT o correo electrónico del usuario.
+        password:
+          type: string
+          example: contrasena123
+          description: Contraseña del usuario.
+          minLength: 6
+      required:
+        - identifier
+        - password
