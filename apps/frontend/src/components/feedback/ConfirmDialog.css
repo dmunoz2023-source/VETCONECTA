@@ -1,0 +1,10 @@
+.vc-confirm-message {
+  font-size: 14px;
+  color: var(--vc-text);
+  margin: 0 0 4px;
+}
+.vc-btn-danger {
+  background: #8602a4;
+  border-color: #9e03b0;
+  color: #fff;
+}
