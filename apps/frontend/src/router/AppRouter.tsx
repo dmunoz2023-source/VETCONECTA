@@ -1,16 +1,23 @@
-import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Navigate, Route, Routes, useNavigate } from "react-router-dom";
 import DashboardLayout from "../layouts/DashboardLayout";
 import PlaceholderPage from "../components/common/PlaceholderPage";
 import DashboardHome from "../pages/dashboard/DashboardHome";
 import ClientsPage from "../pages/clients/ClientsPage";
+import Login from "../pages/auth/Login";
 import ProtectedRoute from "./ProtectedRoute";
+
+/** Pantalla de login: al iniciar sesión correctamente lleva al panel. */
+function LoginRoute() {
+  const navigate = useNavigate();
+  return <Login onLoginSuccess={() => navigate("/", { replace: true })} />;
+}
 
 export default function AppRouter() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* Ruta pública. reemplazar el placeholder por pages/auth/Login */}
-        <Route path="/login" element={<PlaceholderPage title="Login" />} />
+        {/* Ruta pública */}
+        <Route path="/login" element={<LoginRoute />} />
 
         {/* Rutas protegidas */}
         <Route element={<ProtectedRoute />}>
