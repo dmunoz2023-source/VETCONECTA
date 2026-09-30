@@ -1,7 +1,7 @@
-import { useEffect, useState } from "react";
-import type { ClientsQuery, ClientsResult } from "../types/client.types";
+import { useCallback, useEffect, useState } from "react";
+import type { ClientFormValues, ClientsQuery, ClientsResult } from "../types/client.types";
 import { getErrorMessage } from "../api/axios";
-import { listClients } from "../api/clients.api";
+import { listClients, saveClient as saveClientRequest } from "../api/clients.api";
 
 const EMPTY_RESULT: ClientsResult = { clients: [], total: 0 };
 
@@ -12,11 +12,12 @@ interface RequestState {
 }
 
 /**
- * Listado de clientes con búsqueda y paginación.
+ * Listado de clientes con búsqueda y paginación, más el guardado (alta y edición).
  * Consulta GET /v1/clients a través del API Gateway.
  */
 export function useClients({ search, page, pageSize }: ClientsQuery) {
-  const queryKey = `${search}|${page}|${pageSize}`;
+  const [reloadCount, setReloadCount] = useState(0);
+  const queryKey = `${search}|${page}|${pageSize}|${reloadCount}`;
   const [state, setState] = useState<RequestState>({ key: "", result: EMPTY_RESULT, error: null });
 
   useEffect(() => {
@@ -38,10 +39,21 @@ export function useClients({ search, page, pageSize }: ClientsQuery) {
     };
   }, [search, page, pageSize, queryKey]);
 
+  /**
+   * Crea un cliente (sin identificador) o edita uno existente (con identificador)
+   * y vuelve a pedir el listado. Si la API responde con error, la promesa se
+   * rechaza para que la página lo muestre.
+   */
+  const saveClient = useCallback(async (values: ClientFormValues, identifier?: string) => {
+    await saveClientRequest(values, identifier);
+    setReloadCount((count) => count + 1);
+  }, []);
+
   return {
     clients: state.result.clients,
     total: state.result.total,
     loading: state.key !== queryKey,
     error: state.error,
+    saveClient,
   };
 }
