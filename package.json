@@ -25,6 +25,7 @@
   "homepage": "https://github.com/dmunoz2023-source/VETCONECTA#readme",
   "devDependencies": {
     "@nestjs/cli": "^12.0.3",
+    "@nestjs/testing": "^12.1.0",
     "@types/jest": "^30.0.0",
     "@types/node": "^24.13.5",
     "jest": "^30.5.2",
