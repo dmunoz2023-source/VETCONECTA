@@ -1,20 +1,11 @@
 import { Module } from '@nestjs/common';
-import { getRepositoryToken } from '@nestjs/typeorm';
-import { PetsController } from './controllers/pet.controller';
-import { PetsService } from './services/pets.service';
-import { PetEntity } from './entities/pet.entity';
-import { InMemoryPetRepository } from './repositories/in-memory-pet.repository';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { Pet } from './entities/pet.entity';
+import { PetsRepository } from './repositories/pets.repository';
 
 @Module({
-  imports: [],
-  controllers: [PetsController],
-  providers: [
-    PetsService,
-    {
-      provide: getRepositoryToken(PetEntity),
-      useClass: InMemoryPetRepository,
-    },
-  ],
-  exports: [PetsService],
+  imports: [TypeOrmModule.forFeature([Pet])],
+  providers: [PetsRepository],
+  exports: [PetsRepository],
 })
 export class PetsModule {}

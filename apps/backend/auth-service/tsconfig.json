@@ -8,6 +8,8 @@
     "allowSyntheticDefaultImports": true,
     "target": "ES2021",
     "sourceMap": true,
+    "outDir": "./dist",
+    "rootDir": "../../../",
     "incremental": true,
     "skipLibCheck": true,
     "strictNullChecks": true,
@@ -15,8 +17,10 @@
 
     "paths": {
       "@app/shared/*": ["../../../libs/shared/src/*"]
-    }
+    },
+    "types": ["jest", "node"]
   },
   "include": ["src/**/*"],
+  
   "exclude": ["node_modules", "dist"]
 }

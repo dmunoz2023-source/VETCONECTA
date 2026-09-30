@@ -1,31 +1,53 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
+import { Client } from '../../clients/entities/client.entity';
 
-@Entity({ name: 'mascotas', schema: 'clients_pets' })
-export class PetEntity {
+/**
+ * [A3] Mapea 1:1 la tabla real clients_pets.pets. La FK a `clients` sí existe
+ * físicamente porque ambas tablas viven en el mismo esquema (clients_pets);
+ * esto es lo único permitido por las reglas de persistencia del proyecto.
+ */
+@Entity({ name: 'pets', schema: 'clients_pets' })
+export class Pet {
   @PrimaryGeneratedColumn('uuid')
-  id: string;
+  id!: string;
 
-  @Column({ name: 'client_id', type: 'uuid', nullable: false })
-  clientId: string;
+  @Column({ name: 'client_id', type: 'uuid' })
+  clientId!: string;
 
-  @Column({ type: 'varchar', length: 100 })
-  nombre: string;
+  @ManyToOne(() => Client, { onDelete: 'RESTRICT' })
+  @JoinColumn({ name: 'client_id' })
+  client?: Client;
 
-  @Column({ type: 'varchar', length: 50 })
-  especie: string;
+  @Column()
+  name!: string;
 
-  @Column({ type: 'varchar', length: 50, nullable: true })
-  raza: string;
+  @Column()
+  species!: string;
 
-  @Column({ name: 'fecha_nacimiento', type: 'date' })
-  fechaNacimiento: Date;
+  @Column({ type: 'varchar', nullable: true })
+  breed!: string | null;
 
-  @Column({ type: 'boolean', default: true })
-  activo: boolean;
+  @Column({ type: 'varchar', nullable: true })
+  sex!: string | null;
 
-  @CreateDateColumn({ name: 'created_at' })
-  createdAt: Date;
+  @Column({ name: 'birth_date', type: 'date', nullable: true })
+  birthDate!: string | null;
 
-  @UpdateDateColumn({ name: 'updated_at' })
-  updatedAt: Date;
+  @Column({ type: 'varchar', nullable: true })
+  color!: string | null;
+
+  @Column({ type: 'varchar', nullable: true })
+  microchip!: string | null;
+
+  @Column({ name: 'photo_url', type: 'varchar', nullable: true })
+  photoUrl!: string | null;
+
+  @Column({ default: true })
+  active!: boolean;
 }

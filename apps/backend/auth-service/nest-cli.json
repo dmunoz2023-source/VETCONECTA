@@ -2,7 +2,9 @@
   "$schema": "https://json.schemastore.org/nest-cli",
   "collection": "@nestjs/schematics",
   "sourceRoot": "src",
+  "entryFile": "apps/backend/auth-service/src/main",
   "compilerOptions": {
     "deleteOutDir": true
+    
   }
 }

@@ -1,0 +1,9 @@
+.vc-icon-btn-danger:hover {
+  background: #fee2e2;
+  color: #9001c0;
+}
+.vc-row-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
