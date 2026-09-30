@@ -9,11 +9,15 @@
     "target": "ES2021",
     "sourceMap": true,
     "outDir": "./dist",
-    "rootDir": "src",
+    "rootDir": "../../../",
+    "paths": {
+      "@app/shared/*": ["../../../libs/shared/src/*"]
+    },
     "incremental": true,
     "skipLibCheck": true,
     "strictNullChecks": true,
-    "noImplicitAny": false
+    "noImplicitAny": false,
+    "types": ["jest", "node"]
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"]
