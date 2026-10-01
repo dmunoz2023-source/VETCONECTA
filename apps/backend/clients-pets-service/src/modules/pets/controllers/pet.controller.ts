@@ -1,16 +1,22 @@
-import { Controller, Get, Headers, UnauthorizedException } from '@nestjs/common';
+import { Controller, Get, UseGuards, UnauthorizedException } from '@nestjs/common';
+import { CurrentUser } from '@app/shared/decorators/current-user.decorator';
+import { JwtPayload } from '@app/shared/types/jwt-payload.interface';
+import { JwtHeadersGuard } from '@app/shared/guards/jwt-headers.guard';
 import { PetsService } from '../services/pets.service';
-
-@Controller('mascotas')
+/*Sin swagger*/
+@Controller('pets')
 export class PetsController {
   constructor(private readonly petsService: PetsService) {}
 
-  @Get()
-  async getMisMascotas(@Headers('x-client-id') clientId: string) {
+  @Get('my-pets')
+  @UseGuards(JwtHeadersGuard)
+  async getMyPets(@CurrentUser() user: JwtPayload) {
+    const clientId = user.clientId || user.sub;
+
     if (!clientId) {
-      throw new UnauthorizedException('No se proporcionó la identidad del cliente (x-client-id)');
+      throw new UnauthorizedException('El usuario autenticado no tiene un ID de cliente asociado.');
     }
 
     return await this.petsService.findByClientId(clientId);
   }
-} 
+}
