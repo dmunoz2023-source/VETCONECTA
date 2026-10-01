@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { PetEntity } from '../entities/pet.entity';
+import { calculateAge } from '../age-calculator.util';
 
 @Injectable()
 export class PetsService {
@@ -14,46 +15,29 @@ export class PetsService {
     const pets = await this.petRepository.find({
       where: {
         clientId: clientId,
-        activo: true,
+        active: true,
       },
       order: {
-        nombre: 'ASC',
+        name: 'ASC', // Usamos "name" según tu PetEntity
       },
     });
 
     return pets.map((pet) => {
-      const edad = this.calcularEdad(pet.fechaNacimiento);
+      const ageInfo = calculateAge(pet.birthDate);
+
       return {
         id: pet.id,
-        nombre: pet.nombre,
-        especie: pet.especie,
-        raza: pet.raza,
-        fechaNacimiento: pet.fechaNacimiento,
-        edad,
+        name: pet.name,
+        species: pet.species,
+        breed: pet.breed,
+        sex: pet.sex,
+        birthDate: pet.birthDate,
+        color: pet.color,
+        microchip: pet.microchip,
+        photoUrl: pet.photoUrl,
+        age: ageInfo, // Devuelve el objeto con la edad o null si no tiene fecha
         clientId: pet.clientId,
       };
     });
-  }
-
-  private calcularEdad(fechaNacimiento: Date): { anos: number; meses: number } {
-    const hoy = new Date();
-    const nacimiento = new Date(fechaNacimiento);
-
-    let anos = hoy.getFullYear() - nacimiento.getFullYear();
-    let meses = hoy.getMonth() - nacimiento.getMonth();
-
-    if (meses < 0 || (meses === 0 && hoy.getDate() < nacimiento.getDate())) {
-      anos--;
-      meses += 12;
-    }
-
-    if (hoy.getDate() < nacimiento.getDate()) {
-      meses--;
-      if (meses < 0) {
-        meses = 11;
-      }
-    }
-
-    return { anos, meses };
   }
 }
