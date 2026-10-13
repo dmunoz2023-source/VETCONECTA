@@ -1,16 +1,14 @@
 import axios from 'axios';
+import { clearToken, getToken } from '../utils/tokenStorage';
 
 /** URL base del API Gateway. Se define en apps/frontend/.env (ver .env.example). */
 const API_URL: string = import.meta.env.VITE_API_URL || 'http://localhost:3000';
-
-/** Clave donde el login guarda el JWT del panel. */
-const TOKEN_STORAGE_KEY = 'jwt_token';
 
 /** Cliente HTTP único hacia el API Gateway (:3000). */
 export const api = axios.create({ baseURL: API_URL });
 
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem(TOKEN_STORAGE_KEY);
+  const token = getToken();
   if (token) config.headers.Authorization = `Bearer ${token}`;
   return config;
 });
@@ -18,9 +16,10 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (response) => response,
   (error: unknown) => {
-    // 401: token ausente o vencido, se vuelve al login.
-    if (axios.isAxiosError(error) && error.response?.status === 401) {
-      localStorage.removeItem(TOKEN_STORAGE_KEY);
+    // 401 con sesión activa: el token venció, se vuelve al login.
+    // Sin sesión (credenciales incorrectas en el login) el error lo muestra la pantalla.
+    if (axios.isAxiosError(error) && error.response?.status === 401 && getToken()) {
+      clearToken();
       window.location.assign('/login');
     }
     return Promise.reject(error);

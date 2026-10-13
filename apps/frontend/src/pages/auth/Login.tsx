@@ -1,12 +1,13 @@
 import { useId, useState } from 'react';
 import type { FormEvent } from 'react';
-import { login, LoginError } from '../../api/auth.api';
-import type { Session } from '../../api/auth.api';
+import { LoginError } from '../../api/auth.api';
+import { useAuth } from '../../hooks/useAuth';
+import type { AuthUser } from '../../types/auth.types';
 import './Login.css';
 
 interface LoginProps {
   /** Se llama cuando el inicio de sesión fue correcto. Quien la use decide adónde ir. */
-  onLoginSuccess: (session: Session) => void;
+  onLoginSuccess: (user: AuthUser) => void;
 }
 
 const UNEXPECTED_ERROR = 'Ocurrió un error inesperado. Intenta nuevamente.';
@@ -23,6 +24,7 @@ function validatePassword(value: string): string | null {
 }
 
 export default function Login({ onLoginSuccess }: LoginProps) {
+  const { login } = useAuth();
   const emailId = useId();
   const passwordId = useId();
   const [email, setEmail] = useState('');
@@ -46,8 +48,8 @@ export default function Login({ onLoginSuccess }: LoginProps) {
     setError(null);
 
     try {
-      const session = await login(email.trim(), password);
-      onLoginSuccess(session);
+      const user = await login({ identifier: email, password });
+      onLoginSuccess(user);
     } catch (err: unknown) {
       setError(err instanceof LoginError ? err.message : UNEXPECTED_ERROR);
       setLoading(false);
