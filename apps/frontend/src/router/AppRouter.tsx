@@ -1,15 +1,24 @@
-import { BrowserRouter, Navigate, Route, Routes, useNavigate } from "react-router-dom";
+import { BrowserRouter, Navigate, Route, Routes, useLocation, useNavigate } from "react-router-dom";
 import DashboardLayout from "../layouts/DashboardLayout";
 import PlaceholderPage from "../components/common/PlaceholderPage";
 import DashboardHome from "../pages/dashboard/DashboardHome";
 import ClientsPage from "../pages/clients/ClientsPage";
 import Login from "../pages/auth/Login";
+import { useAuth } from "../hooks/useAuth";
 import ProtectedRoute from "./ProtectedRoute";
 
-/** Pantalla de login: al iniciar sesión correctamente lleva al panel. */
+/**
+ * Pantalla de login: con sesión activa redirige al panel; al iniciar sesión
+ * vuelve a la ruta protegida que se intentó abrir (o al inicio).
+ */
 function LoginRoute() {
+  const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
-  return <Login onLoginSuccess={() => navigate("/", { replace: true })} />;
+  const location = useLocation();
+  const from: string = location.state?.from?.pathname ?? "/";
+
+  if (isAuthenticated) return <Navigate to={from} replace />;
+  return <Login onLoginSuccess={() => navigate(from, { replace: true })} />;
 }
 
 export default function AppRouter() {
@@ -17,7 +26,7 @@ export default function AppRouter() {
     <BrowserRouter>
       <Routes>
         {/* Ruta pública */}
-        <Route index path="/login" element={<LoginRoute />} />
+        <Route path="/login" element={<LoginRoute />} />
 
         {/* Rutas protegidas */}
         <Route element={<ProtectedRoute />}>
