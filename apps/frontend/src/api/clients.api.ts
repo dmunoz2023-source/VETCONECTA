@@ -1,51 +1,29 @@
 import { api } from './axios';
 import type { Client, ClientFormValues, ClientsQuery, ClientsResult } from '../types/client.types';
 
-/** Columnas de `clients_pets.clients` tal como las devuelve clients-pets-service (script 01-tables.sql). */
-interface ClientDto {
-  rut: string;
-  first_name: string;
-  last_name: string;
-  email: string;
-  phone: string | null;
-  address: string | null;
-  district: string | null;
-  active: boolean;
-}
-
-/**
- * Cuerpo de POST/PATCH /v1/clients: columnas que llena el formulario.
- * TODO: `user_id` es NOT NULL en la tabla; confirmar con backend cómo se asigna al crear desde el panel.
- */
-type ClientPayload = Pick<ClientDto, 'rut' | 'first_name' | 'last_name' | 'email' | 'phone'>;
-
 /** Respuesta paginada común: { data, meta: { total, page, limit } } (Diseño §3.4). */
 interface ClientsPageDto {
-  data: ClientDto[];
+  data: Client[];
   meta: { total: number; page: number; limit: number };
 }
 
-function toClient(dto: ClientDto): Client {
-  return {
-    first_name: dto.first_name,
-    last_name: dto.last_name,
-    rut: dto.rut,
-    phone: dto.phone ?? '',
-    email: dto.email,
-    // TODO: el listado no informa las mascotas del cliente; confirmar con backend.
-    pets: 0,
-  };
-}
+/**
+ * Cuerpo de POST/PATCH /v1/clients (NewClientDataDTO).
+ * TODO: `userId` es obligatorio en el DTO de alta; confirmar con backend cómo se asigna al crear desde el panel.
+ */
+type ClientPayload = Omit<Client, 'id' | 'active'>;
 
-
-
+/** Los campos opcionales vacíos se envían como null. */
 function toPayload(values: ClientFormValues): ClientPayload {
+  const optional = (value: string) => value.trim() || null;
   return {
     rut: values.rut.trim(),
-    first_name: values.first_name.trim(),
-    last_name: values.last_name.trim(),
+    firstName: values.firstName.trim(),
+    lastName: values.lastName.trim(),
     email: values.email.trim(),
-    phone: values.phone.trim(),
+    phone: optional(values.phone),
+    address: optional(values.address),
+    district: optional(values.district),
   };
 }
 
@@ -54,23 +32,20 @@ export async function listClients({ search, page, pageSize }: ClientsQuery): Pro
   const { data } = await api.get<ClientsPageDto>('/v1/clients', {
     params: { q: search || undefined, page, limit: pageSize },
   });
-  return { clients: data.data.map(toClient), total: data.meta.total };
+  return { clients: data.data, total: data.meta.total };
 }
 
-/**
- * POST /v1/clients (crear) o PATCH /v1/clients/{...} (editar) (FR-5).
-
- */
-export async function saveClient(values: ClientFormValues, id?: string): Promise<void> {
-  const payload = toPayload(values);
-  if (id) {
-    await api.patch(`/v1/clients/${id}`, payload);
-  } else {
-    await api.post('/v1/clients', payload);
-  }
+/** POST /v1/clients (FR-5). */
+export async function createClient(values: ClientFormValues): Promise<void> {
+  await api.post('/v1/clients', toPayload(values));
 }
 
+/** PATCH /v1/clients/{id} (FR-5). */
+export async function updateClient(id: string, values: ClientFormValues): Promise<void> {
+  await api.patch(`/v1/clients/${id}`, toPayload(values));
+}
+
+/** DELETE /v1/clients/{id}: baja lógica (`active = false`), nunca borrado físico. */
 export async function deleteClient(id: string): Promise<void> {
-  // TODO: DELETE /v1/clients/{id} (baja lógica); el endpoint no está en la documentación.
-  void id;
+  await api.delete(`/v1/clients/${id}`);
 }

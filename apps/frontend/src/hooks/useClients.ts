@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import type { ClientFormValues, ClientsQuery, ClientsResult } from "../types/client.types";
 import { getErrorMessage } from "../api/axios";
-import { listClients, saveClient as saveClientRequest } from "../api/clients.api";
+import { createClient, deleteClient, listClients, updateClient } from "../api/clients.api";
 
 const EMPTY_RESULT: ClientsResult = { clients: [], total: 0 };
 
@@ -12,8 +12,8 @@ interface RequestState {
 }
 
 /**
- * Listado de clientes con búsqueda y paginación, más el guardado (alta y edición).
- * Consulta GET /v1/clients a través del API Gateway.
+ * Listado de clientes con búsqueda y paginación, más alta, edición y baja.
+ * Consume /v1/clients a través del API Gateway; tras cada cambio vuelve a pedir el listado.
  */
 export function useClients({ search, page, pageSize }: ClientsQuery) {
   const [reloadCount, setReloadCount] = useState(0);
@@ -39,15 +39,26 @@ export function useClients({ search, page, pageSize }: ClientsQuery) {
     };
   }, [search, page, pageSize, queryKey]);
 
-  /**
-   * Crea un cliente (sin identificador) o edita uno existente (con identificador)
-   * y vuelve a pedir el listado. Si la API responde con error, la promesa se
-   * rechaza para que la página lo muestre.
-   */
-  const saveClient = useCallback(async (values: ClientFormValues, id?: string) => {
-    await saveClientRequest(values, id);
-    setReloadCount((count) => count + 1);
-  }, []);
+  const reload = useCallback(() => setReloadCount((count) => count + 1), []);
+
+  /** Crea un cliente (sin `id`) o edita uno existente (con `id`). Si la API falla, la promesa se rechaza. */
+  const saveClient = useCallback(
+    async (values: ClientFormValues, id?: string) => {
+      if (id) await updateClient(id, values);
+      else await createClient(values);
+      reload();
+    },
+    [reload],
+  );
+
+  /** Da de baja al cliente. Si la API falla, la promesa se rechaza. */
+  const removeClient = useCallback(
+    async (id: string) => {
+      await deleteClient(id);
+      reload();
+    },
+    [reload],
+  );
 
   return {
     clients: state.result.clients,
@@ -55,5 +66,6 @@ export function useClients({ search, page, pageSize }: ClientsQuery) {
     loading: state.key !== queryKey,
     error: state.error,
     saveClient,
+    removeClient,
   };
 }

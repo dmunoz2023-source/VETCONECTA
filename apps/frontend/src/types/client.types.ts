@@ -1,15 +1,26 @@
+/** Cliente tal como lo devuelve clients-pets-service (entidad `clients_pets.clients`). */
 export interface Client {
-  first_name: string;
-  last_name: string;
+  id: string;
   rut: string;
-  phone: string;
-  email : string;
-  pets: number;
-  address?: string;
-  district?: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string | null;
+  address: string | null;
+  district: string | null;
+  active: boolean;
 }
 
-export type ClientFormValues = Pick<Client, "first_name" | "last_name" | "rut" | "phone" | "email" | "address" | "district">;
+/** Campos que llena el formulario de alta y edición. */
+export interface ClientFormValues {
+  rut: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  address: string;
+  district: string;
+}
 
 export interface ClientsQuery {
   search: string;

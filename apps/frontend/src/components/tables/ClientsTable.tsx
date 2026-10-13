@@ -26,7 +26,7 @@ export default function ClientsTable({
     <DataTable
       columns={getClientColumns({ onEdit, onDelete })}
       rows={clients}
-      getRowKey={(c) => c.rut}
+      getRowKey={(c) => c.id}
       loading={loading}
       error={error}
       emptyMessage={search ? `No se encontraron clientes para "${search}".` : "No hay clientes registrados."}

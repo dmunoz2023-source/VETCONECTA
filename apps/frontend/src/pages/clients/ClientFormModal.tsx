@@ -23,13 +23,13 @@ export default function ClientFormModal({ client, error, onClose, onSubmit }: Cl
   return (
     <Modal title={client ? "Editar Cliente" : "Nuevo Cliente"} onClose={onClose}>
       <form className="vc-modal-form" onSubmit={handleSubmit}>
-        <FormField label="Nombre" name="first_name" type="text" defaultValue={client?.first_name} placeholder="María González" required />
-        <FormField label="Apellido" name="last_name" type="text" defaultValue={client?.last_name} placeholder="María González" required />
+        <FormField label="Nombre" name="firstName" type="text" defaultValue={client?.firstName} placeholder="María" required />
+        <FormField label="Apellido" name="lastName" type="text" defaultValue={client?.lastName} placeholder="González" required />
         <FormField label="RUT" name="rut" type="text" defaultValue={client?.rut} placeholder="17.456.932-1" required />
-        <FormField label="Teléfono" name="phone" type="tel" defaultValue={client?.phone} placeholder="+56 9 8765 4321" required />
+        <FormField label="Teléfono" name="phone" type="tel" defaultValue={client?.phone ?? ""} placeholder="+56 9 8765 4321" required />
         <FormField label="Correo electrónico" name="email" type="email" defaultValue={client?.email} placeholder="correo@ejemplo.com" required />
-        <FormField label="Dirección" name="address" type="text" defaultValue={client?.address } placeholder="Calle Principal 123" />
-        <FormField label="Comuna" name="district" type="text" defaultValue={client?.district} placeholder="Santiago" /> 
+        <FormField label="Dirección" name="address" type="text" defaultValue={client?.address ?? ""} placeholder="Calle Principal 123" />
+        <FormField label="Comuna" name="district" type="text" defaultValue={client?.district ?? ""} placeholder="Santiago" />
         {error && (
           <p className="vc-modal-error" role="alert">
             {error}
