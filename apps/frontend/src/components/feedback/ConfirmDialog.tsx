@@ -7,6 +7,8 @@ interface ConfirmDialogProps {
   /** Texto de la pregunta; puede incluir el nombre del elemento a eliminar. */
   message: string;
   confirmLabel?: string;
+  /** Mensaje de error del servidor al confirmar; `null` si no hay. */
+  error?: string | null;
   onCancel: () => void;
   onConfirm: () => void;
 }
@@ -16,12 +18,18 @@ export default function ConfirmDialog({
   title,
   message,
   confirmLabel = "Eliminar",
+  error = null,
   onCancel,
   onConfirm,
 }: Readonly<ConfirmDialogProps>) {
   return (
     <Modal title={title} onClose={onCancel}>
       <p className="vc-confirm-message">{message}</p>
+      {error && (
+        <p className="vc-modal-error" role="alert">
+          {error}
+        </p>
+      )}
       <div className="vc-modal-actions">
         <Button type="button" onClick={onCancel}>
           Cancelar
