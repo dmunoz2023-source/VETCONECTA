@@ -1,8 +1,8 @@
-import { useEffect, useState } from "react";
-import { getErrorMessage } from "../api/axios";
+import { useCallback } from "react";
 import { getClient } from "../api/clients.api";
 import { getPet } from "../api/pets.api";
 import type { PetFormValues, PetOwner } from "../types/pet.types";
+import { useAsync } from "./useAsync";
 
 export const EMPTY_PET_FORM: PetFormValues = {
   clientId: "",
@@ -56,24 +56,7 @@ async function loadFormData(petId?: string, presetClientId?: string): Promise<Pe
  * - alta sin dueño: formulario vacío.
  */
 export function usePetFormData(petId?: string, presetClientId?: string) {
-  const [data, setData] = useState<PetFormData | null>(null);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    let cancelled = false;
-
-    loadFormData(petId, presetClientId)
-      .then((result) => {
-        if (!cancelled) setData(result);
-      })
-      .catch((err: unknown) => {
-        if (!cancelled) setError(getErrorMessage(err, "No se pudieron cargar los datos de la mascota."));
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [petId, presetClientId]);
-
-  return { data, error, loading: !data && !error };
+  const load = useCallback(() => loadFormData(petId, presetClientId), [petId, presetClientId]);
+  const { data, error, loading } = useAsync(load, "No se pudieron cargar los datos de la mascota.");
+  return { data, error, loading };
 }
