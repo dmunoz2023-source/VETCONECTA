@@ -1,0 +1,76 @@
+/* Pantallas de pacientes: formulario, ficha y avisos. */
+
+.vc-pet-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.vc-form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 14px 18px;
+}
+
+.vc-age-preview {
+  display: inline-block;
+  margin-top: 6px;
+  font-size: 12px;
+  color: var(--vc-primary);
+  font-weight: 600;
+}
+
+/* Aviso de éxito */
+.vc-notice {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: #ecfdf5;
+  color: #047857;
+  font-size: 14px;
+}
+
+/* Ficha del paciente */
+.vc-dash-actions .vc-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.vc-pet-summary {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 16px;
+  align-items: start;
+}
+@media (max-width: 900px) {
+  .vc-pet-summary {
+    grid-template-columns: 1fr;
+  }
+}
+.vc-detail-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 14px 18px;
+  margin: 14px 0 0;
+}
+.vc-detail-list dt {
+  font-size: 12px;
+  color: var(--vc-text-muted);
+}
+.vc-detail-list dd {
+  margin: 4px 0 0;
+  font-size: 14px;
+  color: var(--vc-text);
+  font-weight: 500;
+}
+.vc-badge-active {
+  background: #ecfdf5;
+  color: #047857;
+}
+.vc-badge-inactive {
+  background: #f3f4f6;
+  color: #6b7280;
+}
