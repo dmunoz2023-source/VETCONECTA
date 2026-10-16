@@ -47,3 +47,6 @@ Thumbs.db
 # Archivos de documentación
 /*.md
 !README.md
+
+/node_modules
+*.tsbuildinfo

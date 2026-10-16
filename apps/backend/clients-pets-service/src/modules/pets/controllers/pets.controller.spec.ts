@@ -1,6 +1,26 @@
 import { mockOwnerUser, mockOtherOwnerUser, mockPetsList } from '../../../test/mocks/pets.mock';
 
-// import { PetsController } from './pets.controller';
+import { PetsController } from './pet.controller';
+
+describe('PetsController - Resolución de clientId', () => {
+  it('resuelve el ID de cliente por userId cuando el JWT no incluye clientId', async () => {
+    const petsService = { findByClientId: jest.fn().mockResolvedValue([]) };
+    const clientsRepository = {
+      findByUserId: jest.fn().mockResolvedValue({
+        id: '22222222-2222-2222-2222-222222222222',
+      }),
+    };
+    const controller = new PetsController(petsService as any, clientsRepository as any);
+    const userWithoutClientId = { ...mockOwnerUser, clientId: undefined };
+
+    await controller.getMyPets(userWithoutClientId);
+
+    expect(clientsRepository.findByUserId).toHaveBeenCalledWith(mockOwnerUser.sub);
+    expect(petsService.findByClientId).toHaveBeenCalledWith(
+      '22222222-2222-2222-2222-222222222222',
+    );
+  });
+});
 
 describe('PetsController - Endpoints GET [E2]', () => {
   const mockPetsService = {

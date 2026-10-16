@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Pet } from '../entities/pet.entity';
+import { PetEntity } from '../entities/pet.entity';
 
 /**
  * [A3] Repositorio tipado — capa de persistencia exclusiva de `pets`.
@@ -11,14 +11,14 @@ import { Pet } from '../entities/pet.entity';
 @Injectable()
 export class PetsRepository {
   constructor(
-    @InjectRepository(Pet) private readonly repo: Repository<Pet>,
+    @InjectRepository(PetEntity) private readonly repo: Repository<PetEntity>,
   ) {}
 
-  findById(id: string): Promise<Pet | null> {
+  findById(id: string): Promise<PetEntity | null> {
     return this.repo.findOne({ where: { id } });
   }
 
-  findByClientId(clientId: string): Promise<Pet[]> {
+  findByClientId(clientId: string): Promise<PetEntity[]> {
     return this.repo.find({
       where: { clientId, active: true },
       order: { name: 'ASC' },
