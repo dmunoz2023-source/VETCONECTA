@@ -1,0 +1,33 @@
+/* Campos de formulario (FormField, SelectField): etiqueta arriba, control y error abajo. */
+
+.vc-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--vc-text-muted);
+}
+
+.vc-field > input,
+.vc-field > select {
+  border: 1px solid var(--vc-border);
+  border-radius: 8px;
+  padding: 9px 12px;
+  font-size: 14px;
+  color: var(--vc-text);
+  background: #fff;
+  color-scheme: light;
+  outline: none;
+}
+.vc-field > input:focus,
+.vc-field > select:focus {
+  border-color: var(--vc-primary);
+}
+.vc-field > [aria-invalid="true"] {
+  border-color: #dc2626;
+}
+
+.vc-field-error {
+  color: #b91c1c;
+  font-size: 12px;
+}
