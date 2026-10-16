@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { Plus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import Button from "../../components/common/Button";
@@ -7,30 +6,22 @@ import PageHeader from "../../components/common/PageHeader";
 import SearchInput from "../../components/common/SearchInput";
 import Notice from "../../components/feedback/Notice";
 import PetsTable from "../../components/tables/PetsTable";
-import { useDebouncedValue } from "../../hooks/useDebouncedValue";
 import { useFlashNotice } from "../../hooks/useFlashNotice";
 import { usePermissions } from "../../hooks/usePermissions";
 import { usePets } from "../../hooks/usePets";
+import { useSearchPagination } from "../../hooks/useSearchPagination";
 import "./Pets.css";
 
 const PAGE_SIZE = 8;
-const SEARCH_DEBOUNCE_MS = 300;
 
 /** Pantalla "Pacientes": listado de mascotas con búsqueda por mascota o dueño (FR-5). */
 export default function PetsPage() {
-  const [search, setSearch] = useState("");
-  const [page, setPage] = useState(1);
-  const debouncedSearch = useDebouncedValue(search, SEARCH_DEBOUNCE_MS);
+  const { search, debouncedSearch, page, setSearch, setPage } = useSearchPagination();
   const navigate = useNavigate();
   const can = usePermissions();
   const { notice, dismiss } = useFlashNotice();
 
   const { pets, total, loading, error } = usePets({ search: debouncedSearch, page, pageSize: PAGE_SIZE });
-
-  const handleSearchChange = (value: string) => {
-    setSearch(value);
-    setPage(1);
-  };
 
   return (
     <div className="vc-dashboard">
@@ -41,7 +32,7 @@ export default function PetsPage() {
           <>
             <SearchInput
               value={search}
-              onChange={handleSearchChange}
+              onChange={setSearch}
               placeholder="Buscar mascota, dueño o RUT..."
             />
             {can("createPet") && (

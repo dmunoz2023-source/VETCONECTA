@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { Plus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import Button from "../../components/common/Button";
@@ -9,20 +8,16 @@ import ConfirmDialog from "../../components/feedback/ConfirmDialog";
 import ClientsTable from "../../components/tables/ClientsTable";
 import { useClientDialogs } from "../../hooks/useClientDialogs";
 import { useClients } from "../../hooks/useClients";
-import { useDebouncedValue } from "../../hooks/useDebouncedValue";
 import { usePermissions } from "../../hooks/usePermissions";
+import { useSearchPagination } from "../../hooks/useSearchPagination";
 import type { Client } from "../../types/client.types";
 import ClientFormModal from "./ClientFormModal";
 import "./ClientsPage.css";
 
 const PAGE_SIZE = 8;
-const SEARCH_DEBOUNCE_MS = 300;
 
 export default function ClientsPage() {
-  const [search, setSearch] = useState("");
-  const [page, setPage] = useState(1);
-  // Espera a que el usuario deje de escribir antes de consultar la API.
-  const debouncedSearch = useDebouncedValue(search, SEARCH_DEBOUNCE_MS);
+  const { search, debouncedSearch, page, setSearch, setPage } = useSearchPagination();
 
   const { clients, total, loading, error, saveClient, removeClient } = useClients({
     search: debouncedSearch,
@@ -36,11 +31,6 @@ export default function ClientsPage() {
   // Abre el alta de mascota con este cliente ya elegido como dueño (UC-05, paso 2).
   const handleAddPet = (client: Client) => navigate(`/mascotas/nueva?clientId=${client.id}`);
 
-  const handleSearchChange = (value: string) => {
-    setSearch(value);
-    setPage(1);
-  };
-
   return (
     <div className="vc-dashboard">
       <PageHeader
@@ -50,7 +40,7 @@ export default function ClientsPage() {
           <>
             <SearchInput
               value={search}
-              onChange={handleSearchChange}
+              onChange={setSearch}
               placeholder="Buscar clientes, rut, teléfono..."
             />
             <Button variant="primary" onClick={form.openNew}>
