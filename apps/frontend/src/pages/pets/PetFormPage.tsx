@@ -19,7 +19,7 @@ export default function PetFormPage() {
 
   const handleSaved = (pet: Pet) => {
     const notice = id ? `Se guardaron los cambios de ${pet.name}.` : `${pet.name} se registró como paciente.`;
-    navigate("/mascotas", { state: { notice } });
+    navigate(`/mascotas/${pet.id}`, { state: { notice } });
   };
 
   return (

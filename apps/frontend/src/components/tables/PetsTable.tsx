@@ -9,12 +9,13 @@ interface PetsTableProps {
   loading: boolean;
   error: string | null;
   pagination: TablePaginationProps;
+  onView: (pet: Pet) => void;
 }
 
-export default function PetsTable({ pets, search, loading, error, pagination }: Readonly<PetsTableProps>) {
+export default function PetsTable({ pets, search, loading, error, pagination, onView }: Readonly<PetsTableProps>) {
   return (
     <DataTable
-      columns={getPetColumns()}
+      columns={getPetColumns({ onView })}
       rows={pets}
       getRowKey={(p) => p.id}
       loading={loading}

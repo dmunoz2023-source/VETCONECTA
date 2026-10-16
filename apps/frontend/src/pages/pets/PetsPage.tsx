@@ -61,6 +61,7 @@ export default function PetsPage() {
           search={search}
           loading={loading}
           error={error}
+          onView={(pet) => navigate(`/mascotas/${pet.id}`)}
           pagination={{ page, pageSize: PAGE_SIZE, total, itemLabel: "pacientes", onPageChange: setPage }}
         />
       </Card>
