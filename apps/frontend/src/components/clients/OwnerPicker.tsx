@@ -1,11 +1,14 @@
 import { useState } from "react";
 import Button from "../common/Button";
 import SearchInput from "../common/SearchInput";
+import StatusText from "../feedback/StatusText";
 import { listClients } from "../../api/clients.api";
 import { useDebouncedValue } from "../../hooks/useDebouncedValue";
 import { usePagedRequest } from "../../hooks/usePagedRequest";
 import type { ClientsResult } from "../../types/client.types";
 import type { PetOwner } from "../../types/pet.types";
+import "../common/FormField.css";
+import "./OwnerPicker.css";
 
 const MAX_RESULTS = 5;
 const EMPTY_RESULT: ClientsResult = { clients: [], total: 0 };
@@ -59,7 +62,7 @@ function OwnerSearch({ onSelect }: { onSelect: (owner: PetOwner) => void }) {
     <div className="vc-owner-search">
       <SearchInput value={search} onChange={setSearch} placeholder="Buscar dueño por nombre o RUT..." />
       {statusMessage ? (
-        <p className="vc-owner-status">{statusMessage}</p>
+        <StatusText>{statusMessage}</StatusText>
       ) : (
         <ul className="vc-owner-results">
           {result.clients.map(({ id, rut, firstName, lastName }) => (

@@ -1,6 +1,7 @@
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import Card from "../../components/common/Card";
 import PageHeader from "../../components/common/PageHeader";
+import StatusText from "../../components/feedback/StatusText";
 import { usePetFormData } from "../../hooks/usePetFormData";
 import type { Pet } from "../../types/pet.types";
 import PetForm from "./PetForm";
@@ -30,7 +31,7 @@ export default function PetFormPage() {
       />
 
       <Card>
-        {loading && <p className="vc-owner-status">Cargando...</p>}
+        {loading && <StatusText>Cargando...</StatusText>}
         {error && (
           <p className="vc-modal-error" role="alert">
             {error}
