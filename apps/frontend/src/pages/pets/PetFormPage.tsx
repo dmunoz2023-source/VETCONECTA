@@ -18,6 +18,9 @@ export default function PetFormPage() {
   const navigate = useNavigate();
   const { data, error, loading } = usePetFormData(id, presetClientId);
 
+  // Cancelar vuelve a donde tiene sentido, aunque el formulario se haya abierto desde un enlace directo.
+  const cancelPath = id ? `/mascotas/${id}` : presetClientId ? "/clientes" : "/mascotas";
+
   const handleSaved = (pet: Pet) => {
     const notice = id ? `Se guardaron los cambios de ${pet.name}.` : `${pet.name} se registró como paciente.`;
     navigate(`/mascotas/${pet.id}`, { state: { notice } });
@@ -43,7 +46,7 @@ export default function PetFormPage() {
             initialOwner={data.initialOwner}
             petId={id}
             onSaved={handleSaved}
-            onCancel={() => navigate(-1)}
+            onCancel={() => navigate(cancelPath)}
           />
         )}
       </Card>
