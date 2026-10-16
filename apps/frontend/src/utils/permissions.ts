@@ -17,6 +17,11 @@ const PERMISSIONS = {
 
 export type Permission = keyof typeof PERMISSIONS;
 
+/** Roles que tienen el permiso (para proteger rutas con <ProtectedRoute allowedRoles>). */
+export function rolesFor(permission: Permission): readonly Role[] {
+  return PERMISSIONS[permission];
+}
+
 export function can(role: Role | undefined, permission: Permission): boolean {
   return role !== undefined && (PERMISSIONS[permission] as readonly Role[]).includes(role);
 }

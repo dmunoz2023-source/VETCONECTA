@@ -7,6 +7,12 @@ export function parseDateOnly(value: string): Date | null {
   return date.getMonth() === month - 1 ? date : null;
 }
 
+/** Fecha local en formato "AAAA-MM-DD", el que usa <input type="date">. */
+export function toDateInputValue(date: Date): string {
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+}
+
 /**
  * Edad legible a partir de la fecha de nacimiento, con la misma regla que
  * clients-pets-service (age-calculator.util). Se usa como vista previa en el

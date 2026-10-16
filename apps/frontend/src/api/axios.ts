@@ -26,11 +26,18 @@ api.interceptors.response.use(
   },
 );
 
-/** Mensaje legible del formato de error común (`message`), o `fallback` si no viene. */
+/**
+ * Mensaje legible del formato de error común (`message`), o `fallback` si no viene.
+ * Los 400 de class-validator traen `message` como lista: se unen en un solo texto.
+ */
 export function getErrorMessage(error: unknown, fallback: string): string {
   if (axios.isAxiosError(error)) {
     const message: unknown = error.response?.data?.message;
     if (typeof message === 'string' && message.trim()) return message;
+    if (Array.isArray(message)) {
+      const parts = message.filter((part): part is string => typeof part === 'string' && part.trim() !== '');
+      if (parts.length) return parts.join(' ');
+    }
   }
   return fallback;
 }

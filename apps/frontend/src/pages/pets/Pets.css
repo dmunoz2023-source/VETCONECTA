@@ -1,0 +1,118 @@
+/* Pantallas de pacientes: formulario, buscador de dueño y avisos. */
+
+.vc-pet-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.vc-form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 14px 18px;
+}
+
+.vc-pet-form label,
+.vc-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--vc-text-muted);
+}
+
+.vc-pet-form input,
+.vc-pet-form select {
+  border: 1px solid var(--vc-border);
+  border-radius: 8px;
+  padding: 9px 12px;
+  font-size: 14px;
+  color: var(--vc-text);
+  background: #fff;
+  color-scheme: light;
+  outline: none;
+}
+.vc-pet-form input:focus,
+.vc-pet-form select:focus {
+  border-color: var(--vc-primary);
+}
+.vc-pet-form [aria-invalid="true"] {
+  border-color: #dc2626;
+}
+
+.vc-field-error {
+  color: #b91c1c;
+  font-size: 12px;
+}
+
+.vc-age-preview {
+  display: inline-block;
+  margin-top: 6px;
+  font-size: 12px;
+  color: var(--vc-primary);
+  font-weight: 600;
+}
+
+/* Buscador de dueño */
+.vc-owner-search .vc-clients-search {
+  width: 100%;
+  box-sizing: border-box;
+}
+.vc-owner-search .vc-clients-search input {
+  border: none;
+  padding: 0;
+}
+.vc-owner-status {
+  margin: 8px 0 0;
+  font-size: 13px;
+  color: var(--vc-text-muted);
+}
+.vc-owner-results {
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 0;
+  border: 1px solid var(--vc-border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.vc-owner-results button {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  padding: 10px 14px;
+  border: none;
+  border-bottom: 1px solid var(--vc-border);
+  background: #fff;
+  cursor: pointer;
+  font-size: 13px;
+  text-align: left;
+}
+.vc-owner-results li:last-child button {
+  border-bottom: none;
+}
+.vc-owner-results button:hover {
+  background: var(--vc-primary-light);
+}
+.vc-owner-selected {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 14px;
+  border: 1px solid var(--vc-border);
+  border-radius: 10px;
+  background: var(--vc-primary-light);
+  font-size: 13px;
+}
+
+/* Aviso de éxito */
+.vc-notice {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: #ecfdf5;
+  color: #047857;
+  font-size: 14px;
+}

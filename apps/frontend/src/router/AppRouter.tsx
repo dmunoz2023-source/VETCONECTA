@@ -3,7 +3,9 @@ import DashboardLayout from "../layouts/DashboardLayout";
 import PlaceholderPage from "../components/common/PlaceholderPage";
 import DashboardHome from "../pages/dashboard/DashboardHome";
 import ClientsPage from "../pages/clients/ClientsPage";
+import PetFormPage from "../pages/pets/PetFormPage";
 import PetsPage from "../pages/pets/PetsPage";
+import { rolesFor } from "../utils/permissions";
 import Login from "../pages/auth/Login";
 import { useAuth } from "../hooks/useAuth";
 import ProtectedRoute from "./ProtectedRoute";
@@ -36,6 +38,12 @@ export default function AppRouter() {
             {/* Restringir por rol con <ProtectedRoute allowedRoles={["reception", "admin"]}/> */}
             <Route path="clientes" element={<ClientsPage />} />
             <Route path="mascotas" element={<PetsPage />} />
+            <Route element={<ProtectedRoute allowedRoles={rolesFor("createPet")} />}>
+              <Route path="mascotas/nueva" element={<PetFormPage />} />
+            </Route>
+            <Route element={<ProtectedRoute allowedRoles={rolesFor("editPet")} />}>
+              <Route path="mascotas/:id/editar" element={<PetFormPage />} />
+            </Route>
             <Route path="agenda" element={<PlaceholderPage title="Agenda" />} />
             <Route path="reportes" element={<PlaceholderPage title="Reportes" />} />
             <Route path="historial" element={<PlaceholderPage title="Historial Clínico" />} />
