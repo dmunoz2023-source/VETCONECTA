@@ -11,7 +11,7 @@ const VALID_STATUSES: AppointmentStatus[] = [
 ];
 
 /**
- * [C3] Query params de GET /v1/citas.
+ * [C3] Query params de GET /v1/scheduling/appointments/me.
  *
  * `status` llega como string separado por comas (ej. "booked,confirmed")
  * porque es la forma mas simple de mandar un filtro de arreglo por query string;
