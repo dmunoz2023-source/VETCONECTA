@@ -8,15 +8,16 @@ import { AppointmentsService } from '../services/appointments.service';
 import { GetCitasQueryDto } from '../dto/get-citas-query.dto';
 
 /**
- * [C3] GET /v1/citas — el dueño consulta sus propias citas agendadas,
- * historicas y canceladas (FR-3, BR-8). Requiere las cabeceras del
- * Gateway (JwtHeadersGuard) y esta reservado al rol owner (RolesGuard).
+ * [C3] GET /v1/scheduling/appointments/me — el dueño consulta sus propias
+ * citas agendadas, historicas y canceladas (FR-3, BR-8). Requiere las
+ * cabeceras del Gateway (JwtHeadersGuard) y esta reservado al rol owner
+ * (RolesGuard). Ruta segun Diseño de Microservicios §7.
  */
-@Controller('v1/citas')
+@Controller('v1/scheduling/appointments')
 export class AppointmentsController {
   constructor(private readonly appointmentsService: AppointmentsService) {}
 
-  @Get()
+  @Get('me')
   @UseGuards(JwtHeadersGuard, RolesGuard)
   @Roles('owner')
   async getMyCitas(@CurrentUser() user: JwtPayload, @Query() query: GetCitasQueryDto) {

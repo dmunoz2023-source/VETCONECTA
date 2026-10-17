@@ -3,7 +3,7 @@ import { AppointmentsRepository } from '../repositories/appointments.repository'
 import { GetCitasQueryDto } from '../dto/get-citas-query.dto';
 
 /**
- * [C3] Logica de negocio de GET /v1/citas: el dueño solo puede ver sus
+ * [C3] Logica de negocio de GET /v1/scheduling/appointments/me: el dueño solo puede ver sus
  * propias citas (BR-8), asi que el clientId siempre sale del JWT
  * (request.user), nunca de un parametro que el cliente pueda manipular.
  */

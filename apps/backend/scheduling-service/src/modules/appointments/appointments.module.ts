@@ -8,7 +8,7 @@ import { AppointmentsService } from './services/appointments.service';
 import { AppointmentsController } from './controllers/appointments.controller';
 
 /**
- * [A3][C3] Capa de datos (repositorios) mas el endpoint GET /v1/citas
+ * [A3][C3] Capa de datos (repositorios) mas el endpoint GET /v1/scheduling/appointments/me
  * (controller + service) que consume AppointmentsRepository.findByClient.
  */
 @Module({
