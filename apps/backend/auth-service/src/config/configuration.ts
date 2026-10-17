@@ -1,7 +1,7 @@
 // src/config/configuration.ts
 export default () => ({
   port: parseInt(process.env.PORT || '3000', 10),
-  clientsServiceUrl: process.env.CLIENTS_SERVICE_URL || 'http://localhost:3002',
+  clientsServiceUrl: process.env.CLIENTS_SERVICE_URL || 'http://127.0.0.1:3002',
   database: {
     host: process.env.DB_HOST || 'localhost',
     port: parseInt(process.env.DB_PORT || '5432', 10),
