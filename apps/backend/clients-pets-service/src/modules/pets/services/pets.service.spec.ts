@@ -6,7 +6,27 @@ import {
 } from '../../../test/mocks/pets.mock';
 
 // import { PetsService } from './pets.service';
+import { PetsController } from '../controllers/pets.controller';
 
+describe('PetsController - Resolución de clientId', () => {
+  it('resuelve el ID de cliente por userId cuando el JWT no incluye clientId', async () => {
+    const petsService = { findByClientId: jest.fn().mockResolvedValue([]) };
+    const clientsRepository = {
+      findByUserId: jest.fn().mockResolvedValue({
+        id: '22222222-2222-2222-2222-222222222222',
+      }),
+    };
+    const controller = new PetsController(petsService as any, clientsRepository as any);
+    const userWithoutClientId = { ...mockOwnerUser, clientId: undefined };
+
+    await controller.getMyPets(userWithoutClientId);
+
+    expect(clientsRepository.findByUserId).toHaveBeenCalledWith(mockOwnerUser.sub);
+    expect(petsService.findByClientId).toHaveBeenCalledWith(
+      '22222222-2222-2222-2222-222222222222',
+    );
+  });
+});
 describe('PetsService - Reglas de Negocio GET [E2]', () => {
   class MockPetsServiceLogic {
     async getPetsByClientId(clientId: string): Promise<MockPet[]> {
