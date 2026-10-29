@@ -11,9 +11,11 @@ import { Client } from '../../clients/entities/client.entity';
  * [A3] Mapea 1:1 la tabla real clients_pets.pets. La FK a `clients` sí existe
  * físicamente porque ambas tablas viven en el mismo esquema (clients_pets);
  * esto es lo único permitido por las reglas de persistencia del proyecto.
+ * 
+ * MODIFICADO SOLO class Pet -> PetEntity para que coindian los imports
  */
 @Entity({ name: 'pets', schema: 'clients_pets' })
-export class Pet {
+export class PetEntity {
   @PrimaryGeneratedColumn('uuid')
   id!: string;
 

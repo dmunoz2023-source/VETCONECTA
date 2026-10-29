@@ -6,6 +6,7 @@ import {
 } from '../../../test/mocks/pets.mock';
 
 // import { PetsService } from './pets.service';
+import { PetsController } from '../controllers/pets.controller';
 
 describe('PetsService - Reglas de Negocio GET [E2]', () => {
   class MockPetsServiceLogic {
