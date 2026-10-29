@@ -15,6 +15,7 @@ import { PetsLookup } from '../clients/pets.lookup';
 import { RemindersClient } from '../clients/reminders.client';
 import { GetCitasQueryDto } from '../dto/get-citas-query.dto';
 import { CreateCitaDto } from '../dto/create-cita.dto';
+import { FinalStatus } from '../dto/update-estado.dto';
 
 /** Estados en los que una cita ocupa el horario del veterinario. */
 export const ACTIVE_STATUSES = ['booked', 'confirmed'] as const;
@@ -156,5 +157,91 @@ export class AppointmentsService {
     });
 
     return appointment;
+  }
+
+  /**
+   * PATCH /v1/citas/:id/cancelar: el dueño cancela solo sus citas futuras (BR-8);
+   * recepcion y admin pueden cancelar cualquiera. Libera el horario porque el
+   * indice unico solo considera citas booked/confirmed.
+   */
+  async cancel(user: JwtPayload, id: string): Promise<Appointment> {
+    const appointment = await this.dataSource.transaction(async (manager) => {
+      const repo = manager.getRepository(Appointment);
+      const current = await repo.findOne({ where: { id }, lock: { mode: 'pessimistic_write' } });
+      if (!current) {
+        throw new NotFoundException('La cita no existe.');
+      }
+      if (user.role === 'owner') {
+        if (current.clientId !== user.clientId) {
+          throw new ForbiddenException('La cita no pertenece a tu cuenta (BR-8).');
+        }
+        if (current.startTime.getTime() <= Date.now()) {
+          throw new BadRequestException('No se puede cancelar una cita que ya comenzó.');
+        }
+      }
+      if (!this.isActive(current.status)) {
+        throw new ConflictException('La cita ya no se puede cancelar.');
+      }
+
+      const from = current.status;
+      current.status = 'cancelled';
+      current.cancelledAt = new Date();
+      const saved = await repo.save(current);
+
+      await this.auditLog.record(
+        {
+          actorUserId: user.sub,
+          action: 'appointment.cancelled',
+          entityId: saved.id,
+          data: { from },
+        },
+        manager,
+      );
+      return saved;
+    });
+
+    // La cita ya esta cancelada: si no se puede anular el aviso solo se registra.
+    await this.reminders.cancel(appointment.id);
+
+    return appointment;
+  }
+
+  /**
+   * PATCH /v1/citas/:id/estado: el personal cierra la cita como atendida o
+   * inasistente. Un veterinario solo puede cerrar sus propias citas.
+   */
+  async updateStatus(user: JwtPayload, id: string, status: FinalStatus): Promise<Appointment> {
+    return this.dataSource.transaction(async (manager) => {
+      const repo = manager.getRepository(Appointment);
+      const current = await repo.findOne({ where: { id }, lock: { mode: 'pessimistic_write' } });
+      if (!current) {
+        throw new NotFoundException('La cita no existe.');
+      }
+      if (user.role === 'vet' && current.vetUserId !== user.sub) {
+        throw new ForbiddenException('Solo puedes actualizar tus propias citas.');
+      }
+      if (!this.isActive(current.status)) {
+        throw new ConflictException(`No se puede pasar de "${current.status}" a "${status}".`);
+      }
+
+      const from = current.status;
+      current.status = status;
+      const saved = await repo.save(current);
+
+      await this.auditLog.record(
+        {
+          actorUserId: user.sub,
+          action: 'appointment.status_changed',
+          entityId: saved.id,
+          data: { from, to: status },
+        },
+        manager,
+      );
+      return saved;
+    });
+  }
+
+  private isActive(status: string): boolean {
+    return (ACTIVE_STATUSES as readonly string[]).includes(status);
   }
 }
