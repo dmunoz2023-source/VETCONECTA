@@ -1,0 +1,5 @@
+.vc-status-text {
+  margin: 8px 0 0;
+  font-size: 13px;
+  color: var(--vc-text-muted);
+}
