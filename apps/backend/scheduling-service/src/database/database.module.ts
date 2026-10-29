@@ -5,12 +5,13 @@ import { AppConfig } from '../config/configuration';
 import { AvailabilitySlot } from '../modules/availability/entities/availability-slot.entity';
 import { Appointment } from '../modules/appointments/entities/appointment.entity';
 import { Rating } from '../modules/appointments/entities/rating.entity';
+import { AuditLog } from '../modules/appointments/entities/audit-log.entity';
 
 /**
  * [A3] Punto único de conexión de scheduling-service a PostgreSQL.
  *
  * Aislamiento por esquema (regla de oro de la arquitectura, §3 del doc de
- * arquitectura): este módulo solo registra las 3 entidades de `scheduling`
+ * arquitectura): este módulo solo registra las entidades de `scheduling`
  * y fija `schema: dbSchema` ('scheduling'). Ningún repositorio de este
  * servicio puede terminar apuntando, ni por accidente, a una tabla de
  * `clients_pets`, `clinical`, `catalog`, etc.
@@ -40,7 +41,7 @@ import { Rating } from '../modules/appointments/entities/rating.entity';
           type: 'postgres',
           url: databaseUrl,
           schema: dbSchema,
-          entities: [AvailabilitySlot, Appointment, Rating],
+          entities: [AvailabilitySlot, Appointment, Rating, AuditLog],
           synchronize: false,
           logging: process.env.NODE_ENV !== 'production',
         };
