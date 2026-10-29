@@ -5,8 +5,8 @@ export type PetFormErrors = Partial<Record<keyof PetFormValues, string>>;
 
 /**
  * Mismas reglas que CrearMascotaDto / ActualizarMascotaDto (F1): nombre, especie,
- * raza, sexo, fecha de nacimiento y dueño obligatorios; la fecha no puede ser futura.
- * Color y microchip son opcionales. Devuelve un objeto vacío si todo es válido.
+ * sexo, fecha de nacimiento y dueño obligatorios; la fecha no puede ser futura.
+ * Raza, color y microchip son opcionales. Devuelve un objeto vacío si todo es válido.
  */
 export function validatePetForm(values: PetFormValues, today: Date = new Date()): PetFormErrors {
   const errors: PetFormErrors = {};
@@ -14,7 +14,7 @@ export function validatePetForm(values: PetFormValues, today: Date = new Date())
   if (!values.clientId) errors.clientId = "Selecciona el dueño de la mascota.";
   if (!values.name.trim()) errors.name = "Ingresa el nombre de la mascota.";
   if (!values.species) errors.species = "Selecciona la especie.";
-  if (!values.breed.trim()) errors.breed = "Ingresa la raza.";
+  // Se eliminó la validación estricta de raza (puede quedar en blanco)
   if (!values.sex) errors.sex = "Selecciona el sexo.";
 
   if (!values.birthDate) {
