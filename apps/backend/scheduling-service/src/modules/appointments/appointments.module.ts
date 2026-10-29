@@ -4,6 +4,9 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Appointment } from './entities/appointment.entity';
 import { Rating } from './entities/rating.entity';
 import { AuditLog } from './entities/audit-log.entity';
+import { AvailabilitySlot } from '../availability/entities/availability-slot.entity';
+import { AvailabilityPort } from './availability/availability.port';
+import { SlotAvailabilityAdapter } from './availability/slot-availability.adapter';
 import { AppointmentsRepository } from './repositories/appointments.repository';
 import { RatingsRepository } from './repositories/ratings.repository';
 import { AuditLogRepository } from './repositories/audit-log.repository';
@@ -17,7 +20,8 @@ import { HttpRemindersClient, RemindersClient } from './clients/reminders.client
  * (controller + service) que consume AppointmentsRepository.findByClient.
  */
 @Module({
-  imports: [TypeOrmModule.forFeature([Appointment, Rating, AuditLog]), HttpModule],
+  imports: [TypeOrmModule.forFeature([Appointment, Rating, AuditLog, AvailabilitySlot]),
+    HttpModule],
   controllers: [AppointmentsController],
   providers: [
     AppointmentsRepository,
@@ -26,6 +30,7 @@ import { HttpRemindersClient, RemindersClient } from './clients/reminders.client
     AppointmentsService,
     { provide: PetsLookup, useClass: HttpPetsLookup },
     { provide: RemindersClient, useClass: HttpRemindersClient },
+    { provide: AvailabilityPort, useClass: SlotAvailabilityAdapter },
   ],
   exports: [AppointmentsRepository, RatingsRepository],
 })
