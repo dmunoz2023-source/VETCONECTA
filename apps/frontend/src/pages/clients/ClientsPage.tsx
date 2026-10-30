@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Plus } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import Button from "../../components/common/Button";
 import Card from "../../components/common/Card";
 import PageHeader from "../../components/common/PageHeader";
@@ -9,6 +10,8 @@ import ClientsTable from "../../components/tables/ClientsTable";
 import { useClientDialogs } from "../../hooks/useClientDialogs";
 import { useClients } from "../../hooks/useClients";
 import { useDebouncedValue } from "../../hooks/useDebouncedValue";
+import { usePermissions } from "../../hooks/usePermissions";
+import type { Client } from "../../types/client.types";
 import ClientFormModal from "./ClientFormModal";
 import "./ClientsPage.css";
 
@@ -27,6 +30,11 @@ export default function ClientsPage() {
     pageSize: PAGE_SIZE,
   });
   const { form, remove, error: dialogError } = useClientDialogs({ saveClient, removeClient });
+  const navigate = useNavigate();
+  const can = usePermissions();
+
+  // Abre el alta de mascota con este cliente ya elegido como dueño (UC-05, paso 2).
+  const handleAddPet = (client: Client) => navigate(`/mascotas/nueva?clientId=${client.id}`);
 
   const handleSearchChange = (value: string) => {
     setSearch(value);
@@ -60,6 +68,7 @@ export default function ClientsPage() {
           error={error}
           onEdit={form.openEdit}
           onDelete={remove.ask}
+          onAddPet={can("createPet") ? handleAddPet : undefined}
           pagination={{ page, pageSize: PAGE_SIZE, total, itemLabel: "clientes", onPageChange: setPage }}
         />
       </Card>

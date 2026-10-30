@@ -35,6 +35,12 @@ export async function listClients({ search, page, pageSize }: ClientsQuery): Pro
   return { clients: data.data, total: data.meta.total };
 }
 
+/** GET /v1/clients/{id}: ficha del cliente (FR-5). */
+export async function getClient(id: string): Promise<Client> {
+  const { data } = await api.get<Client>(`/v1/clients/${id}`);
+  return data;
+}
+
 /** POST /v1/clients (FR-5). */
 export async function createClient(values: ClientFormValues): Promise<void> {
   await api.post('/v1/clients', toPayload(values));
