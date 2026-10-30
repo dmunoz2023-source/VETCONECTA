@@ -4,6 +4,7 @@ import PlaceholderPage from "../components/common/PlaceholderPage";
 import DashboardHome from "../pages/dashboard/DashboardHome";
 import ClientsPage from "../pages/clients/ClientsPage";
 import PetDetailPage from "../pages/pets/PetDetailPage";
+import PetClinicalPage from "../pages/pets/PetClinicalPage";
 import PetFormPage from "../pages/pets/PetFormPage";
 import PetsPage from "../pages/pets/PetsPage";
 import { rolesFor } from "../utils/permissions";
@@ -46,11 +47,10 @@ export default function AppRouter() {
               <Route path="mascotas/:id/editar" element={<PetFormPage />} />
             </Route>
             <Route path="mascotas/:id" element={<PetDetailPage />} />
-            {/* TODO (I2): reemplazar por el formulario de evento clínico y el carnet. */}
             <Route element={<ProtectedRoute allowedRoles={rolesFor("registerClinicalEvent")} />}>
-              <Route path="mascotas/:id/atencion" element={<PlaceholderPage title="Registrar evento clínico" />} />
+              <Route path="mascotas/:id/atencion" element={<PetClinicalPage register />} />
             </Route>
-            <Route path="mascotas/:id/historial" element={<PlaceholderPage title="Historial clínico" />} />
+            <Route path="mascotas/:id/historial" element={<PetClinicalPage />} />
             <Route path="agenda" element={<PlaceholderPage title="Agenda" />} />
             <Route path="reportes" element={<PlaceholderPage title="Reportes" />} />
             <Route path="historial" element={<PlaceholderPage title="Historial Clínico" />} />
