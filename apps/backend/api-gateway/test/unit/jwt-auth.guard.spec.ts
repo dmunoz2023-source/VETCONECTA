@@ -32,7 +32,7 @@ describe('JwtAuthGuard', () => {
   });
 
   it('rechaza rutas protegidas sin Bearer', () => {
-    const req: FakeRequest = { method: 'GET', url: '/v1/citas', headers: {} };
+    const req: FakeRequest = { method: 'GET', url: '/v1/scheduling/appointments/me', headers: {} };
 
     expect(() => guard.canActivate(makeContext(req))).toThrow(UnauthorizedException);
   });
@@ -43,7 +43,7 @@ describe('JwtAuthGuard', () => {
     });
     const req: FakeRequest = {
       method: 'GET',
-      url: '/v1/citas',
+      url: '/v1/scheduling/appointments/me',
       headers: { authorization: 'Bearer token-malo' },
     };
 
@@ -59,7 +59,7 @@ describe('JwtAuthGuard', () => {
     });
     const req: FakeRequest = {
       method: 'GET',
-      url: '/v1/citas',
+      url: '/v1/scheduling/appointments/me',
       headers: { authorization: 'Bearer token-ok' },
     };
 
@@ -79,7 +79,7 @@ describe('JwtAuthGuard', () => {
     });
     const req: FakeRequest = {
       method: 'GET',
-      url: '/v1/citas',
+      url: '/v1/scheduling/appointments/me',
       headers: {
         authorization: 'Bearer token-ok',
         'x-user-id': 'HACKER',
@@ -103,7 +103,7 @@ describe('JwtAuthGuard', () => {
     });
     const req: FakeRequest = {
       method: 'GET',
-      url: '/v1/citas',
+      url: '/v1/scheduling/appointments/me',
       headers: { authorization: 'Bearer token-ok', 'x-client-id': 'CLIENTE-FALSO' },
     };
 
