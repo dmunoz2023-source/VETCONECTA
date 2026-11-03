@@ -1,3 +1,9 @@
+export interface FirebaseConfig {
+  projectId: string;
+  clientEmail: string;
+  privateKey: string;
+}
+
 export interface AppConfig {
   port: number;
   databaseUrl: string;
@@ -7,8 +13,8 @@ export interface AppConfig {
   reminderPollSeconds: number;
   /** Intentos maximos de envio antes de dejar el recordatorio en estado "error". */
   reminderMaxAttempts: number;
-  /** Secreto compartido entre servicios para las rutas /internal */
   internalKey: string;
+  firebase: FirebaseConfig;
 }
 
 export default (): AppConfig => ({
@@ -19,4 +25,9 @@ export default (): AppConfig => ({
   reminderPollSeconds: parseInt(process.env.REMINDER_POLL_SECONDS ?? '300', 10),
   reminderMaxAttempts: parseInt(process.env.REMINDER_MAX_ATTEMPTS ?? '3', 10),
   internalKey: process.env.INTERNAL_KEY as string,
+  firebase: {
+    projectId: process.env.FIREBASE_PROJECT_ID ?? '',
+    clientEmail: process.env.FIREBASE_CLIENT_EMAIL ?? '',
+    privateKey: process.env.FIREBASE_PRIVATE_KEY ?? '',
+  },
 });

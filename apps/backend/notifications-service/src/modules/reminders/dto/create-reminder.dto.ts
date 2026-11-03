@@ -1,16 +1,13 @@
-import { IsISO8601, IsNotEmpty, IsString, IsUUID, MaxLength } from 'class-validator';
+import { IsISO8601, IsNotEmpty, IsString, Matches, MaxLength } from 'class-validator';
 
-/**
- * [H1] Datos que envía scheduling-service al reservar una cita
- * (POST /internal/reminders).
- */
+
+const UUID_FORMAT = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 export class CreateReminderDto {
-  /** Id de la cita en scheduling.appointments */
-  @IsUUID()
+  @Matches(UUID_FORMAT, { message: 'appointmentId debe ser un UUID valido' })
   appointmentId!: string;
 
-  /** Id del usuario dueño (auth.users) que recibirá el aviso. */
-  @IsUUID()
+  @Matches(UUID_FORMAT, { message: 'ownerUserId debe ser un UUID valido' })
   ownerUserId!: string;
 
   @IsString()
@@ -18,7 +15,6 @@ export class CreateReminderDto {
   @MaxLength(100)
   petName!: string;
 
-  /** Inicio de la cita en ISO 8601, ej. 2026-10-25T15:00:00Z. */
   @IsISO8601()
   startsAt!: string;
 }

@@ -8,4 +8,8 @@ export const validationSchema = Joi.object({
   REMINDER_POLL_SECONDS: Joi.number().integer().min(1).default(300),
   REMINDER_MAX_ATTEMPTS: Joi.number().integer().min(1).default(3),
   INTERNAL_KEY: Joi.string().required(),
+  // Opcionales: si no están, el servicio usa el envío simulado.
+  FIREBASE_PROJECT_ID: Joi.string().allow('').optional(),
+  FIREBASE_CLIENT_EMAIL: Joi.string().allow('').optional(),
+  FIREBASE_PRIVATE_KEY: Joi.string().allow('').optional(),
 });
