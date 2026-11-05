@@ -51,6 +51,17 @@ export function futureUtc(days: number, hour: number, minute = 0): Date {
   );
 }
 
+/**
+ * Escribe un instante con una zona horaria fija (ej. -3 => "2030-05-01T23:30:00-03:00").
+ * Sirve para probar que la misma hora en distintas zonas es el mismo horario.
+ */
+export function withOffset(date: Date, offsetHours: number): string {
+  const local = new Date(date.getTime() + offsetHours * 3_600_000).toISOString().slice(0, 19);
+  const sign = offsetHours < 0 ? '-' : '+';
+  const hours = String(Math.abs(offsetHours)).padStart(2, '0');
+  return `${local}${sign}${hours}:00`;
+}
+
 /** Cuerpo de POST /v1/citas. */
 export function citaBody(params: {
   petId: string;

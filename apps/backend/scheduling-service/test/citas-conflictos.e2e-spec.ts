@@ -6,6 +6,7 @@ import {
   OWNER_2,
   PET_OWNER_1,
   PET_OWNER_2,
+  SPECIALTY_CIRUGIA,
   SPECIALTY_CONSULTA,
   VET_A,
   VET_B,
@@ -13,6 +14,7 @@ import {
   asReception,
   citaBody,
   futureUtc,
+  withOffset,
 } from './helpers/fixtures';
 
 /**
@@ -28,8 +30,18 @@ describe('Conflictos de horario en citas [J2]', () => {
   const cancel = (headers: Record<string, string>, appointmentId: string) =>
     request(ctx.app.getHttpServer()).patch(`/v1/citas/${appointmentId}/cancelar`).set(headers);
 
-  const bodyFor = (petId: string, vetUserId: string, start: Date, specialtyId = SPECIALTY_CONSULTA) =>
-    citaBody({ petId, vetUserId, specialtyId, startTime: start.toISOString() });
+  const bodyFor = (
+    petId: string,
+    vetUserId: string,
+    start: Date | string,
+    specialtyId = SPECIALTY_CONSULTA,
+  ) =>
+    citaBody({
+      petId,
+      vetUserId,
+      specialtyId,
+      startTime: typeof start === 'string' ? start : start.toISOString(),
+    });
 
   beforeAll(async () => {
     ctx = await createTestApp();
@@ -239,6 +251,151 @@ describe('Conflictos de horario en citas [J2]', () => {
       expect(responses.filter((response) => response.status === 200)).toHaveLength(1);
       expect(responses.filter((response) => response.status === 409)).toHaveLength(4);
       expect(await countAllActive(ctx.dataSource, VET_A)).toBe(0);
+    });
+  });
+
+  describe('solapamiento parcial (bloques de distinta duracion)', () => {
+    const consulta = futureUtc(5, 13); // 13:00-14:00, 60 min
+    const cirugiaDentro = futureUtc(5, 13, 30); // 13:30-14:00, 30 min, otra especialidad
+    const cirugiaAntes = futureUtc(5, 12, 30); // 12:30-13:30, 60 min, otra especialidad
+    const contiguo = futureUtc(5, 14); // 14:00-14:30, empieza cuando termina la consulta
+
+    beforeEach(async () => {
+      for (const vetUserId of [VET_A, VET_B]) {
+        await seedSlot(ctx.dataSource, { vetUserId, specialtyId: SPECIALTY_CONSULTA, start: consulta, minutes: 60 });
+        await seedSlot(ctx.dataSource, { vetUserId, specialtyId: SPECIALTY_CIRUGIA, start: cirugiaDentro, minutes: 30 });
+        await seedSlot(ctx.dataSource, { vetUserId, specialtyId: SPECIALTY_CIRUGIA, start: cirugiaAntes, minutes: 60 });
+        await seedSlot(ctx.dataSource, { vetUserId, specialtyId: SPECIALTY_CONSULTA, start: contiguo, minutes: 30 });
+      }
+    });
+
+    const reservar = (vet: string, start: Date, specialtyId: string) =>
+      book(asOwner(OWNER_1), bodyFor(PET_OWNER_1.id, vet, start, specialtyId));
+
+    it('un bloque corto dentro de una cita larga ya reservada: 409', async () => {
+      expect((await reservar(VET_A, consulta, SPECIALTY_CONSULTA)).status).toBe(201);
+
+      const response = await reservar(VET_A, cirugiaDentro, SPECIALTY_CIRUGIA);
+
+      expect(response.status).toBe(409);
+      expect(await countAllActive(ctx.dataSource, VET_A)).toBe(1);
+    });
+
+    it('en orden inverso (primero el corto, luego el largo que lo contiene): 409', async () => {
+      expect((await reservar(VET_A, cirugiaDentro, SPECIALTY_CIRUGIA)).status).toBe(201);
+
+      const response = await reservar(VET_A, consulta, SPECIALTY_CONSULTA);
+
+      expect(response.status).toBe(409);
+      expect(await countAllActive(ctx.dataSource, VET_A)).toBe(1);
+    });
+
+    it('un bloque que empieza antes y termina dentro de la cita reservada: 409', async () => {
+      expect((await reservar(VET_A, consulta, SPECIALTY_CONSULTA)).status).toBe(201);
+
+      const response = await reservar(VET_A, cirugiaAntes, SPECIALTY_CIRUGIA);
+
+      expect(response.status).toBe(409);
+    });
+
+    it('un bloque que empieza justo cuando termina la cita reservada no es conflicto: 201', async () => {
+      expect((await reservar(VET_A, consulta, SPECIALTY_CONSULTA)).status).toBe(201);
+
+      const response = await reservar(VET_A, contiguo, SPECIALTY_CONSULTA);
+
+      expect(response.status).toBe(201);
+      expect(await countAllActive(ctx.dataSource, VET_A)).toBe(2);
+    });
+
+    it('el solapamiento solo cuenta dentro del mismo veterinario: otro veterinario puede reservar: 201', async () => {
+      expect((await reservar(VET_A, consulta, SPECIALTY_CONSULTA)).status).toBe(201);
+
+      const response = await reservar(VET_B, cirugiaDentro, SPECIALTY_CIRUGIA);
+
+      expect(response.status).toBe(201);
+    });
+
+    it('reservas simultaneas que se solapan sin empezar a la misma hora: solo una gana', async () => {
+      const responses = await Promise.all(
+        Array.from({ length: 6 }, (_, index) =>
+          index % 2 === 0
+            ? reservar(VET_A, consulta, SPECIALTY_CONSULTA)
+            : reservar(VET_A, cirugiaDentro, SPECIALTY_CIRUGIA),
+        ),
+      );
+
+      expect(responses.filter((response) => response.status === 201)).toHaveLength(1);
+      expect(responses.filter((response) => response.status === 409)).toHaveLength(5);
+      expect(await countAllActive(ctx.dataSource, VET_A)).toBe(1);
+    });
+  });
+
+  describe('cambio de dia a medianoche y zona horaria', () => {
+    // 23:30 del dia anterior en Chile (-03:00) = 02:30 UTC. La cita dura una hora y cruza la medianoche.
+    const cruzaMedianoche = futureUtc(6, 2, 30);
+    const empiezaALaMedianoche = futureUtc(6, 3, 0); // 00:00 locales, se solapa con la anterior
+    const despuesDeMedianoche = futureUtc(6, 3, 30); // 00:30 locales, justo cuando termina
+
+    beforeEach(async () => {
+      await seedSlot(ctx.dataSource, { vetUserId: VET_A, specialtyId: SPECIALTY_CONSULTA, start: cruzaMedianoche, minutes: 60 });
+      await seedSlot(ctx.dataSource, { vetUserId: VET_A, specialtyId: SPECIALTY_CIRUGIA, start: empiezaALaMedianoche, minutes: 30 });
+      await seedSlot(ctx.dataSource, { vetUserId: VET_A, specialtyId: SPECIALTY_CONSULTA, start: despuesDeMedianoche, minutes: 30 });
+    });
+
+    it('una hora escrita con zona -03:00 se guarda como el instante UTC correcto', async () => {
+      const response = await book(
+        asOwner(OWNER_1),
+        bodyFor(PET_OWNER_1.id, VET_A, withOffset(cruzaMedianoche, -3)),
+      );
+
+      expect(response.status).toBe(201);
+      const rows = await ctx.dataSource.query('SELECT start_time FROM scheduling.appointments');
+      expect(new Date(rows[0].start_time).toISOString()).toBe(cruzaMedianoche.toISOString());
+    });
+
+    it('el mismo instante escrito en UTC o en +09:00 es el mismo horario: 409', async () => {
+      const first = await book(asOwner(OWNER_1), bodyFor(PET_OWNER_1.id, VET_A, withOffset(cruzaMedianoche, -3)));
+      expect(first.status).toBe(201);
+
+      const enUtc = await book(asOwner(OWNER_2), bodyFor(PET_OWNER_2.id, VET_A, withOffset(cruzaMedianoche, 0)));
+      const enTokio = await book(asOwner(OWNER_2), bodyFor(PET_OWNER_2.id, VET_A, withOffset(cruzaMedianoche, 9)));
+
+      expect(enUtc.status).toBe(409);
+      expect(enTokio.status).toBe(409);
+      expect(await countAllActive(ctx.dataSource, VET_A)).toBe(1);
+    });
+
+    it('un bloque que empieza a las 00:00 y se solapa con la cita que cruza la medianoche: 409', async () => {
+      const first = await book(asOwner(OWNER_1), bodyFor(PET_OWNER_1.id, VET_A, withOffset(cruzaMedianoche, -3)));
+      expect(first.status).toBe(201);
+
+      const response = await book(
+        asOwner(OWNER_2),
+        bodyFor(PET_OWNER_2.id, VET_A, withOffset(empiezaALaMedianoche, -3), SPECIALTY_CIRUGIA),
+      );
+
+      expect(response.status).toBe(409);
+    });
+
+    it('un bloque que empieza a las 00:30, justo cuando termina la cita: 201', async () => {
+      const first = await book(asOwner(OWNER_1), bodyFor(PET_OWNER_1.id, VET_A, withOffset(cruzaMedianoche, -3)));
+      expect(first.status).toBe(201);
+
+      const response = await book(
+        asOwner(OWNER_2),
+        bodyFor(PET_OWNER_2.id, VET_A, withOffset(despuesDeMedianoche, -3)),
+      );
+
+      expect(response.status).toBe(201);
+    });
+
+    it('la misma hora de reloj en otra zona es otro instante: 404', async () => {
+      // "23:30" con +00:00 es 23:30 UTC, tres horas despues del bloque real (23:30 en -03:00).
+      const mismaHoraDeRelojEnUtc = withOffset(cruzaMedianoche, -3).slice(0, 19) + '+00:00';
+
+      const response = await book(asOwner(OWNER_1), bodyFor(PET_OWNER_1.id, VET_A, mismaHoraDeRelojEnUtc));
+
+      expect(response.status).toBe(404);
     });
   });
 });
