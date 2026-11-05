@@ -48,4 +48,3 @@ export class ClientsRepository {
     await this.repo.update(id, { active: false });
   }
 }
-
