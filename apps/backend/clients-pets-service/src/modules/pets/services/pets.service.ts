@@ -67,6 +67,14 @@ export class PetsService {
     return pets.map((pet) => this.mapPetWithAge(pet));
   }
 
+  async findByPetId(clientId: string, petId: string) {
+    const pet = await  this.petRepository.find({
+        where: { id: petId, clientId, active: true }
+    })
+
+    return this.mapPetWithAge(pet[0])
+  }
+
   private validateBirthDate(birthDate: string): void {
     if (new Date(birthDate) > new Date()) {
       throw new BadRequestException(

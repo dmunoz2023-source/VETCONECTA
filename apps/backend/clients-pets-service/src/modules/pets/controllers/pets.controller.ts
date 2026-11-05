@@ -17,19 +17,20 @@ export class PetsController {
     private readonly clientsRepository: ClientsRepository,
   ) {}
 
-  @Post()
-  @Roles('admin', 'vet', 'reception')
-  async create(@Body() createPetDto: CreatePetDto) {
-    return this.petsService.create(createPetDto);
-  }
-
-  @Put(':id')
-  @Roles('admin', 'vet', 'reception')
-  async update(
-    @Param('id') id: string,
-    @Body() updatePetDto: UpdatePetDto,
+  @Get('my-pet/:id')
+  async getPet(
+    @Param('id') petId: string,
+    @CurrentUser() user: JwtPayload
   ) {
-    return this.petsService.update(id, updatePetDto);
+    const clientId =
+      user.clientId ?? (await this.clientsRepository.findByUserId(user.sub))?.id;
+
+    if (!clientId) {
+      throw new UnauthorizedException(
+        'El usuario autenticado no tiene un ID de cliente asociado.',
+      );
+    }
+    return this.petsService.findByPetId(clientId, petId);
   }
 
   @Get('my-pets')
@@ -45,4 +46,23 @@ export class PetsController {
 
     return this.petsService.findByClientId(clientId);
   }
+
+  @Post()
+  @Roles('admin', 'vet', 'reception')
+  async create(@Body() createPetDto: CreatePetDto) {
+    return this.petsService.create(createPetDto);
+  }
+
+  @Put(':id')
+  @Roles('admin', 'vet', 'reception')
+  async update(
+    @Param('id') id: string,
+    @Body() updatePetDto: UpdatePetDto,
+  ) {
+    return this.petsService.update(id, updatePetDto);
+  }
+    
+  
+
+  
 }
