@@ -34,6 +34,8 @@ export async function createTestApp(): Promise<TestContext> {
     new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true, transform: true }),
   );
   await app.init();
+  // Un solo servidor escuchando: supertest no abre uno nuevo por cada peticion simultanea.
+  await app.listen(0);
 
   return { app, dataSource: app.get(DataSource), pets, reminders };
 }

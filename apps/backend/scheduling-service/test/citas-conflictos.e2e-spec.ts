@@ -1,6 +1,6 @@
 import * as request from 'supertest';
 import { TestContext, createTestApp } from './helpers/app';
-import { countActiveAppointments, resetDatabase, seedSlot } from './helpers/db';
+import { countActiveAppointments, countAllActive, resetDatabase, seedSlot } from './helpers/db';
 import {
   OWNER_1,
   OWNER_2,
@@ -162,6 +162,83 @@ describe('Conflictos de horario en citas [J2]', () => {
 
       expect(ajena.status).toBe(403);
       expect(porRecepcion.status).toBe(201);
+    });
+  });
+
+  describe('reservas simultaneas', () => {
+    it('20 reservas al mismo bloque con Promise.all: solo una gana y el resto recibe 409', async () => {
+      const start = futureUtc(4, 13);
+      await seedSlot(ctx.dataSource, { vetUserId: VET_A, specialtyId: SPECIALTY_CONSULTA, start, minutes: 30 });
+
+      const responses = await Promise.all(
+        Array.from({ length: 20 }, (_, index) =>
+          index % 2 === 0
+            ? book(asOwner(OWNER_1), bodyFor(PET_OWNER_1.id, VET_A, start))
+            : book(asOwner(OWNER_2), bodyFor(PET_OWNER_2.id, VET_A, start)),
+        ),
+      );
+
+      const statuses = responses.map((response) => response.status);
+      expect(statuses.filter((status) => status === 201)).toHaveLength(1);
+      expect(statuses.filter((status) => status === 409)).toHaveLength(19);
+      expect(await countActiveAppointments(ctx.dataSource, VET_A, start)).toBe(1);
+
+      const audited = await ctx.dataSource.query(
+        "SELECT count(*)::int AS total FROM scheduling.audit_log WHERE action = 'appointment.created'",
+      );
+      expect(audited[0].total).toBe(1);
+      expect(ctx.reminders.scheduled).toHaveLength(1);
+    });
+
+    it('repetido en 5 bloques distintos: nunca quedan dos citas activas en el mismo bloque', async () => {
+      const starts = [13, 14, 15, 16, 17].map((hour) => futureUtc(4, hour));
+      for (const start of starts) {
+        await seedSlot(ctx.dataSource, { vetUserId: VET_A, specialtyId: SPECIALTY_CONSULTA, start, minutes: 30 });
+      }
+
+      const responses = await Promise.all(
+        starts.flatMap((start) =>
+          Array.from({ length: 8 }, () => book(asOwner(OWNER_1), bodyFor(PET_OWNER_1.id, VET_A, start))),
+        ),
+      );
+
+      expect(responses.filter((response) => response.status === 201)).toHaveLength(5);
+      expect(responses.filter((response) => response.status === 409)).toHaveLength(35);
+      for (const start of starts) {
+        expect(await countActiveAppointments(ctx.dataSource, VET_A, start)).toBe(1);
+      }
+    });
+
+    it('mismo horario con dos veterinarios a la vez: gana una reserva por cada veterinario', async () => {
+      const start = futureUtc(4, 18);
+      await seedSlot(ctx.dataSource, { vetUserId: VET_A, specialtyId: SPECIALTY_CONSULTA, start, minutes: 30 });
+      await seedSlot(ctx.dataSource, { vetUserId: VET_B, specialtyId: SPECIALTY_CONSULTA, start, minutes: 30 });
+
+      const responses = await Promise.all(
+        [VET_A, VET_B, VET_A, VET_B, VET_A, VET_B].map((vet) =>
+          book(asOwner(OWNER_1), bodyFor(PET_OWNER_1.id, vet, start)),
+        ),
+      );
+
+      expect(responses.filter((response) => response.status === 201)).toHaveLength(2);
+      expect(responses.filter((response) => response.status === 409)).toHaveLength(4);
+      expect(await countActiveAppointments(ctx.dataSource, VET_A, start)).toBe(1);
+      expect(await countActiveAppointments(ctx.dataSource, VET_B, start)).toBe(1);
+    });
+
+    it('cancelaciones simultaneas de la misma cita: una recibe 200 y las demas 409', async () => {
+      const start = futureUtc(4, 19);
+      await seedSlot(ctx.dataSource, { vetUserId: VET_A, specialtyId: SPECIALTY_CONSULTA, start, minutes: 30 });
+      const created = await book(asOwner(OWNER_1), bodyFor(PET_OWNER_1.id, VET_A, start));
+      expect(created.status).toBe(201);
+
+      const responses = await Promise.all(
+        Array.from({ length: 5 }, () => cancel(asOwner(OWNER_1), created.body.id)),
+      );
+
+      expect(responses.filter((response) => response.status === 200)).toHaveLength(1);
+      expect(responses.filter((response) => response.status === 409)).toHaveLength(4);
+      expect(await countAllActive(ctx.dataSource, VET_A)).toBe(0);
     });
   });
 });
