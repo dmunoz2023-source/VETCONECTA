@@ -13,7 +13,8 @@ export interface SlotSeed {
 /** Deja vacias las tablas de scheduling entre pruebas. */
 export async function resetDatabase(dataSource: DataSource): Promise<void> {
   await dataSource.query(
-    'TRUNCATE scheduling.audit_log, scheduling.appointments, scheduling.availability_slots',
+    `TRUNCATE scheduling.ratings, scheduling.audit_log, scheduling.appointments,
+             scheduling.availability_slots`,
   );
 }
 

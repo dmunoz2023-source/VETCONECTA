@@ -7,7 +7,9 @@
     "^.+\\.(t|j)s$": "ts-jest"
   },
   "moduleNameMapper": {
-    "^@app/shared/(.*)$": "<rootDir>/../../../libs/shared/src/$1"
+    "^@app/shared/(.*)$": "<rootDir>/../../../libs/shared/src/$1",
+    "^@nestjs/common(.*)$": "<rootDir>/node_modules/@nestjs/common$1",
+    "^@nestjs/core(.*)$": "<rootDir>/node_modules/@nestjs/core$1"
   },
   "setupFiles": ["<rootDir>/test/helpers/setup-env.ts"],
   "testTimeout": 30000
