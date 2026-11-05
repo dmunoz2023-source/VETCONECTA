@@ -8,7 +8,7 @@ import { JwtHeadersGuard } from '@app/shared/guards/jwt-headers.guard';
 import { RolesGuard } from '@app/shared/guards/roles.guard';
 import { Roles } from '@app/shared/decorators/roles.decorator';
 
-@Controller('pets')
+@Controller('v1/pets')
 @UseGuards(JwtHeadersGuard, RolesGuard) // Protege todas las rutas del controlador
 export class PetsController {
   constructor(private readonly petsService: PetsService) {}
