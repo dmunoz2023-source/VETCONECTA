@@ -8,6 +8,7 @@ interface UseAppointmentsResult {
   error: string | null;
 }
 
+
 /**simula la peticion con una Promise sobre datos mock*/
 
 export function useAppointments(): UseAppointmentsResult {

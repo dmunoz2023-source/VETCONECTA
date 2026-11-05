@@ -1,19 +1,18 @@
-/** URL base del API Gateway. Se define en apps/frontend/.env (ver .env.example). */
-const API_URL: string = import.meta.env.VITE_API_URL || 'http://localhost:3000';
-const LOGIN_URL = `${API_URL}/v1/auth/login`;
+import axios from 'axios';
+import { api, getErrorMessage } from './axios';
+import { STAFF_ROLES } from '../types/auth.types';
+import type { AuthUser, LoginCredentials, Role } from '../types/auth.types';
+import { decodeToken } from '../utils/jwt';
 
-/** Clave donde se guarda el JWT del panel. */
-const TOKEN_STORAGE_KEY = 'jwt_token';
+/** Respuesta de POST /v1/auth/login: datos del usuario más el access token. */
+interface LoginResponse {
+  accessToken: string;
+}
 
-/** Roles del sistema (BR-14). El panel clínico solo admite al personal. */
-type UserRole = 'owner' | 'vet' | 'reception' | 'admin';
-export type StaffRole = Exclude<UserRole, 'owner'>;
-
-const USER_ROLES: readonly string[] = ['owner', 'vet', 'reception', 'admin'];
-
-/** Datos de la sesión activa que necesita el panel. */
-export interface Session {
-  role: StaffRole;
+/** Resultado de un login correcto: token a persistir y usuario de la sesión. */
+export interface LoginResult {
+  token: string;
+  user: AuthUser;
 }
 
 const MESSAGES = {
@@ -39,82 +38,44 @@ function messageForStatus(status: number): string {
   return MESSAGES.server;
 }
 
-/** Lee el `message` del formato de error común (Diseño §3.3). Devuelve null si no viene. */
-async function readErrorMessage(response: Response): Promise<string | null> {
-  const body: unknown = await response.json().catch(() => null);
-  if (typeof body !== 'object' || body === null || !('message' in body)) return null;
-  return typeof body.message === 'string' && body.message.trim() ? body.message : null;
+function toLoginError(error: unknown): LoginError {
+  if (!axios.isAxiosError(error) || !error.response) return new LoginError(MESSAGES.network);
+  return new LoginError(getErrorMessage(error, messageForStatus(error.response.status)));
+}
+
+function isStaffRole(role: string): role is Role {
+  return (STAFF_ROLES as readonly string[]).includes(role);
 }
 
 /**
- * Lee el rol dentro del access token (diseño de microservicios, §3.1).
- * No verifica la firma: eso lo hace el API Gateway (NFR-3).
- * Devuelve null si el token está mal formado o ya venció.
+ * Usuario de la sesión a partir del access token. Devuelve null si el token
+ * no es válido, venció o pertenece a un dueño (owner), que usa la app móvil (BR-14).
  */
-function readRole(token: string): UserRole | null {
-  const parts = token.split('.');
-  if (parts.length !== 3) return null;
-
-  try {
-    // El contenido va en base64url: se pasa a base64 normal y se decodifica como UTF-8.
-    const base64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
-    const bytes = Uint8Array.from(atob(base64), (char) => char.charCodeAt(0));
-    const payload: unknown = JSON.parse(new TextDecoder().decode(bytes));
-
-    if (typeof payload !== 'object' || payload === null) return null;
-    const { role, exp } = payload as Record<string, unknown>;
-    if (typeof exp !== 'number' || exp * 1000 <= Date.now()) return null;
-    if (typeof role !== 'string' || !USER_ROLES.includes(role)) return null;
-    return role as UserRole;
-  } catch {
-    return null;
-  }
+export function getSessionUser(token: string): AuthUser | null {
+  const payload = decodeToken(token);
+  if (!payload || !isStaffRole(payload.role)) return null;
+  return { id: payload.sub, email: payload.email, role: payload.role };
 }
 
-/**
- * POST /v1/auth/login (FR-13).
- * Guarda el access token en localStorage solo si la cuenta es de personal
- * clínico, y devuelve la sesión resultante.
- */
-export async function login(email: string, password: string): Promise<Session> {
-  let response: Response;
+/** POST /v1/auth/login (FR-13). Solo admite cuentas del personal clínico. */
+export async function login({ identifier, password }: LoginCredentials): Promise<LoginResult> {
+  let data: LoginResponse;
   try {
-    response = await fetch(LOGIN_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({identifier: email.trim(), password }),
-    });
-  } catch {
-    throw new LoginError(MESSAGES.network);
+    ({ data } = await api.post<LoginResponse>('/v1/auth/login', {
+      identifier: identifier.trim(),
+      password,
+    }));
+  } catch (error: unknown) {
+    throw toLoginError(error);
   }
 
-  if (!response.ok) {
-    const serverMessage = await readErrorMessage(response);
-    throw new LoginError(serverMessage ?? messageForStatus(response.status));
-  }
+  const token = data?.accessToken;
+  if (typeof token !== 'string') throw new LoginError(MESSAGES.invalidResponse);
 
-  const data: unknown = await response.json().catch(() => null);
-    const accessToken =
-    typeof data === 'object' && data !== null
-      ? 'token' in data
-        ? data.token
-        : 'accessToken' in data
-          ? data.accessToken
-          : null
-      : null;
-      
-  if (typeof accessToken !== 'string') throw new LoginError(MESSAGES.invalidResponse);
+  const payload = decodeToken(token);
+  if (!payload) throw new LoginError(MESSAGES.invalidResponse);
 
-  const role = readRole(accessToken);
-  if (!role) throw new LoginError(MESSAGES.invalidResponse);
-
-  // Los dueños (owner) usan la app móvil: el panel clínico no los admite (BR-14).
-  if (role === 'owner') throw new LoginError(MESSAGES.notStaff);
-
-  try {
-    localStorage.setItem(TOKEN_STORAGE_KEY, accessToken);
-  } catch {
-    // Sin localStorage (modo privado): la sesión dura solo mientras la pestaña esté abierta.
-  }
-  return { role };
+  const user = getSessionUser(token);
+  if (!user) throw new LoginError(MESSAGES.notStaff);
+  return { token, user };
 }

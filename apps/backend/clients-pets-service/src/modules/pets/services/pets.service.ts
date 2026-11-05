@@ -1,85 +1,84 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Pet } from '../entities/pet.entity';
+import { ClientsRepository } from '../../clients/repositories/clients.repository';
 import { CreatePetDto } from '../dto/create-pet.dto';
 import { UpdatePetDto } from '../dto/update-pet.dto';
-import { Client } from '../../clients/entities/client.entity'; // Ajusta esta ruta si tu entidad Client está en otra carpeta
+import { PetEntity } from '../entities/pet.entity';
+import { calculateAge } from '../age-calculator.util';
 
 @Injectable()
 export class PetsService {
   constructor(
-    @InjectRepository(Pet)
-    private readonly petRepository: Repository<Pet>,
-    @InjectRepository(Client)
-    private readonly clientRepository: Repository<Client>, // Necesario para validar BR-1
+    @InjectRepository(PetEntity)
+    private readonly petRepository: Repository<PetEntity>,
+    private readonly clientsRepository: ClientsRepository,
   ) {}
 
-  // 1. Crear Mascota (POST /mascotas)
-  async create(createPetDto: CreatePetDto): Promise<any> {
-    // BR-1: Validar que el cliente exista en la base de datos
-    const clientExists = await this.clientRepository.findOne({
-      where: { id: createPetDto.clientId },
-    });
-    if (!clientExists) {
-      throw new NotFoundException(`El cliente con ID ${createPetDto.clientId} no existe`);
+  async create(createPetDto: CreatePetDto) {
+    const client = await this.clientsRepository.findById(createPetDto.clientId);
+    if (!client) {
+      throw new NotFoundException(
+        `El cliente con ID ${createPetDto.clientId} no existe`,
+      );
     }
 
-    // Validar que la fecha de nacimiento no sea una fecha futura
-    if (createPetDto.birthDate && new Date(createPetDto.birthDate) > new Date()) {
-      throw new BadRequestException('La fecha de nacimiento no puede ser una fecha futura');
-    }
+    this.validateBirthDate(createPetDto.birthDate);
 
     const pet = this.petRepository.create(createPetDto);
     const savedPet = await this.petRepository.save(pet);
-
     return this.mapPetWithAge(savedPet);
   }
 
-  // 2. Actualizar Mascota (PUT /mascotas/:id)
-  async update(id: string, updatePetDto: UpdatePetDto): Promise<any> {
+  async update(id: string, updatePetDto: UpdatePetDto) {
     const pet = await this.petRepository.findOne({ where: { id } });
     if (!pet) {
       throw new NotFoundException(`Mascota con ID ${id} no encontrada`);
     }
 
-    // Si se envía un nuevo clientId, validar que el cliente exista (BR-1)
     if (updatePetDto.clientId) {
-      const clientExists = await this.clientRepository.findOne({
-        where: { id: updatePetDto.clientId },
-      });
-      if (!clientExists) {
-        throw new NotFoundException(`El cliente con ID ${updatePetDto.clientId} no existe`);
+      const client = await this.clientsRepository.findById(updatePetDto.clientId);
+      if (!client) {
+        throw new NotFoundException(
+          `El cliente con ID ${updatePetDto.clientId} no existe`,
+        );
       }
     }
 
-    // Validar fecha futura si se proporciona
-    if (updatePetDto.birthDate && new Date(updatePetDto.birthDate) > new Date()) {
-      throw new BadRequestException('La fecha de nacimiento no puede ser una fecha futura');
+    if (updatePetDto.birthDate) {
+      this.validateBirthDate(updatePetDto.birthDate);
     }
 
     Object.assign(pet, updatePetDto);
     const updatedPet = await this.petRepository.save(pet);
-
     return this.mapPetWithAge(updatedPet);
   }
 
-  // BR-2: Método auxiliar para calcular la edad dinámicamente al responder
-  private mapPetWithAge(pet: Pet) {
-    let ageYears: number | null = null;
-    if (pet.birthDate) {
-      const birth = new Date(pet.birthDate);
-      const today = new Date();
-      ageYears = today.getFullYear() - birth.getFullYear();
-      const m = today.getMonth() - birth.getMonth();
-      if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) {
-        ageYears--;
-      }
-    }
+  async findByClientId(clientId: string) {
+    const pets = await this.petRepository.find({
+      where: { clientId, active: true },
+      order: { name: 'ASC' },
+    });
 
+    return pets.map((pet) => this.mapPetWithAge(pet));
+  }
+
+  private validateBirthDate(birthDate: string): void {
+    if (new Date(birthDate) > new Date()) {
+      throw new BadRequestException(
+        'La fecha de nacimiento no puede ser una fecha futura',
+      );
+    }
+  }
+
+  private mapPetWithAge(pet: PetEntity) {
     return {
       ...pet,
-      age: ageYears, // Calculada al vuelo, no se persiste en la BD
+      age: calculateAge(pet.birthDate),
     };
   }
 }

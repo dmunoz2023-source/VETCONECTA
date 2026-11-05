@@ -30,14 +30,6 @@
   gap: 6px;
 }
 
-.vc-badge-count {
-  background: var(--vc-primary);
-  color: #fff;
-  min-width: 22px;
-  text-align: center;
-  font-weight: 700;
-}
-
 .vc-empty-row {
   text-align: center;
   color: var(--vc-text-muted);
@@ -131,4 +123,13 @@
   justify-content: flex-end;
   gap: 10px;
   margin-top: 6px;
+}
+
+.vc-modal-error {
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: #fef2f2;
+  color: #b91c1c;
+  font-size: 14px;
 }

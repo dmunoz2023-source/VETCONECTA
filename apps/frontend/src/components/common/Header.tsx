@@ -1,10 +1,11 @@
-import { Search, Bell } from "lucide-react";
+import { Search, Bell, LogOut } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth";
 import { formatRole, getInitials } from "../../utils/formatters";
+import IconButton from "./IconButton";
 
-// Lee nombre y rol de la sesión (AuthContext)
+// Lee correo y rol de la sesión activa (AuthContext)
 export default function Header() {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
 
   return (
     <header className="vc-header">
@@ -17,11 +18,14 @@ export default function Header() {
         <Bell size={20} />
         {user && (
           <>
-            <div className="vc-avatar">{getInitials(user.name)}</div>
+            <div className="vc-avatar">{getInitials(user.email)}</div>
             <div className="vc-user-meta">
-              <span>{user.name}</span>
+              <span>{user.email}</span>
               <span>{formatRole(user.role)}</span>
             </div>
+            <IconButton label="Cerrar sesión" onClick={logout}>
+              <LogOut size={18} />
+            </IconButton>
           </>
         )}
       </div>
