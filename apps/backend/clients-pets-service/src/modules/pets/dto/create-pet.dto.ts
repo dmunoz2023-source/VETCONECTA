@@ -1,7 +1,9 @@
 import { IsString, IsNotEmpty, IsUUID, IsOptional, IsBoolean, IsDateString, Matches } from 'class-validator';
 
 export class CreatePetDto {
-  @IsUUID('4', { message: 'El ID del cliente debe ser un UUID válido' })
+    @Matches(/^[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}$/i, {
+    message: 'El ID del cliente debe tener formato UUID',
+  })
   @IsNotEmpty({ message: 'El ID del cliente es obligatorio' })
   clientId!: string;
 
