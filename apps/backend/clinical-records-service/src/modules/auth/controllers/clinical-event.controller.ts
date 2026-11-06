@@ -2,14 +2,17 @@ import {
   Body,
   Controller,
   Get,
-  Param,
   HttpCode,
   HttpStatus,
+  Param,
+  ParseUUIDPipe,
   Post,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 import { ClinicalEventService } from '../services/clinical-event.service';
 import { CreateClinicalEventDto } from '../dto/create-clinical-event.dto';
+import { GetClinicalHistoryQueryDto } from '../dto/get-clinical-history-query.dto';
 import { ClinicalEventEntity } from '../entities/clinical-event.entity';
 import { CurrentUser } from '@app/shared/decorators/current-user.decorator';
 import { Roles } from '@app/shared/decorators/roles.decorator';
@@ -17,12 +20,12 @@ import { JwtHeadersGuard } from '@app/shared/guards/jwt-headers.guard';
 import { RolesGuard } from '@app/shared/guards/roles.guard';
 import { JwtPayload } from '@app/shared/types/jwt-payload.interface';
 
-@Controller('v1/clinical/clinical-event')
+@Controller('v1/clinical')
 @UseGuards(JwtHeadersGuard, RolesGuard)
 export class ClinicalEventController {
   constructor(private readonly clinicalEventService: ClinicalEventService) {}
 
-  @Post()
+  @Post('events')
   @HttpCode(HttpStatus.CREATED)
   @Roles('vet')
   async create(
@@ -32,9 +35,20 @@ export class ClinicalEventController {
     return this.clinicalEventService.create(createClinicalEventDto, user.sub);
   }
 
-  @Get('pet/:petId')
+  @Get('pets/:petId/carnet')
   @HttpCode(HttpStatus.OK)
-  async getByPetId(@Param('petId') petId: string): Promise<ClinicalEventEntity[]> {
+  async getCarnet(
+    @Param('petId', ParseUUIDPipe) petId: string,
+  ): Promise<ClinicalEventEntity[]> {
     return this.clinicalEventService.findByPetId(petId);
+  }
+
+  @Get('pets/:petId/history')
+  @HttpCode(HttpStatus.OK)
+  async getHistory(
+    @Param('petId', ParseUUIDPipe) petId: string,
+    @Query() query: GetClinicalHistoryQueryDto,
+  ) {
+    return this.clinicalEventService.findHistoryByPetId(petId, query);
   }
 }

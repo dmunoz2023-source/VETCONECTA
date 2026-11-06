@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ClinicalEventEntity } from '../entities/clinical-event.entity';
 import { CreateClinicalEventDto } from '../dto/create-clinical-event.dto';
+import { GetClinicalHistoryQueryDto } from '../dto/get-clinical-history-query.dto';
 
 @Injectable()
 export class ClinicalEventService {
@@ -38,5 +39,27 @@ export class ClinicalEventService {
       where: { petId },
       order: { date: 'DESC' },
     });
+  }
+
+  async findHistoryByPetId(
+    petId: string,
+    { page, limit }: GetClinicalHistoryQueryDto,
+  ) {
+    const [events, total] = await this.clinicalEventRepository.findAndCount({
+      where: { petId },
+      order: { date: 'DESC' },
+      skip: (page - 1) * limit,
+      take: limit,
+    });
+
+    return {
+      data: events,
+      meta: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+      },
+    };
   }
 }
