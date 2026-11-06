@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Client } from '../modules/clients/entities/client.entity';
-import { Pet } from '../modules/pets/entities/pet.entity';
+import { PetEntity } from '../modules/pets/entities/pet.entity';
 
 /**
  * [A3] Conexión TypeORM aislada al esquema 'clients_pets'.
@@ -26,7 +26,7 @@ import { Pet } from '../modules/pets/entities/pet.entity';
         type: 'postgres',
         url: config.get<string>('databaseUrl'),
         schema: config.get<string>('dbSchema'),
-        entities: [Client, Pet],
+        entities: [Client, PetEntity],
         synchronize: false,
         autoLoadEntities: false,
       }),
