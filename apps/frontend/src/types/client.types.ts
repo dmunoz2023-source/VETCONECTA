@@ -1,13 +1,33 @@
+import type { Pet } from "./pet.types";
+
+/** Cliente tal como lo devuelve clients-pets-service (entidad `clients_pets.clients`). */
 export interface Client {
   id: string;
-  nombre: string;
   rut: string;
-  telefono: string;
-  correo: string;
-  mascotas: number;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string | null;
+  address: string | null;
+  district: string | null;
+  active: boolean;
 }
 
-export type ClientFormValues = Pick<Client, "nombre" | "rut" | "telefono" | "correo">;
+/** GET /v1/clients/{id}: ficha del cliente junto con sus mascotas activas (FR-5). */
+export interface ClientDetail extends Client {
+  pets: Pet[];
+}
+
+/** Campos que llena el formulario de alta y edición. */
+export interface ClientFormValues {
+  rut: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  address: string;
+  district: string;
+}
 
 export interface ClientsQuery {
   search: string;

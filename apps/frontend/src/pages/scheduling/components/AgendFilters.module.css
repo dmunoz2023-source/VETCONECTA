@@ -1,0 +1,40 @@
+.container {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+  background-color: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px 16px;
+  box-shadow: var(--shadow);
+}
+
+.searchBox {
+  flex: 1;
+  max-width: 400px;
+}
+
+.searchInput,
+.selectInput {
+  width: 100%;
+  background-color: var(--code-bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 12px;
+  color: var(--text-h);
+  font-family: var(--sans);
+  font-size: 0.875rem;
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.searchInput:focus,
+.selectInput:focus {
+  border-color: var(--accent);
+}
+
+.filterGroup {
+  display: flex;
+  gap: 8px;
+}

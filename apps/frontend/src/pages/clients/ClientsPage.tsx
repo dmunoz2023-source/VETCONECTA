@@ -1,54 +1,35 @@
-import { useState } from "react";
 import { Plus } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import Button from "../../components/common/Button";
 import Card from "../../components/common/Card";
-import PageHeader from "../../components/common/PageHeader";
+import PageHeader from "../../components/common/PageHeader/PageHeader";
 import SearchInput from "../../components/common/SearchInput";
 import ConfirmDialog from "../../components/feedback/ConfirmDialog";
 import ClientsTable from "../../components/tables/ClientsTable";
+import { useClientDialogs } from "../../hooks/useClientDialogs";
 import { useClients } from "../../hooks/useClients";
-import type { Client, ClientFormValues } from "../../types/client.types";
+import { usePermissions } from "../../hooks/usePermissions";
+import { useSearchPagination } from "../../hooks/useSearchPagination";
+import type { Client } from "../../types/client.types";
 import ClientFormModal from "./ClientFormModal";
 import "./ClientsPage.css";
 
 const PAGE_SIZE = 8;
 
 export default function ClientsPage() {
-  const [search, setSearch] = useState("");
-  const [page, setPage] = useState(1);
-  const [modalOpen, setModalOpen] = useState(false);
-  const [editing, setEditing] = useState<Client | null>(null);
-  const [deleting, setDeleting] = useState<Client | null>(null);
+  const { search, debouncedSearch, page, setSearch, setPage } = useSearchPagination();
 
-  const { clients, total, loading, error } = useClients({ search, page, pageSize: PAGE_SIZE });
+  const { clients, total, loading, error, saveClient, removeClient } = useClients({
+    search: debouncedSearch,
+    page,
+    pageSize: PAGE_SIZE,
+  });
+  const { form, remove, error: dialogError } = useClientDialogs({ saveClient, removeClient });
+  const navigate = useNavigate();
+  const can = usePermissions();
 
-  const handleSearchChange = (value: string) => {
-    setSearch(value);
-    setPage(1);
-  };
-
-  const openNew = () => {
-    setEditing(null);
-    setModalOpen(true);
-  };
-
-  const openEdit = (client: Client) => {
-    setEditing(client);
-    setModalOpen(true);
-  };
-
-  // TODO (API real): editing ? PATCH /v1/clients/{id} : POST /v1/clients con `values`;
-  // al terminar, cerrar el modal y volver a pedir el listado.
-  const handleSubmit = (values: ClientFormValues) => {
-    void values;
-    setModalOpen(false);
-  };
-
-  // TODO (API real): DELETE /v1/clients/{id} (baja lógica, según el SRS: "nunca borra físico");
-  // al terminar, cerrar el diálogo y volver a pedir el listado.
-  const handleConfirmDelete = () => {
-    setDeleting(null);
-  };
+  // Abre el alta de mascota con este cliente ya elegido como dueño (UC-05, paso 2).
+  const handleAddPet = (client: Client) => navigate(`/mascotas/nueva?clientId=${client.id}`);
 
   return (
     <div className="vc-dashboard">
@@ -59,10 +40,10 @@ export default function ClientsPage() {
           <>
             <SearchInput
               value={search}
-              onChange={handleSearchChange}
+              onChange={setSearch}
               placeholder="Buscar clientes, rut, teléfono..."
             />
-            <Button variant="primary" onClick={openNew}>
+            <Button variant="primary" onClick={form.openNew}>
               <Plus size={16} /> Nuevo Cliente
             </Button>
           </>
@@ -75,22 +56,24 @@ export default function ClientsPage() {
           search={search}
           loading={loading}
           error={error}
-          onEdit={openEdit}
-          onDelete={setDeleting}
+          onEdit={form.openEdit}
+          onDelete={remove.ask}
+          onAddPet={can("createPet") ? handleAddPet : undefined}
           pagination={{ page, pageSize: PAGE_SIZE, total, itemLabel: "clientes", onPageChange: setPage }}
         />
       </Card>
 
-      {modalOpen && (
-        <ClientFormModal client={editing} onClose={() => setModalOpen(false)} onSubmit={handleSubmit} />
+      {form.open && (
+        <ClientFormModal client={form.client} error={dialogError} onClose={form.close} onSubmit={form.submit} />
       )}
 
-      {deleting && (
+      {remove.client && (
         <ConfirmDialog
           title="Eliminar cliente"
-          message={`¿Eliminar a ${deleting.nombre}? Esta acción no se puede deshacer.`}
-          onCancel={() => setDeleting(null)}
-          onConfirm={handleConfirmDelete}
+          message={`¿Dar de baja a ${remove.client.firstName} ${remove.client.lastName}? Dejará de aparecer en el directorio.`}
+          error={dialogError}
+          onCancel={remove.cancel}
+          onConfirm={remove.confirm}
         />
       )}
     </div>
