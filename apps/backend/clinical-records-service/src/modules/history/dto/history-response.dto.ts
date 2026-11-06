@@ -113,4 +113,11 @@ export class HistoryResponseDto {
       'fechas, con su estado. No se paginan: la paginación aplica a los eventos clínicos.',
   })
   appointments: HistoryAppointmentDto[];
+
+  @ApiProperty({
+    description:
+      'false si el servicio de citas no respondió: en ese caso `appointments` viene vacío y no ' +
+      'significa que la mascota no tenga citas pasadas.',
+  })
+  appointmentsAvailable: boolean;
 }
