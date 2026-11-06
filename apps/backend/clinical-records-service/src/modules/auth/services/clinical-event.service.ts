@@ -3,7 +3,6 @@ import {
   ForbiddenException,
   Injectable,
   InternalServerErrorException,
-  NotFoundException,
   ServiceUnavailableException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -21,8 +20,6 @@ export class ClinicalEventService {
   ) {}
 
   async create(createDto: CreateClinicalEventDto, veterinarianId: string): Promise<ClinicalEventEntity> {
-    await this.assertPetExists(createDto.mascotaId);
-
     const eventDate = new Date(createDto.fecha);
     if (eventDate > new Date()) {
       throw new BadRequestException('La fecha del evento clínico no puede ser futura.');
@@ -41,42 +38,6 @@ export class ClinicalEventService {
     });
 
     return await this.clinicalEventRepository.save(clinicalEvent);
-  }
-
-  private async assertPetExists(petId: string): Promise<void> {
-    const internalKey =
-      process.env.INTERNAL_API_KEY || process.env.INTERNAL_KEY;
-    if (!internalKey) {
-      throw new InternalServerErrorException(
-        'La clave de comunicación interna no está configurada.',
-      );
-    }
-
-    const clientsServiceUrl = (
-      process.env.CLIENTS_SERVICE_URL || 'http://localhost:3002'
-    ).replace(/\/+$/, '');
-    let response: Response;
-    try {
-      response = await fetch(
-        `${clientsServiceUrl}/internal/pets/${encodeURIComponent(petId)}`,
-        { headers: { 'X-Internal-Key': internalKey } },
-      );
-    } catch {
-      throw new ServiceUnavailableException(
-        'No fue posible verificar la existencia de la mascota.',
-      );
-    }
-
-    if (response.status === 404) {
-      throw new NotFoundException(
-        `La mascota con ID ${petId} no existe.`,
-      );
-    }
-    if (!response.ok) {
-      throw new ServiceUnavailableException(
-        'No fue posible verificar la existencia de la mascota.',
-      );
-    }
   }
 
   // El método de consulta vive aquí, usando el repositorio privado del servicio
