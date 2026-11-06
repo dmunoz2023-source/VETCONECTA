@@ -12,16 +12,14 @@ export class ClinicalEventService {
   ) {}
 
   async create(createDto: CreateClinicalEventDto, veterinarianId: string): Promise<ClinicalEventEntity> {
-    // Validar que la fecha no sea futura
     const eventDate = new Date(createDto.fecha);
     if (eventDate > new Date()) {
       throw new BadRequestException('La fecha del evento clínico no puede ser futura.');
     }
 
-    // Mapear y guardar directamente en la tabla física de PostgreSQL
     const clinicalEvent = this.clinicalEventRepository.create({
       petId: createDto.mascotaId,
-      veterinarianId: veterinarianId, // Extraído estrictamente del JWT (BR-3)
+      veterinarianId: veterinarianId,
       type: createDto.tipo,
       date: eventDate,
       weightKg: createDto.peso ?? null,
@@ -32,5 +30,13 @@ export class ClinicalEventService {
     });
 
     return await this.clinicalEventRepository.save(clinicalEvent);
+  }
+
+  // El método de consulta vive aquí, usando el repositorio privado del servicio
+  async findByPetId(petId: string): Promise<ClinicalEventEntity[]> {
+    return await this.clinicalEventRepository.find({
+      where: { petId },
+      order: { date: 'DESC' },
+    });
   }
 }

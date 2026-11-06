@@ -1,6 +1,8 @@
 import {
   Body,
   Controller,
+  Get,
+  Param,
   HttpCode,
   HttpStatus,
   Post,
@@ -28,5 +30,11 @@ export class ClinicalEventController {
     @CurrentUser() user: JwtPayload,
   ): Promise<ClinicalEventEntity> {
     return this.clinicalEventService.create(createClinicalEventDto, user.sub);
+  }
+
+  @Get('pet/:petId')
+  @HttpCode(HttpStatus.OK)
+  async getByPetId(@Param('petId') petId: string): Promise<ClinicalEventEntity[]> {
+    return this.clinicalEventService.findByPetId(petId);
   }
 }
