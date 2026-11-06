@@ -19,8 +19,8 @@ export class CreateClinicalEventDto {
   @IsNotEmpty()
   fecha!: string;
 
-  @IsOptional()
   @IsNumber({}, { message: 'El peso debe ser numérico' })
+  @IsNotEmpty()
   @Min(0.1, { message: 'El peso en kg debe ser mayor a 0' })
   peso?: number;
 
