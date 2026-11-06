@@ -3,6 +3,8 @@ import DashboardLayout from "../layouts/DashboardLayout";
 import PlaceholderPage from "../components/common/PlaceholderPage";
 import DashboardHome from "../pages/dashboard/DashboardHome";
 import ClientsPage from "../pages/clients/ClientsPage";
+import ClinicalEventPage from "../pages/clinical/ClinicalEventPage";
+import ClinicalHistoryPage from "../pages/clinical/ClinicalHistoryPage";
 import PetDetailPage from "../pages/pets/PetDetailPage";
 import PetFormPage from "../pages/pets/PetFormPage";
 import PetsPage from "../pages/pets/PetsPage";

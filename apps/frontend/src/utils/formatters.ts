@@ -23,3 +23,9 @@ export const formatDate = (isoDate: string | null): string => {
   const date = isoDate ? parseDateOnly(isoDate) : null;
   return date ? date.toLocaleDateString("es-CL") : "—";
 };
+
+/** Fecha y hora ISO (columna timestamptz) → día local legible, p. ej. "06-11-2026". */
+export const formatTimestampDate = (isoTimestamp: string | null): string => {
+  const date = isoTimestamp ? new Date(isoTimestamp) : null;
+  return date && !Number.isNaN(date.getTime()) ? date.toLocaleDateString("es-CL") : "—";
+};
