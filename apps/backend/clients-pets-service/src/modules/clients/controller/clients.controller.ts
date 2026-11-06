@@ -25,10 +25,11 @@ export class ClientsController {
 
   /**
    * GET /v1/clients?q=&page=&limit= (FR-5)
-   * Busca clientes por RUT, nombre o teléfono, con paginación.
+   * Busca clientes activos por RUT, nombre completo o teléfono.
+   * Accesible para reception, admin y vet.
    */
   @Get()
-  @Roles('reception', 'admin')
+  @Roles('reception', 'admin', 'vet')
   async getClients(
     @Query('q') search?: string,
     @Query('page') page = 1,
@@ -37,30 +38,18 @@ export class ClientsController {
     return this.clientsService.findAll(search, Number(page), Number(limit));
   }
 
-  /**
-   * POST /v1/clients (FR-5, UC-05 A1)
-   * Crea un cliente. Devuelve 409 si el RUT ya existe.
-   */
   @Post()
   @Roles('reception', 'admin')
   async createClient(@Body() createClientDto: CreateClientDto) {
     return this.clientsService.create(createClientDto);
   }
 
-  /**
-   * GET /v1/clients/me (FR-14)
-   * Perfil del dueño autenticado.
-   */
   @Get('me')
   @Roles('owner')
   async getMyProfile(@CurrentUser() user: JwtPayload) {
     return this.clientsService.getMyProfile(user);
   }
 
-  /**
-   * PATCH /v1/clients/me (FR-14, BR-15)
-   * Edita correo, teléfono y dirección. Si intenta enviar rut, nombres o apellidos rechaza con 403.
-   */
   @Patch('me')
   @Roles('owner')
   async updateMyProfile(
@@ -70,30 +59,18 @@ export class ClientsController {
     return this.clientsService.updateMyProfile(user, updateProfileDto);
   }
 
-  /**
-   * GET /v1/clients/me/pets (FR-11, BR-8, BR-12)
-   * Mascotas del dueño autenticado (selector multi-mascota).
-   */
   @Get('me/pets')
   @Roles('owner')
   async getMyPets(@CurrentUser() user: JwtPayload) {
     return this.clientsService.getMyPets(user);
   }
 
-  /**
-   * GET /v1/clients/:id (FR-5)
-   * Ficha del cliente junto con el listado de sus mascotas.
-   */
   @Get(':id')
   @Roles('reception', 'admin', 'vet')
   async getClient(@Param('id') clientId: string) {
     return this.clientsService.findById(clientId);
   }
 
-  /**
-   * PATCH /v1/clients/:id (FR-5)
-   * Actualiza los datos de un cliente desde el panel clínico.
-   */
   @Patch(':id')
   @Roles('reception', 'admin')
   async updateClient(
