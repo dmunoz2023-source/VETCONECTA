@@ -47,6 +47,7 @@ export class ClinicalEventController {
 
   @Get('pets/:petId/history')
   @HttpCode(HttpStatus.OK)
+  @Roles('vet', 'reception')
   async getHistory(
     @Param('petId', ParseUUIDPipe) petId: string,
     @Query() query: GetClinicalHistoryQueryDto,
