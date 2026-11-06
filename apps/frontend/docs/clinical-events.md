@@ -1,77 +1,83 @@
-# I2: eventos clínicos
+# I2: eventos clínicos (panel web)
 
 Desde la ficha del paciente, «Registrar evento» abre `/mascotas/:id/atencion`
-(solo `vet`); «Historial» abre `/mascotas/:id/historial` en modo lectura.
-Consulta/control requieren diagnóstico y próximo control; vacuna requiere nombre,
-lote y próxima dosis. Todos requieren fecha no futura, peso positivo y observaciones.
-El formulario conserva los datos cuando falla la API y muestra sus mensajes 400/403.
+(solo `vet`) y «Historial» abre `/mascotas/:id/historial`, el carnet de solo
+lectura. Al registrar un evento se vuelve al carnet, donde aparece primero.
 
-## Contrato propuesto para coordinar con F2
+## Estructura
 
-El servicio clínico aún no implementa estos endpoints en esta rama. Los nombres
-siguientes son una propuesta basada en el prefijo `/v1/clinical` del gateway y
-las convenciones inglesas del repositorio; deben confirmarse con Jeremy antes
-de considerar validada la integración. El SRS no define sus nombres HTTP.
+| Capa | Archivo | Responsabilidad |
+|---|---|---|
+| Tipos | `src/types/clinical.types.ts` | Evento que devuelve la API y campos del formulario |
+| API | `src/api/clinical.api.ts` | Llamadas HTTP y traducción al DTO de F2 |
+| Utils | `src/utils/clinicalLabels.ts` | Etiquetas en español, formato del peso |
+| Utils | `src/utils/clinicalValidators.ts` | Mismas reglas que `CreateClinicalEventDto` |
+| Hooks | `src/hooks/useClinicalEventForm.ts` | Estado, validación y envío del formulario |
+| Hooks | `src/hooks/useClinicalEvents.ts` | Carga del carnet |
+| UI | `src/pages/clinical/ClinicalEventForm.tsx` | Formulario (presentación) |
+| UI | `src/pages/clinical/ClinicalTimeline.tsx` | Línea de tiempo (presentación) |
+| UI | `src/pages/clinical/ClinicalEventPage.tsx`, `ClinicalHistoryPage.tsx` | Páginas de las rutas |
 
-- `POST /v1/clinical/events`: devuelve el evento creado (201).
-- `GET /v1/clinical/pets/:petId/card`: devuelve un arreglo de eventos sin paginar.
+## Contrato con F2 (clinical-records-service, PR #77)
 
-Ejemplo de consulta/control (para control, `type: "checkup"`):
+### `POST /v1/clinical/events` — rol `vet`
 
 ```json
 {
-  "petId": "UUID",
-  "type": "consultation",
-  "date": "2026-10-29",
-  "weightKg": 8.5,
-  "notes": "Paciente estable",
-  "diagnosis": "Control preventivo",
-  "nextCheckup": "2026-11-29"
+  "mascotaId": "UUID",
+  "tipo": "consultation",
+  "fecha": "2026-11-06T15:30:00.000Z",
+  "peso": 8.5,
+  "observaciones": "Paciente estable",
+  "proximoControl": "2026-12-06"
 }
 ```
 
-Para vacuna, usar `type: "vaccine"` y reemplazar `diagnosis` y `nextCheckup` por:
+- `tipo`: `consultation` | `vaccine` | `checkup`.
+- Obligatorios: `mascotaId`, `tipo`, `fecha` (no futura), `peso` (≥ 0.1) y `observaciones`.
+- `proximoControl` es opcional; en una vacuna se muestra como «Próxima vacuna».
+- El veterinario no se envía: F2 lo toma del JWT (BR-3).
+- `fecha` va con hora porque la columna es `timestamptz`: hoy se envía la hora
+  actual y un día pasado su mediodía local, para que no cambie de día en Chile.
+
+Errores: 400 (dato inválido o faltante), 403 (rol sin permiso), 404 (mascota
+inexistente). El panel muestra el `message` del backend y conserva los datos.
+
+### `GET /v1/clinical/pets/{petId}/carnet` — roles `owner` (solo las suyas), `vet`, `reception`
+
+Devuelve un arreglo ordenado del más reciente al más antiguo:
 
 ```json
-{
-  "vaccination": {
-    "vaccine": "Antirrábica",
-    "batch": "L001",
-    "boosterDate": "2027-10-29"
+[
+  {
+    "id": "UUID",
+    "petId": "UUID",
+    "veterinarianId": "UUID",
+    "type": "consultation",
+    "date": "2026-11-06T15:30:00.000Z",
+    "weightKg": "8.50",
+    "temperatureC": null,
+    "reason": null,
+    "notes": "Paciente estable",
+    "nextCheckup": "2026-12-06"
   }
-}
+]
 ```
 
-Cada evento leído incluye los campos enviados más `id` y `vetUserId`. El frontend
-no envía el veterinario: F2 debe tomarlo de la identidad autenticada, validar roles,
-persistir, auditar y exponer el mismo evento al carnet móvil (BR-3, BR-9).
-Después del POST exitoso el panel navega al historial y hace un GET nuevo, sin
-simular persistencia local.
+`weightKg` llega como texto (columna `decimal`). El filtro por tipo se aplica en el panel.
 
-## Verificación manual con F2 disponible
+## Pendiente del backend (fuera de I2)
 
-1. Iniciar sesión como veterinario y abrir una ficha existente.
-2. Intentar guardar cada tipo con campos vacíos, peso cero y fecha futura:
-   debe mostrar validaciones sin enviar el POST.
-3. Registrar cada tipo completo y comprobar que el GET del carnet lo muestra,
-   incluso después de recargar; probar cada filtro y el estado sin resultados.
-4. Con recepción/admin, verificar que no aparece «Registrar evento» y que la
-   URL de registro redirige al inicio. El carnet permanece consultable.
-5. Provocar respuestas 400 con `message` como lista y 403 sin mensaje: comprobar
-   el aviso, que los datos se conservan y que se puede reintentar.
-6. Consultar el carnet de la misma mascota desde la app del dueño.
+- El carnet no admite el rol `admin` (recibe 403).
+- Nombre, lote y fecha de la vacuna (`clinical.vaccination_details`) y el
+  diagnóstico no están en el DTO de F2; el panel no los pide.
 
-Desde la raíz: `npm.cmd run build --workspace=apps/frontend` y
-`npm.cmd run lint --workspace=apps/frontend` (en Linux usar `npm`).
+## Verificación manual
 
-## Commits pequeños sugeridos
+1. Como veterinario, abrir una ficha y entrar a «Registrar evento».
+2. Guardar con campos vacíos, peso 0 y fecha futura: se muestran los errores y no se envía nada.
+3. Registrar cada tipo: se vuelve al carnet con el aviso y el evento aparece primero; probar el filtro.
+4. Como recepción, comprobar que «Registrar evento» no aparece y que `/atencion` redirige al inicio.
+5. Ver el mismo evento en el carnet de la app del dueño.
 
-1. `feat(clinical): agrega cliente y validaciones`: `src/types/clinical.types.ts`,
-   `src/utils/clinicalValidators.ts`, `src/api/clinical.api.ts`.
-2. `feat(clinical): agrega formulario y carnet`: `src/pages/pets/ClinicalEventForm.tsx`,
-   `src/pages/pets/ClinicalTimeline.tsx`, `src/pages/pets/Clinical.css`.
-3. `feat(clinical): conecta ficha con eventos`: `src/pages/pets/PetClinicalPage.tsx`,
-   `src/router/AppRouter.tsx` y este documento.
-
-Las rutas anteriores son relativas a `apps/frontend`. Cada bloque depende del
-anterior. No incluir cambios ajenos en `infra/docs/openapi/openapi.yaml`.
+Desde la raíz: `npm run build --workspace=apps/frontend` y `npm run lint --workspace=apps/frontend`.
