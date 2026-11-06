@@ -6,6 +6,8 @@ import ClientsPage from "../pages/clients/ClientsPage";
 import Login from "../pages/auth/Login";
 import { useAuth } from "../hooks/useAuth";
 import ProtectedRoute from "./ProtectedRoute";
+import { AgendPage } from "../pages/scheduling/AgendPage";
+import { ROUTES } from "../utils/navigation";
 
 /**
  * Pantalla de login: con sesión activa redirige al panel; al iniciar sesión
@@ -33,12 +35,12 @@ export default function AppRouter() {
           <Route element={<DashboardLayout />}>
             <Route index element={<DashboardHome />} />
             {/* Restringir por rol con <ProtectedRoute allowedRoles={["reception", "admin"]}/> */}
-            <Route path="clientes" element={<ClientsPage />} />
-            <Route path="mascotas" element={<PlaceholderPage title="Mascotas" />} />
-            <Route path="agenda" element={<PlaceholderPage title="Agenda" />} />
-            <Route path="reportes" element={<PlaceholderPage title="Reportes" />} />
-            <Route path="historial" element={<PlaceholderPage title="Historial Clínico" />} />
-            <Route path="configuracion" element={<PlaceholderPage title="Configuración" />} />
+            <Route path={ROUTES.clients} element={<ClientsPage />}/>
+            <Route path={ROUTES.pets} element={<PlaceholderPage title="Mascotas" />} />
+            <Route path={ROUTES.agend} element={<AgendPage/>} />
+            <Route path={ROUTES.reports} element={<PlaceholderPage title="Reportes" />} />
+            <Route path={ROUTES.history} element={<PlaceholderPage title="Historial Clínico" />} />
+            <Route path={ROUTES.config} element={<PlaceholderPage title="Configuración" />} />
           </Route>
         </Route>
 
