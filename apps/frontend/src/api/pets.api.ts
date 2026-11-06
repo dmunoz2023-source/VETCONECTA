@@ -1,11 +1,6 @@
 import { api } from './axios';
+import { getClient, listClients } from './clients.api';
 import type { Pet, PetFormValues, PetsQuery, PetsResult } from '../types/pet.types';
-
-/** Respuesta paginada común: { data, meta: { total, page, limit } } (Diseño §3.4). */
-interface PetsPageDto {
-  data: Pet[];
-  meta: { total: number; page: number; limit: number };
-}
 
 /** Cuerpo de POST /v1/pets y PATCH /v1/pets/{id} (F1). La edad nunca se envía (BR-2). */
 type PetPayload = Omit<Pet, 'id' | 'active' | 'age' | 'photoUrl' | 'client'>;
@@ -26,14 +21,18 @@ function toPayload(values: PetFormValues): PetPayload {
 }
 
 /**
- * GET /v1/pets?q=&page=&limit= (FR-5). Busca por nombre de la mascota o nombre/RUT del dueño.
- * TODO: endpoint pendiente en clients-pets-service (coordinar con F1).
+ * Listado de pacientes (FR-5, UC-05). El diseño no tiene GET /v1/pets, así que se buscan
+ * los dueños con GET /v1/clients?q= y se piden sus mascotas con GET /v1/clients/{id}.
+ * La búsqueda es por nombre o RUT del dueño, y `total` cuenta dueños, no mascotas.
  */
-export async function listPets({ search, page, pageSize }: PetsQuery): Promise<PetsResult> {
-  const { data } = await api.get<PetsPageDto>('/v1/pets', {
-    params: { q: search || undefined, page, limit: pageSize },
-  });
-  return { pets: data.data, total: data.meta.total };
+export async function listPets(query: PetsQuery): Promise<PetsResult> {
+  const { clients, total } = await listClients(query);
+  const details = await Promise.all(clients.map((client) => getClient(client.id)));
+
+  const pets = details.flatMap(({ pets, id, rut, firstName, lastName }) =>
+    pets.map((pet) => ({ ...pet, client: { id, rut, firstName, lastName } })),
+  );
+  return { pets, total };
 }
 
 /** GET /v1/pets/{id}: ficha con la edad calculada (FR-2, BR-2). */

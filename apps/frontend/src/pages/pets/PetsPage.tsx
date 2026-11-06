@@ -14,7 +14,7 @@ import "./Pets.css";
 
 const PAGE_SIZE = 8;
 
-/** Pantalla "Pacientes": listado de mascotas con búsqueda por mascota o dueño (FR-5). */
+/** Pantalla "Pacientes": mascotas agrupadas por dueño, con búsqueda por nombre o RUT del dueño (FR-5). */
 export default function PetsPage() {
   const { search, debouncedSearch, page, setSearch, setPage } = useSearchPagination();
   const navigate = useNavigate();
@@ -33,7 +33,7 @@ export default function PetsPage() {
             <SearchInput
               value={search}
               onChange={setSearch}
-              placeholder="Buscar mascota, dueño o RUT..."
+              placeholder="Buscar dueño o RUT..."
             />
             {can("createPet") && (
               <Button variant="primary" onClick={() => navigate("/mascotas/nueva")}>
@@ -53,7 +53,7 @@ export default function PetsPage() {
           loading={loading}
           error={error}
           onView={(pet) => navigate(`/mascotas/${pet.id}`)}
-          pagination={{ page, pageSize: PAGE_SIZE, total, itemLabel: "pacientes", onPageChange: setPage }}
+          pagination={{ page, pageSize: PAGE_SIZE, total, itemLabel: "dueños", onPageChange: setPage }}
         />
       </Card>
     </div>
