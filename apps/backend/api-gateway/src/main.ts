@@ -1,12 +1,16 @@
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { HttpExceptionFilter } from '@app/shared/filters/http-exception.filter';
 import { AppModule } from './app.module';
 import { aggregateServiceDocs } from './swagger/swagger-aggregator';
 import { exportOpenApiSpec } from './swagger/export-openapi-spec';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+
+  // [J3] Formato de error único en todas las respuestas (Diseño §3.3).
+  app.useGlobalFilters(new HttpExceptionFilter());
 
   // Configuración de CORS para Frontend Web y Mobile
   app.enableCors({
