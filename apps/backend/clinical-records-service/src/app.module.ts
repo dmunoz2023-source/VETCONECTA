@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import configuration from './config/configuration';
 import { validationSchema } from './config/validation.schema';
+import { DatabaseModule } from './database/database.module';
 
 @Module({
   imports: [
@@ -10,6 +11,7 @@ import { validationSchema } from './config/validation.schema';
       load: [configuration],
       validationSchema,
     }),
+    DatabaseModule,
   ],
   controllers: [],
   providers: [],
