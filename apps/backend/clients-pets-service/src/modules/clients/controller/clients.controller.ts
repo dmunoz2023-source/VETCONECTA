@@ -1,9 +1,11 @@
 import {
+  Body,
   Controller,
   Get,
-  NotFoundException,
   Param,
-  UnauthorizedException,
+  Patch,
+  Post,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 import { CurrentUser } from '@app/shared/decorators/current-user.decorator';
@@ -11,56 +13,70 @@ import { Roles } from '@app/shared/decorators/roles.decorator';
 import { JwtHeadersGuard } from '@app/shared/guards/jwt-headers.guard';
 import { RolesGuard } from '@app/shared/guards/roles.guard';
 import { JwtPayload } from '@app/shared/types/jwt-payload.interface';
-import { ClientsRepository } from '../repositories/clients.repository';
-import { PetsService } from '../../pets/services/pets.service';
+import { CreateClientDto } from '../dto/create-client.dto';
+import { UpdateClientDto } from '../dto/update-client.dto';
+import { UpdateClientProfileDto } from '../dto/update-client-profile.dto';
+import { ClientsService } from '../services/clients.service';
 
 @Controller('v1/clients')
 @UseGuards(JwtHeadersGuard, RolesGuard)
 export class ClientsController {
-  constructor(
-    private readonly clientsRepository: ClientsRepository,
-    private readonly petsService: PetsService,
-  ) {}
+  constructor(private readonly clientsService: ClientsService) {}
 
   /**
-   * GET /v1/clients/:id (FR-5)
-   * Obten la ficha del cliente junto con el listado de sus mascotas asociadas.
+   * GET /v1/clients?q=&page=&limit= (FR-5)
+   * Busca clientes activos por RUT, nombre completo o teléfono.
+   * Accesible para reception, admin y vet.
    */
-  @Get(':id')
-  @Roles('vet', 'reception', 'admin')
-  async getClient(@Param('id') clientId: string) {
-    const client = await this.clientsRepository.findById(clientId);
-
-    if (!client) {
-      throw new NotFoundException(
-        `El cliente con ID ${clientId} no fue encontrado.`,
-      );
-    }
-
-    const pets = await this.petsService.findByClientId(clientId);
-
-    return {
-      ...client,
-      pets,
-    };
+  @Get()
+  @Roles('reception', 'admin', 'vet')
+  async getClients(
+    @Query('q') search?: string,
+    @Query('page') page = 1,
+    @Query('limit') limit = 10,
+  ) {
+    return this.clientsService.findAll(search, Number(page), Number(limit));
   }
 
-  /**
-   * GET /v1/clients/me/pets (FR-11, BR-8, BR-12)
-   * Selector multi-mascota para el dueño autenticado.
-   */
+  @Post()
+  @Roles('reception', 'admin')
+  async createClient(@Body() createClientDto: CreateClientDto) {
+    return this.clientsService.create(createClientDto);
+  }
+
+  @Get('me')
+  @Roles('owner')
+  async getMyProfile(@CurrentUser() user: JwtPayload) {
+    return this.clientsService.getMyProfile(user);
+  }
+
+  @Patch('me')
+  @Roles('owner')
+  async updateMyProfile(
+    @CurrentUser() user: JwtPayload,
+    @Body() updateProfileDto: UpdateClientProfileDto,
+  ) {
+    return this.clientsService.updateMyProfile(user, updateProfileDto);
+  }
+
   @Get('me/pets')
   @Roles('owner')
   async getMyPets(@CurrentUser() user: JwtPayload) {
-    const clientId =
-      user.clientId ?? (await this.clientsRepository.findByUserId(user.sub))?.id;
+    return this.clientsService.getMyPets(user);
+  }
 
-    if (!clientId) {
-      throw new UnauthorizedException(
-        'El usuario autenticado no tiene un ID de cliente asociado.',
-      );
-    }
+  @Get(':id')
+  @Roles('reception', 'admin', 'vet')
+  async getClient(@Param('id') clientId: string) {
+    return this.clientsService.findById(clientId);
+  }
 
-    return this.petsService.findByClientId(clientId);
+  @Patch(':id')
+  @Roles('reception', 'admin')
+  async updateClient(
+    @Param('id') clientId: string,
+    @Body() updateClientDto: UpdateClientDto,
+  ) {
+    return this.clientsService.update(clientId, updateClientDto);
   }
 }

@@ -3,7 +3,7 @@ import { Calendar, PawPrint, Wallet, SlidersHorizontal, MoreVertical } from "luc
 import type { ReactNode } from "react";
 import Button from "../../components/common/Button";
 import Card from "../../components/common/Card";
-import PageHeader from "../../components/common/PageHeader";
+import PageHeader from "../../components/common/PageHeader/PageHeader";
 import StatCard from "../../components/common/StatCard";
 import MiniCalendar from "../../components/dashboard/MiniCalendar";
 import WeeklyActivityChart from "../../components/dashboard/WeeklyActivityChart";
