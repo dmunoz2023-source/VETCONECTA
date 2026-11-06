@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
 
 @Entity({ name: 'clinical_events', schema: 'clinical' })
 export class ClinicalEventEntity {
@@ -9,7 +9,7 @@ export class ClinicalEventEntity {
   petId!: string;
 
   @Column({ type: 'varchar' })
-  type!: string; // CONSULTA, VACUNA, CONTROL
+  type!: string;
 
   @Column({ name: 'date', type: 'timestamp' })
   date!: Date;
@@ -23,19 +23,18 @@ export class ClinicalEventEntity {
   @Column({ name: 'vet_user_id', type: 'uuid' })
   veterinarianId!: string;
 
-  // Campos condicionales o extras según tipo de evento
   @Column({ nullable: true })
-  name!: string; // Para vacunas
+  name!: string | null;
 
   @Column({ nullable: true })
-  lot!: string; // Para vacunas
+  lot!: string | null;
 
   @Column({ name: 'next_dose_date', type: 'timestamp', nullable: true })
-  nextDoseDate!: string; // Para vacunas
+  nextDoseDate!: string | null;
 
   @Column({ nullable: true })
-  diagnosis!: string; // Para consultas/controles
+  diagnosis!: string | null;
 
   @Column({ name: 'next_control_date', type: 'timestamp', nullable: true })
-  nextControlDate!: string; // Para consultas/controles
+  nextControlDate!: string | null;
 }
