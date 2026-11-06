@@ -1,4 +1,14 @@
-import {Body, Controller, Get, Param, Post, Put, UnauthorizedException, UseGuards,} from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+  UnauthorizedException,
+  UseGuards,
+} from '@nestjs/common';
 import { CurrentUser } from '@app/shared/decorators/current-user.decorator';
 import { Roles } from '@app/shared/decorators/roles.decorator';
 import { JwtHeadersGuard } from '@app/shared/guards/jwt-headers.guard';
@@ -17,43 +27,46 @@ export class PetsController {
     private readonly clientsRepository: ClientsRepository,
   ) {}
 
-  @Get('my-pet/:id')
+  /**
+   * GET /v1/pets/:id (FR-2, BR-2, BR-8)
+   * Ficha de la mascota con la edad calculada al vuelo.
+   */
+  @Get(':id')
+  @Roles('owner', 'vet', 'reception', 'admin')
   async getPet(
     @Param('id') petId: string,
-    @CurrentUser() user: JwtPayload
+    @CurrentUser() user: JwtPayload,
   ) {
-    const clientId =
-      user.clientId ?? (await this.clientsRepository.findByUserId(user.sub))?.id;
+    if (user.role === 'owner') {
+      const clientId =
+        user.clientId ?? (await this.clientsRepository.findByUserId(user.sub))?.id;
 
-    if (!clientId) {
-      throw new UnauthorizedException(
-        'El usuario autenticado no tiene un ID de cliente asociado.',
-      );
-    }
-    return this.petsService.findByPetId(clientId, petId);
-  }
-
-  @Get('my-pets')
-  async getMyPets(@CurrentUser() user: JwtPayload) {
-    const clientId =
-      user.clientId ?? (await this.clientsRepository.findByUserId(user.sub))?.id;
-
-    if (!clientId) {
-      throw new UnauthorizedException(
-        'El usuario autenticado no tiene un ID de cliente asociado.',
-      );
+      if (!clientId) {
+        throw new UnauthorizedException(
+          'El usuario autenticado no tiene un ID de cliente asociado.',
+        );
+      }
+      return this.petsService.findByPetId(clientId, petId);
     }
 
-    return this.petsService.findByClientId(clientId);
+    return this.petsService.findById(petId);
   }
 
+  /**
+   * POST /v1/pets (FR-5, BR-1)
+   * Crea una mascota asociada a un cliente.
+   */
   @Post()
-  @Roles('admin', 'vet', 'reception')
+  @Roles('admin', 'reception')
   async create(@Body() createPetDto: CreatePetDto) {
     return this.petsService.create(createPetDto);
   }
 
-  @Put(':id')
+  /**
+   * PATCH /v1/pets/:id (FR-5)
+   * Actualización parcial de la ficha de la mascota.
+   */
+  @Patch(':id')
   @Roles('admin', 'vet', 'reception')
   async update(
     @Param('id') id: string,
@@ -61,8 +74,14 @@ export class PetsController {
   ) {
     return this.petsService.update(id, updatePetDto);
   }
-    
-  
 
-  
+  /**
+   * DELETE /v1/pets/:id (BR-9)
+   * Baja lógica (active = false).
+   */
+  @Delete(':id')
+  @Roles('admin')
+  async remove(@Param('id') id: string) {
+    return this.petsService.softDelete(id);
+  }
 }
