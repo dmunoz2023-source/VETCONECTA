@@ -1,4 +1,5 @@
 import type { SelectHTMLAttributes } from "react";
+import "./FormField.css";
 
 interface SelectFieldProps extends SelectHTMLAttributes<HTMLSelectElement> {
   label: string;
@@ -10,7 +11,7 @@ interface SelectFieldProps extends SelectHTMLAttributes<HTMLSelectElement> {
 
 export default function SelectField({ label, options, placeholder = "Selecciona...", error, ...selectProps }: SelectFieldProps) {
   return (
-    <label>
+    <label className="vc-field">
       {label}
       <select aria-invalid={error ? true : undefined} {...selectProps}>
         <option value="">{placeholder}</option>

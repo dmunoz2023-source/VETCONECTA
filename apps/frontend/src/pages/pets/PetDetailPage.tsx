@@ -6,6 +6,7 @@ import Card from "../../components/common/Card";
 import PageHeader from "../../components/common/PageHeader";
 import ConfirmDialog from "../../components/feedback/ConfirmDialog";
 import Notice from "../../components/feedback/Notice";
+import StatusText from "../../components/feedback/StatusText";
 import { getErrorMessage } from "../../api/axios";
 import { useFlashNotice } from "../../hooks/useFlashNotice";
 import { usePermissions } from "../../hooks/usePermissions";
@@ -49,7 +50,7 @@ export default function PetDetailPage() {
               {error}
             </p>
           ) : (
-            <p className="vc-owner-status">Cargando...</p>
+            <StatusText>Cargando...</StatusText>
           )}
         </Card>
       </div>

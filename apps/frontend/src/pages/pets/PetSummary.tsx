@@ -1,6 +1,7 @@
 import Card from "../../components/common/Card";
 import DetailList from "../../components/common/DetailList";
 import StatusBadge from "../../components/common/StatusBadge";
+import StatusText from "../../components/feedback/StatusText";
 import type { Pet } from "../../types/pet.types";
 import { formatDate } from "../../utils/formatters";
 import { formatSex, formatSpecies } from "../../utils/petLabels";
@@ -40,7 +41,7 @@ export default function PetSummary({ pet }: { pet: Pet }) {
             ]}
           />
         ) : (
-          <p className="vc-owner-status">Sin datos del dueño.</p>
+          <StatusText>Sin datos del dueño.</StatusText>
         )}
       </Card>
     </div>

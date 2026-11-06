@@ -1,11 +1,14 @@
-import { useState } from "react";
+import { useId, useState } from "react";
 import Button from "../common/Button";
 import SearchInput from "../common/SearchInput";
+import StatusText from "../feedback/StatusText";
 import { listClients } from "../../api/clients.api";
 import { useDebouncedValue } from "../../hooks/useDebouncedValue";
 import { usePagedRequest } from "../../hooks/usePagedRequest";
 import type { ClientsResult } from "../../types/client.types";
 import type { PetOwner } from "../../types/pet.types";
+import "../common/FormField.css";
+import "./OwnerPicker.css";
 
 const MAX_RESULTS = 5;
 const EMPTY_RESULT: ClientsResult = { clients: [], total: 0 };
@@ -19,11 +22,16 @@ interface OwnerPickerProps {
 
 /** Selector del dueño de la mascota: buscador de clientes por nombre o RUT (BR-1). */
 export default function OwnerPicker({ value, onChange, error }: OwnerPickerProps) {
+  const labelId = useId();
+  const errorId = useId();
+
   return (
     <div className="vc-field">
-      <span className="vc-field-label">Dueño</span>
+      <span id={labelId} className="vc-field-label">
+        Dueño
+      </span>
       {value ? (
-        <div className="vc-owner-selected">
+        <div className="vc-owner-selected" role="group" aria-labelledby={labelId}>
           <div>
             <div className="vc-pet-name">
               {value.firstName} {value.lastName}
@@ -35,15 +43,27 @@ export default function OwnerPicker({ value, onChange, error }: OwnerPickerProps
           </Button>
         </div>
       ) : (
-        <OwnerSearch onSelect={onChange} />
+        <OwnerSearch onSelect={onChange} labelId={labelId} errorId={error ? errorId : undefined} />
       )}
-      {error && <span className="vc-field-error">{error}</span>}
+      {error && (
+        <span id={errorId} className="vc-field-error">
+          {error}
+        </span>
+      )}
     </div>
   );
 }
 
 /** Busca clientes en GET /v1/clients mientras no haya dueño elegido. */
-function OwnerSearch({ onSelect }: { onSelect: (owner: PetOwner) => void }) {
+interface OwnerSearchProps {
+  onSelect: (owner: PetOwner) => void;
+  /** Id de la etiqueta "Dueño", para que el lector de pantalla nombre el buscador. */
+  labelId: string;
+  /** Id del mensaje de error, si lo hay. */
+  errorId?: string;
+}
+
+function OwnerSearch({ onSelect, labelId, errorId }: OwnerSearchProps) {
   const [search, setSearch] = useState("");
   const debouncedSearch = useDebouncedValue(search, 300);
   const { result, loading, error } = usePagedRequest(
@@ -57,9 +77,16 @@ function OwnerSearch({ onSelect }: { onSelect: (owner: PetOwner) => void }) {
 
   return (
     <div className="vc-owner-search">
-      <SearchInput value={search} onChange={setSearch} placeholder="Buscar dueño por nombre o RUT..." />
+      <SearchInput
+        value={search}
+        onChange={setSearch}
+        placeholder="Buscar dueño por nombre o RUT..."
+        aria-labelledby={labelId}
+        aria-describedby={errorId}
+        aria-invalid={errorId ? true : undefined}
+      />
       {statusMessage ? (
-        <p className="vc-owner-status">{statusMessage}</p>
+        <StatusText>{statusMessage}</StatusText>
       ) : (
         <ul className="vc-owner-results">
           {result.clients.map(({ id, rut, firstName, lastName }) => (

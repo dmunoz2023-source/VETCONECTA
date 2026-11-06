@@ -1,4 +1,5 @@
 import type { InputHTMLAttributes } from "react";
+import "./FormField.css";
 
 interface FormFieldProps extends InputHTMLAttributes<HTMLInputElement> {
   label: string;
@@ -8,7 +9,7 @@ interface FormFieldProps extends InputHTMLAttributes<HTMLInputElement> {
 
 export default function FormField({ label, error, ...inputProps }: FormFieldProps) {
   return (
-    <label>
+    <label className="vc-field">
       {label}
       <input aria-invalid={error ? true : undefined} {...inputProps} />
       {error && <span className="vc-field-error">{error}</span>}
