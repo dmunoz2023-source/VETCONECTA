@@ -1,0 +1,30 @@
+/* Carnet clínico: línea de tiempo vertical, del evento más reciente al más antiguo. */
+
+.vc-clinical-filter {
+  max-width: 240px;
+  margin-bottom: 18px;
+}
+
+.vc-clinical-timeline {
+  list-style: none;
+  margin: 0;
+  padding: 0 0 0 20px;
+  border-left: 2px solid var(--vc-border);
+}
+.vc-clinical-timeline li {
+  padding: 0 0 24px 8px;
+  overflow-wrap: anywhere;
+}
+.vc-clinical-timeline h3 {
+  margin: 0 0 4px;
+  font-size: 15px;
+}
+.vc-clinical-timeline time {
+  color: var(--vc-text-muted);
+  font-size: 13px;
+}
+
+.vc-clinical-notes {
+  margin: 12px 0 0;
+  white-space: pre-wrap;
+}

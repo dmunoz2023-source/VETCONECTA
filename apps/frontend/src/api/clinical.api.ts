@@ -37,6 +37,12 @@ function toPayload(petId: string, values: ClinicalEventFormValues): ClinicalEven
   };
 }
 
+/** GET /v1/clinical/pets/{petId}/carnet: eventos de la mascota, del más reciente al más antiguo (FR-2, BR-6). */
+export async function listClinicalEvents(petId: string): Promise<ClinicalEvent[]> {
+  const { data } = await api.get<ClinicalEvent[]>(`/v1/clinical/pets/${petId}/carnet`);
+  return data;
+}
+
 /** POST /v1/clinical/events: solo el veterinario (BR-6); 400 si falta un dato, 404 si la mascota no existe. */
 export async function createClinicalEvent(petId: string, values: ClinicalEventFormValues): Promise<ClinicalEvent> {
   const { data } = await api.post<ClinicalEvent>('/v1/clinical/events', toPayload(petId, values));

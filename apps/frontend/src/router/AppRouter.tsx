@@ -4,6 +4,7 @@ import PlaceholderPage from "../components/common/PlaceholderPage";
 import DashboardHome from "../pages/dashboard/DashboardHome";
 import ClientsPage from "../pages/clients/ClientsPage";
 import ClinicalEventPage from "../pages/clinical/ClinicalEventPage";
+import ClinicalHistoryPage from "../pages/clinical/ClinicalHistoryPage";
 import PetDetailPage from "../pages/pets/PetDetailPage";
 import PetFormPage from "../pages/pets/PetFormPage";
 import PetsPage from "../pages/pets/PetsPage";
@@ -50,7 +51,7 @@ export default function AppRouter() {
             <Route element={<ProtectedRoute allowedRoles={rolesFor("registerClinicalEvent")} />}>
               <Route path="mascotas/:id/atencion" element={<ClinicalEventPage />} />
             </Route>
-            <Route path="mascotas/:id/historial" element={<PlaceholderPage title="Historial clínico" />} />
+            <Route path="mascotas/:id/historial" element={<ClinicalHistoryPage />} />
             <Route path="agenda" element={<PlaceholderPage title="Agenda" />} />
             <Route path="reportes" element={<PlaceholderPage title="Reportes" />} />
             <Route path="historial" element={<PlaceholderPage title="Historial Clínico" />} />
