@@ -1,5 +1,6 @@
 import { api } from './axios';
 import type { Client, ClientFormValues, ClientsQuery, ClientsResult } from '../types/client.types';
+import type { PetOwner } from '../types/pet.types';
 
 /** Respuesta paginada común: { data, meta: { total, page, limit } } (Diseño §3.4). */
 interface ClientsPageDto {
@@ -39,6 +40,12 @@ export async function listClients({ search, page, pageSize }: ClientsQuery): Pro
 export async function getClient(id: string): Promise<Client> {
   const { data } = await api.get<Client>(`/v1/clients/${id}`);
   return data;
+}
+
+/** Dueño resumido de una mascota, desde GET /v1/clients/{id}: GET /v1/pets/{id} no lo incluye. */
+export async function getOwner(id: string): Promise<PetOwner> {
+  const { rut, firstName, lastName } = await getClient(id);
+  return { id, rut, firstName, lastName };
 }
 
 /** POST /v1/clients (FR-5). */

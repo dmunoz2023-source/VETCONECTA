@@ -1,5 +1,5 @@
 import { useCallback } from "react";
-import { getClient } from "../api/clients.api";
+import { getOwner } from "../api/clients.api";
 import { getPet } from "../api/pets.api";
 import type { PetFormValues, PetOwner } from "../types/pet.types";
 import { useAsync } from "./useAsync";
@@ -20,11 +20,6 @@ interface PetFormData {
   initialOwner: PetOwner | null;
 }
 
-async function loadOwner(clientId: string): Promise<PetOwner> {
-  const { id, rut, firstName, lastName } = await getClient(clientId);
-  return { id, rut, firstName, lastName };
-}
-
 async function loadFormData(petId?: string, presetClientId?: string): Promise<PetFormData> {
   if (petId) {
     const pet = await getPet(petId);
@@ -39,11 +34,11 @@ async function loadFormData(petId?: string, presetClientId?: string): Promise<Pe
         color: pet.color ?? "",
         microchip: pet.microchip ?? "",
       },
-      initialOwner: pet.client ?? (await loadOwner(pet.clientId)),
+      initialOwner: await getOwner(pet.clientId),
     };
   }
   if (presetClientId) {
-    const owner = await loadOwner(presetClientId);
+    const owner = await getOwner(presetClientId);
     return { initialValues: { ...EMPTY_PET_FORM, clientId: owner.id }, initialOwner: owner };
   }
   return { initialValues: EMPTY_PET_FORM, initialOwner: null };
