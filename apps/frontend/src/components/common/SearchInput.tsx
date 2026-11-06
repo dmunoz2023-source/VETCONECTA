@@ -1,12 +1,13 @@
+import type { InputHTMLAttributes } from "react";
 import { Search } from "lucide-react";
 
-interface SearchInputProps {
+interface SearchInputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, "value" | "onChange" | "type"> {
   value: string;
   onChange: (value: string) => void;
-  placeholder?: string;
 }
 
-export default function SearchInput({ value, onChange, placeholder = "Buscar..." }: SearchInputProps) {
+/** Buscador con icono. Acepta atributos extra del input (p. ej. `aria-labelledby`). */
+export default function SearchInput({ value, onChange, placeholder = "Buscar...", ...inputProps }: SearchInputProps) {
   return (
     <div className="vc-clients-search">
       <Search size={16} />
@@ -15,6 +16,7 @@ export default function SearchInput({ value, onChange, placeholder = "Buscar..."
         placeholder={placeholder}
         value={value}
         onChange={(e) => onChange(e.target.value)}
+        {...inputProps}
       />
     </div>
   );
