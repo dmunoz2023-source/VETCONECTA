@@ -40,5 +40,5 @@ export class CreateClinicalEventDto {
 
   @IsOptional()
   @IsDateString({}, { message: 'La fecha de próximo control debe ser un formato válido' })
-  fechaProximoControl?: string;
+  proximoControl?: string;
 }

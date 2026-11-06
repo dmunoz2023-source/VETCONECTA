@@ -34,7 +34,7 @@ export class ClinicalEventService {
       temperatureC: createDto.temperatura ?? null,
       reason: createDto.motivo ?? null,
       notes: createDto.observaciones,
-      nextCheckup: createDto.fechaProximoControl ? createDto.fechaProximoControl : null,
+      nextCheckup: createDto.proximoControl ?? null,
     });
 
     return await this.clinicalEventRepository.save(clinicalEvent);
