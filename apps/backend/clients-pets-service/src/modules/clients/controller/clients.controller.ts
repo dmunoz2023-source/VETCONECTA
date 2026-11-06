@@ -1,4 +1,11 @@
-import { Controller, Get, UnauthorizedException, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  NotFoundException,
+  Param,
+  UnauthorizedException,
+  UseGuards,
+} from '@nestjs/common';
 import { CurrentUser } from '@app/shared/decorators/current-user.decorator';
 import { Roles } from '@app/shared/decorators/roles.decorator';
 import { JwtHeadersGuard } from '@app/shared/guards/jwt-headers.guard';
@@ -14,6 +21,29 @@ export class ClientsController {
     private readonly clientsRepository: ClientsRepository,
     private readonly petsService: PetsService,
   ) {}
+
+  /**
+   * GET /v1/clients/:id (FR-5)
+   * Obten la ficha del cliente junto con el listado de sus mascotas asociadas.
+   */
+  @Get(':id')
+  @Roles('vet', 'reception', 'admin')
+  async getClient(@Param('id') clientId: string) {
+    const client = await this.clientsRepository.findById(clientId);
+
+    if (!client) {
+      throw new NotFoundException(
+        `El cliente con ID ${clientId} no fue encontrado.`,
+      );
+    }
+
+    const pets = await this.petsService.findByClientId(clientId);
+
+    return {
+      ...client,
+      pets,
+    };
+  }
 
   /**
    * GET /v1/clients/me/pets (FR-11, BR-8, BR-12)
