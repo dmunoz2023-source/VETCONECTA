@@ -11,8 +11,8 @@ INSERT INTO auth.users (id, email, password_hash, role) VALUES
 ('55555555-5555-5555-5555-555555555554', 'dueno2@vetconecta.cl', '$2b$10$mlrjGSw/nVwnVv6aOvw/4O2sdShcfqZbjSq6ZFmNQZwz/8arsc1Ji', 'owner');
 
 -- 2. Configure the clinic and specialties (catalog)
-INSERT INTO catalog.clinic (id, name, rut, emergency_phone, email)
-VALUES (1, 'VetConecta Clinic', '76.123.456-7', '+56912345678', 'emergencia@vetconecta.cl');
+INSERT INTO catalog.clinic (id, name, rut, phone, emergency_phone, whatsapp, email)
+VALUES (1, 'VetConecta Clinic', '76.123.456-7', '+56452000000', '+56912345678', '+56912345678', 'emergencia@vetconecta.cl');
 
 INSERT INTO catalog.specialties (id, name, duration_minutes) VALUES
 ('44444444-4444-4444-4444-444444444441', 'General Medicine', 30),
