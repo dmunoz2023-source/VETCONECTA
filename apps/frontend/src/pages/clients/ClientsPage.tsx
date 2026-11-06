@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Plus } from "lucide-react";
 import Button from "../../components/common/Button";
 import Card from "../../components/common/Card";
-import PageHeader from "../../components/common/PageHeader";
+import PageHeader from "../../components/common/PageHeader/PageHeader";
 import SearchInput from "../../components/common/SearchInput";
 import ConfirmDialog from "../../components/feedback/ConfirmDialog";
 import ClientsTable from "../../components/tables/ClientsTable";
