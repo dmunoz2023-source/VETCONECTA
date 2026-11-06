@@ -1,4 +1,4 @@
-import { Column, Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { AvailabilitySlot } from '../../availability/entities/availability-slot.entity';
 
 export type AppointmentStatus =
@@ -11,7 +11,7 @@ export type AppointmentStatus =
 /**
  * [A3] Mapea scheduling.appointments (infra/db/01-tables.sql).
  *
- * `slotId` sí tiene relación de TypeORM (@OneToOne) porque availability_slots
+ * `slotId` sí tiene relación de TypeORM (@ManyToOne) porque availability_slots
  * vive en el MISMO esquema (scheduling) — la FK física existe en la base.
  * En cambio petId, clientId y vetUserId son UUID planos: pertenecen a
  * clients_pets y catalog, esquemas ajenos, así que aquí no se declara
@@ -22,12 +22,14 @@ export class Appointment {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ name: 'slot_id', type: 'uuid', unique: true })
-  slotId: string;
+  // Opcional: la disponibilidad puede calcularse sin bloques guardados (G1/G3).
+  // El anti doble reserva (BR-5) lo da el indice parcial uq_appointments_vet_start_active.
+  @Column({ name: 'slot_id', type: 'uuid', nullable: true })
+  slotId: string | null;
 
-  @OneToOne(() => AvailabilitySlot)
+  @ManyToOne(() => AvailabilitySlot, { nullable: true })
   @JoinColumn({ name: 'slot_id' })
-  slot?: AvailabilitySlot;
+  slot?: AvailabilitySlot | null;
 
   @Column({ name: 'pet_id', type: 'uuid' })
   petId: string;
