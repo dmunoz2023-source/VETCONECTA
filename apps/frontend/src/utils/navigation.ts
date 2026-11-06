@@ -5,11 +5,16 @@ export const ROUTES = {
   home: '/',
   clients: '/clients',
   pets: '/pets',
+  petNew: '/pets/nueva',
+  petEdit: '/pets/:id/editar',
+  petDetail: '/pets/:id',
+  petAttention: '/pets/:id/atencion',
+  petHistory: '/pets/:id/historial',
   agend: '/agend',
   reports: '/reports',
   history: '/history',
-  config: '/config'
-}
+  config: '/config',
+} as const;
 
 // Ítems del menú lateral. Para restringir por rol, agregar aquí un campo
 // `allowedRoles` y filtrar en el Sidebar con el rol de useAuth().
