@@ -1,5 +1,8 @@
 import axios from 'axios';
-import { clearToken, getToken } from '../utils/tokenStorage';
+import {
+  // clearToken,
+  getToken
+} from '../utils/tokenStorage';
 
 /** URL base del API Gateway. Se define en apps/frontend/.env (ver .env.example). */
 const API_URL: string = import.meta.env.VITE_API_URL || 'http://localhost:3000';
@@ -18,10 +21,11 @@ api.interceptors.response.use(
   (error: unknown) => {
     // 401 con sesión activa: el token venció, se vuelve al login.
     // Sin sesión (credenciales incorrectas en el login) el error lo muestra la pantalla.
-    if (axios.isAxiosError(error) && error.response?.status === 401 && getToken()) {
-      clearToken();
-      window.location.assign('/login');
-    }
+    
+    // if (axios.isAxiosError(error) && error.response?.status === 401 && getToken()) {
+    //   clearToken();
+    //   window.location.assign('/login');
+    // }
     return Promise.reject(error);
   },
 );
