@@ -12,7 +12,7 @@
   "scripts": {
     "dev:frontend": "npm run dev --workspace=frontend",
     "dev:gateway": "npm run start --prefix apps/backend/api-gateway",
-    "dev:microservices": "concurrently \"npm run start --prefix apps/backend/auth-service\" \"npm run start --prefix apps/backend/clients-pets-service\" \"npm run start --prefix apps/backend/clinic-catalog-service\" \"npm run start --prefix apps/backend/notifications-service\" \"npm run start --prefix apps/backend/scheduling-service\"",
+    "dev:microservices": "concurrently \"npm run start --prefix apps/backend/auth-service\" \"npm run start --prefix apps/backend/clients-pets-service\" \"npm run start --prefix apps/backend/clinic-catalog-service\" \"npm run start --prefix apps/backend/clinical-records-service\" \"npm run start --prefix apps/backend/notifications-service\" \"npm run start --prefix apps/backend/scheduling-service\"",
     "test": "npm test --workspaces --passWithNoTests"
   },
   "repository": {
