@@ -1,9 +1,9 @@
-import { IsUUID, IsEnum, IsString, IsNotEmpty, IsNumber, Min, IsDateString, IsOptional } from 'class-validator';
+import { IsUUID, IsEnum, IsString, IsNotEmpty, IsNumber, Min, Max, IsDateString, IsOptional } from 'class-validator';
 
 export enum ClinicalEventType {
-  CONSULTA = 'CONSULTA',
-  VACUNA = 'VACUNA',
-  CONTROL = 'CONTROL',
+  CONSULTA = 'consultation',
+  VACUNA = 'vaccine',
+  CONTROL = 'checkup',
 }
 
 export class CreateClinicalEventDto {
@@ -11,7 +11,7 @@ export class CreateClinicalEventDto {
   @IsNotEmpty()
   mascotaId!: string;
 
-  @IsEnum(ClinicalEventType, { message: 'El tipo debe ser CONSULTA, VACUNA o CONTROL' })
+  @IsEnum(ClinicalEventType, { message: 'El tipo debe ser consultation, vaccine o checkup' })
   @IsNotEmpty()
   tipo!: ClinicalEventType;
 
@@ -19,36 +19,26 @@ export class CreateClinicalEventDto {
   @IsNotEmpty()
   fecha!: string;
 
+  @IsOptional()
   @IsNumber({}, { message: 'El peso debe ser numérico' })
   @Min(0.1, { message: 'El peso en kg debe ser mayor a 0' })
-  peso!: number;
+  peso?: number;
+
+  @IsOptional()
+  @IsNumber({}, { message: 'La temperatura debe ser numérica' })
+  @Min(30, { message: 'La temperatura no es válida' })
+  @Max(45, { message: 'La temperatura no es válida' })
+  temperatura?: number;
+
+  @IsOptional()
+  @IsString()
+  motivo?: string;
 
   @IsString()
   @IsNotEmpty({ message: 'Las observaciones son obligatorias' })
   observaciones!: string;
 
-  // --- Campos condicionales para VACUNA ---
   @IsOptional()
-  @IsString()
-  @IsNotEmpty({ message: 'El nombre de la vacuna es obligatorio' })
-  nombre?: string;
-
-  @IsOptional()
-  @IsString()
-  @IsNotEmpty({ message: 'El lote de la vacuna es obligatorio' })
-  lote?: string;
-
-  @IsOptional()
-  @IsDateString()
-  fechaProximaDosis?: string;
-
-  // --- Campos condicionales para CONSULTA / CONTROL ---
-  @IsOptional()
-  @IsString()
-  @IsNotEmpty({ message: 'El diagnóstico es obligatorio para consultas y controles' })
-  diagnostico?: string;
-
-  @IsOptional()
-  @IsDateString()
+  @IsDateString({}, { message: 'La fecha de próximo control debe ser un formato válido' })
   fechaProximoControl?: string;
 }
