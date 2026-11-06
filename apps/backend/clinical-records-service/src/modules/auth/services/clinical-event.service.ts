@@ -1,6 +1,13 @@
-import { Injectable, BadRequestException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  Injectable,
+  InternalServerErrorException,
+  ServiceUnavailableException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { JwtPayload } from '@app/shared/types/jwt-payload.interface';
 import { ClinicalEventEntity } from '../entities/clinical-event.entity';
 import { CreateClinicalEventDto } from '../dto/create-clinical-event.dto';
 import { GetClinicalHistoryQueryDto } from '../dto/get-clinical-history-query.dto';
@@ -34,11 +41,54 @@ export class ClinicalEventService {
   }
 
   // El método de consulta vive aquí, usando el repositorio privado del servicio
-  async findByPetId(petId: string): Promise<ClinicalEventEntity[]> {
+  async findByPetId(
+    petId: string,
+    user: JwtPayload,
+  ): Promise<ClinicalEventEntity[]> {
+    if (user.role === 'owner') {
+      await this.assertPetOwnership(petId, user.sub);
+    }
+
     return await this.clinicalEventRepository.find({
       where: { petId },
       order: { date: 'DESC' },
     });
+  }
+
+  private async assertPetOwnership(petId: string, userId: string): Promise<void> {
+    const internalKey =
+      process.env.INTERNAL_API_KEY || process.env.INTERNAL_KEY;
+    if (!internalKey) {
+      throw new InternalServerErrorException(
+        'La clave de comunicación interna no está configurada.',
+      );
+    }
+
+    const clientsServiceUrl = (
+      process.env.CLIENTS_SERVICE_URL || 'http://localhost:3002'
+    ).replace(/\/+$/, '');
+    let response: Response;
+    try {
+      response = await fetch(
+        `${clientsServiceUrl}/internal/pets/${encodeURIComponent(petId)}/owner/${encodeURIComponent(userId)}`,
+        { headers: { 'X-Internal-Key': internalKey } },
+      );
+    } catch {
+      throw new ServiceUnavailableException(
+        'No fue posible verificar la propiedad de la mascota.',
+      );
+    }
+
+    if (response.status === 404) {
+      throw new ForbiddenException(
+        'No tienes permiso para consultar el carnet de esta mascota.',
+      );
+    }
+    if (!response.ok) {
+      throw new ServiceUnavailableException(
+        'No fue posible verificar la propiedad de la mascota.',
+      );
+    }
   }
 
   async findHistoryByPetId(

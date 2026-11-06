@@ -37,10 +37,12 @@ export class ClinicalEventController {
 
   @Get('pets/:petId/carnet')
   @HttpCode(HttpStatus.OK)
+  @Roles('owner', 'vet', 'reception')
   async getCarnet(
     @Param('petId', ParseUUIDPipe) petId: string,
+    @CurrentUser() user: JwtPayload,
   ): Promise<ClinicalEventEntity[]> {
-    return this.clinicalEventService.findByPetId(petId);
+    return this.clinicalEventService.findByPetId(petId, user);
   }
 
   @Get('pets/:petId/history')
