@@ -1,7 +1,9 @@
 import { Search, Bell, LogOut } from "lucide-react";
-import { useAuth } from "../../hooks/useAuth";
-import { formatRole, getInitials } from "../../utils/formatters";
-import IconButton from "./IconButton";
+import { useAuth } from "../../../hooks/useAuth";
+import { formatRole, getInitials } from "../../../utils/formatters";
+import IconButton from "../IconButton";
+
+import './Header.css'
 
 // Lee correo y rol de la sesión activa (AuthContext)
 export default function Header() {
