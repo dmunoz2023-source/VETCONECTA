@@ -1,35 +1,30 @@
-export const clinicalTypes = [
-  { value: 'consultation', label: 'Consulta' },
-  { value: 'vaccine', label: 'Vacuna' },
-  { value: 'checkup', label: 'Control' },
-] as const;
+/** Tipos de evento de `clinical.clinical_events.type` y de CreateClinicalEventDto (F2). */
+export type ClinicalEventType = "consultation" | "vaccine" | "checkup";
 
-export type ClinicalType = typeof clinicalTypes[number]['value'];
-
-export interface ClinicalEventPayload {
-  petId: string;
-  type: ClinicalType;
-  date: string;
-  weightKg: number;
-  notes: string;
-  diagnosis?: string;
-  nextCheckup?: string;
-  vaccination?: { vaccine: string; batch: string; boosterDate: string };
-}
-
-export interface ClinicalEvent extends ClinicalEventPayload {
+/** Evento clínico tal como lo devuelve clinical-records-service (entidad `clinical.clinical_events`). */
+export interface ClinicalEvent {
   id: string;
-  vetUserId: string;
+  petId: string;
+  /** Usuario veterinario que lo registró; el backend lo toma del JWT (BR-3). */
+  veterinarianId: string;
+  type: ClinicalEventType;
+  /** Fecha y hora ISO (columna timestamptz). */
+  date: string;
+  /** PostgreSQL entrega las columnas decimal como texto, p. ej. "8.50". */
+  weightKg: string | number | null;
+  temperatureC: string | number | null;
+  reason: string | null;
+  notes: string | null;
+  /** "AAAA-MM-DD": próximo control o, en una vacuna, la próxima dosis. */
+  nextCheckup: string | null;
 }
 
-export interface ClinicalFormValues {
-  type: ClinicalType;
+/** Campos que llena el formulario de registro (UC-06). */
+export interface ClinicalEventFormValues {
+  /** Vacío hasta que el veterinario elige el tipo. */
+  type: ClinicalEventType | "";
   date: string;
   weightKg: string;
   notes: string;
-  diagnosis: string;
   nextCheckup: string;
-  vaccine: string;
-  batch: string;
-  boosterDate: string;
 }

@@ -1,30 +1,40 @@
-import type { ClinicalFormValues } from '../types/clinical.types';
+import type { ClinicalEventFormValues } from "../types/clinical.types";
+import { parseDateOnly } from "./age";
 
-export function localToday(): string {
-  const now = new Date();
-  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
-}
+export type ClinicalEventFormErrors = Partial<Record<keyof ClinicalEventFormValues, string>>;
 
-function validDate(value: string): boolean {
-  return /^\d{4}-\d{2}-\d{2}$/.test(value) &&
-    !Number.isNaN(Date.parse(value)) && new Date(value).toISOString().slice(0, 10) === value;
-}
+/** Peso mínimo que acepta CreateClinicalEventDto (`@Min(0.1)`). */
+const MIN_WEIGHT_KG = 0.1;
 
-export function validateClinicalEvent(values: ClinicalFormValues) {
-  const errors: Partial<Record<keyof ClinicalFormValues, string>> = {};
-  if (!['consultation', 'vaccine', 'checkup'].includes(values.type)) errors.type = 'Selecciona un tipo de evento.';
-  if (!validDate(values.date) || values.date > localToday()) errors.date = 'Ingresa una fecha válida que no sea futura.';
-  if (!values.weightKg.trim() || !Number.isFinite(Number(values.weightKg)) || Number(values.weightKg) <= 0) {
-    errors.weightKg = 'Ingresa un peso mayor que cero.';
+/**
+ * Mismas reglas que CreateClinicalEventDto (F2): tipo, fecha (no futura), peso (> 0)
+ * y observaciones obligatorios. El próximo control o la próxima vacuna es opcional,
+ * pero no puede ser anterior al evento. Sin errores no se envía nada (flujo A1 de UC-06).
+ */
+export function validateClinicalEventForm(
+  values: ClinicalEventFormValues,
+  today: Date = new Date(),
+): ClinicalEventFormErrors {
+  const errors: ClinicalEventFormErrors = {};
+
+  if (!values.type) errors.type = "Selecciona el tipo de evento.";
+
+  const date = values.date ? parseDateOnly(values.date) : null;
+  if (!values.date) errors.date = "Ingresa la fecha del evento.";
+  else if (!date) errors.date = "Ingresa una fecha válida.";
+  else if (date > today) errors.date = "La fecha del evento no puede ser futura.";
+
+  const weight = Number(values.weightKg);
+  if (!values.weightKg.trim()) errors.weightKg = "Ingresa el peso.";
+  else if (!Number.isFinite(weight) || weight < MIN_WEIGHT_KG) errors.weightKg = "El peso debe ser mayor a 0 kg.";
+
+  if (!values.notes.trim()) errors.notes = "Ingresa las observaciones.";
+
+  if (values.nextCheckup) {
+    const next = parseDateOnly(values.nextCheckup);
+    if (!next) errors.nextCheckup = "Ingresa una fecha válida.";
+    else if (date && next < date) errors.nextCheckup = "No puede ser anterior a la fecha del evento.";
   }
-  if (!values.notes.trim()) errors.notes = 'Ingresa las observaciones.';
-  const nextField = values.type === 'vaccine' ? 'boosterDate' : 'nextCheckup';
-  if (!validDate(values[nextField]) || values[nextField] < values.date) {
-    errors[nextField] = 'Ingresa una fecha válida igual o posterior al evento.';
-  }
-  if (values.type === 'vaccine') {
-    if (!values.vaccine.trim()) errors.vaccine = 'Ingresa el nombre de la vacuna.';
-    if (!values.batch.trim()) errors.batch = 'Ingresa el lote.';
-  } else if (!values.diagnosis.trim()) errors.diagnosis = 'Ingresa el diagnóstico.';
+
   return errors;
 }
