@@ -10,4 +10,6 @@ export const validationSchema = Joi.object({
   PORT: Joi.number().default(3004),
   DATABASE_URL: Joi.string().uri({ scheme: ['postgresql', 'postgres'] }).required(),
   DB_SCHEMA: Joi.string().valid('scheduling').default('scheduling'),
+  CATALOG_SERVICE_URL: Joi.string().uri().default('http://localhost:3006'),
+  INTERNAL_KEY: Joi.string().min(8).required(),
 });

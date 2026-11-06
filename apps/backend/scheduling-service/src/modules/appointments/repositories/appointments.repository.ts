@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { In, LessThan, MoreThan, Repository } from 'typeorm';
 import { Appointment, AppointmentStatus } from '../entities/appointment.entity';
 
 export interface FindByClientOptions {
@@ -24,6 +24,19 @@ export class AppointmentsRepository {
 
   findById(id: string): Promise<Appointment | null> {
     return this.repo.findOne({ where: { id }, relations: ['slot'] });
+  }
+
+  /** [G3] Citas vigentes del veterinario que se cruzan con el rango [from, to). */
+  findActiveByVetBetween(vetUserId: string, from: Date, to: Date): Promise<Appointment[]> {
+    return this.repo.find({
+      where: {
+        vetUserId,
+        status: In(['booked', 'confirmed']),
+        startTime: LessThan(to),
+        endTime: MoreThan(from),
+      },
+      order: { startTime: 'ASC' },
+    });
   }
 
   async findByClient(
