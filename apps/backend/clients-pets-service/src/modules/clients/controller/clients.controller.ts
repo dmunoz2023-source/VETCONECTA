@@ -1,15 +1,51 @@
-import { Controller, Get, Param, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { CurrentUser } from '@app/shared/decorators/current-user.decorator';
 import { Roles } from '@app/shared/decorators/roles.decorator';
 import { JwtHeadersGuard } from '@app/shared/guards/jwt-headers.guard';
 import { RolesGuard } from '@app/shared/guards/roles.guard';
 import { JwtPayload } from '@app/shared/types/jwt-payload.interface';
+import { CreateClientDto } from '../dto/create-client.dto';
+import { UpdateClientDto } from '../dto/update-client.dto';
+import { UpdateClientProfileDto } from '../dto/update-client-profile.dto';
 import { ClientsService } from '../services/clients.service';
 
 @Controller('v1/clients')
 @UseGuards(JwtHeadersGuard, RolesGuard)
 export class ClientsController {
   constructor(private readonly clientsService: ClientsService) {}
+
+  /**
+   * GET /v1/clients?q=&page=&limit= (FR-5)
+   * Busca clientes por RUT, nombre o teléfono, con paginación.
+   */
+  @Get()
+  @Roles('reception', 'admin')
+  async getClients(
+    @Query('q') search?: string,
+    @Query('page') page = 1,
+    @Query('limit') limit = 10,
+  ) {
+    return this.clientsService.findAll(search, Number(page), Number(limit));
+  }
+
+  /**
+   * POST /v1/clients (FR-5, UC-05 A1)
+   * Crea un cliente. Devuelve 409 si el RUT ya existe.
+   */
+  @Post()
+  @Roles('reception', 'admin')
+  async createClient(@Body() createClientDto: CreateClientDto) {
+    return this.clientsService.create(createClientDto);
+  }
 
   /**
    * GET /v1/clients/me (FR-14)
@@ -22,8 +58,21 @@ export class ClientsController {
   }
 
   /**
+   * PATCH /v1/clients/me (FR-14, BR-15)
+   * Edita correo, teléfono y dirección. Si intenta enviar rut, nombres o apellidos rechaza con 403.
+   */
+  @Patch('me')
+  @Roles('owner')
+  async updateMyProfile(
+    @CurrentUser() user: JwtPayload,
+    @Body() updateProfileDto: UpdateClientProfileDto,
+  ) {
+    return this.clientsService.updateMyProfile(user, updateProfileDto);
+  }
+
+  /**
    * GET /v1/clients/me/pets (FR-11, BR-8, BR-12)
-   * Selector multi-mascota para el dueño autenticado.
+   * Mascotas del dueño autenticado (selector multi-mascota).
    */
   @Get('me/pets')
   @Roles('owner')
@@ -33,11 +82,24 @@ export class ClientsController {
 
   /**
    * GET /v1/clients/:id (FR-5)
-   * Ficha del cliente junto con el listado de sus mascotas asociadas.
+   * Ficha del cliente junto con el listado de sus mascotas.
    */
   @Get(':id')
-  @Roles('vet', 'reception', 'admin')
+  @Roles('reception', 'admin', 'vet')
   async getClient(@Param('id') clientId: string) {
     return this.clientsService.findById(clientId);
+  }
+
+  /**
+   * PATCH /v1/clients/:id (FR-5)
+   * Actualiza los datos de un cliente desde el panel clínico.
+   */
+  @Patch(':id')
+  @Roles('reception', 'admin')
+  async updateClient(
+    @Param('id') clientId: string,
+    @Body() updateClientDto: UpdateClientDto,
+  ) {
+    return this.clientsService.update(clientId, updateClientDto);
   }
 }
