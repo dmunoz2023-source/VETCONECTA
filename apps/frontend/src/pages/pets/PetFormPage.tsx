@@ -1,11 +1,12 @@
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import Card from "../../components/common/Card";
-import PageHeader from "../../components/common/PageHeader";
+import PageHeader from "../../components/common/PageHeader/PageHeader";
 import StatusText from "../../components/feedback/StatusText";
 import { usePetFormData } from "../../hooks/usePetFormData";
 import type { Pet } from "../../types/pet.types";
 import PetForm from "./PetForm";
 import "./Pets.css";
+import { ROUTES } from "../../utils/navigation";
 
 /**
  * Alta (/mascotas/nueva) y edición (/mascotas/:id/editar) de una mascota (FR-5).
@@ -19,11 +20,11 @@ export default function PetFormPage() {
   const { data, error, loading } = usePetFormData(id, presetClientId);
 
   // Cancelar vuelve a donde tiene sentido, aunque el formulario se haya abierto desde un enlace directo.
-  const cancelPath = id ? `/mascotas/${id}` : presetClientId ? "/clientes" : "/mascotas";
+  const cancelPath = id ? `${ROUTES.pets}/${id}` : presetClientId ? ROUTES.clients : ROUTES.pets;
 
   const handleSaved = (pet: Pet) => {
     const notice = id ? `Se guardaron los cambios de ${pet.name}.` : `${pet.name} se registró como paciente.`;
-    navigate(`/mascotas/${pet.id}`, { state: { notice } });
+    navigate(`${ROUTES.pets}/${pet.id}`, { state: { notice } });
   };
 
   return (

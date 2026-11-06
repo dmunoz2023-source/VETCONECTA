@@ -3,7 +3,7 @@ import { ClipboardPlus, History, Pencil, PowerOff } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import Button from "../../components/common/Button";
 import Card from "../../components/common/Card";
-import PageHeader from "../../components/common/PageHeader";
+import PageHeader from "../../components/common/PageHeader/PageHeader";
 import ConfirmDialog from "../../components/feedback/ConfirmDialog";
 import Notice from "../../components/feedback/Notice";
 import StatusText from "../../components/feedback/StatusText";
@@ -13,6 +13,7 @@ import { usePermissions } from "../../hooks/usePermissions";
 import { usePet } from "../../hooks/usePet";
 import PetSummary from "./PetSummary";
 import "./Pets.css";
+import { ROUTES } from "../../utils/navigation";
 
 /** Ficha del paciente: datos, dueño y accesos a registrar evento (I2) e historial (FR-5, FR-2). */
 export default function PetDetailPage() {
@@ -34,7 +35,7 @@ export default function PetDetailPage() {
     setDeactivateError(null);
     try {
       await deactivate();
-      navigate("/mascotas", { state: { notice: `${pet?.name} se desactivó.` } });
+      navigate(ROUTES.pets, { state: { notice: `${pet?.name} se desactivó.` } });
     } catch (err: unknown) {
       setDeactivateError(getErrorMessage(err, "No se pudo desactivar la mascota."));
     }
@@ -65,15 +66,15 @@ export default function PetDetailPage() {
         actions={
           <>
             {can("registerClinicalEvent") && (
-              <Button variant="primary" onClick={() => navigate(`/mascotas/${pet.id}/atencion`)}>
+              <Button variant="primary" onClick={() => navigate(`${ROUTES.pets}/${pet.id}/atencion`)}>
                 <ClipboardPlus size={16} /> Registrar evento
               </Button>
             )}
-            <Button onClick={() => navigate(`/mascotas/${pet.id}/historial`)}>
+            <Button onClick={() => navigate(`${ROUTES.pets}/${pet.id}/historial`)}>
               <History size={16} /> Historial
             </Button>
             {can("editPet") && (
-              <Button onClick={() => navigate(`/mascotas/${pet.id}/editar`)}>
+              <Button onClick={() => navigate(`${ROUTES.pets}/${pet.id}/editar`)}>
                 <Pencil size={16} /> Editar
               </Button>
             )}

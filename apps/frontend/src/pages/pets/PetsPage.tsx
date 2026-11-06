@@ -2,15 +2,16 @@ import { Plus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import Button from "../../components/common/Button";
 import Card from "../../components/common/Card";
-import PageHeader from "../../components/common/PageHeader";
 import SearchInput from "../../components/common/SearchInput";
 import Notice from "../../components/feedback/Notice";
+import PageHeader from "../../components/common/PageHeader/PageHeader";
 import PetsTable from "../../components/tables/PetsTable";
 import { useFlashNotice } from "../../hooks/useFlashNotice";
 import { usePermissions } from "../../hooks/usePermissions";
 import { usePets } from "../../hooks/usePets";
 import { useSearchPagination } from "../../hooks/useSearchPagination";
 import "./Pets.css";
+import { ROUTES } from "../../utils/navigation";
 
 const PAGE_SIZE = 8;
 
@@ -36,7 +37,7 @@ export default function PetsPage() {
               placeholder="Buscar dueño o RUT..."
             />
             {can("createPet") && (
-              <Button variant="primary" onClick={() => navigate("/mascotas/nueva")}>
+              <Button variant="primary" onClick={() => navigate(ROUTES.petNew)}>
                 <Plus size={16} /> Nueva mascota
               </Button>
             )}
@@ -52,7 +53,7 @@ export default function PetsPage() {
           search={search}
           loading={loading}
           error={error}
-          onView={(pet) => navigate(`/mascotas/${pet.id}`)}
+          onView={(pet) => navigate(`${ROUTES.pets}/${pet.id}`)}
           pagination={{ page, pageSize: PAGE_SIZE, total, itemLabel: "dueños", onPageChange: setPage }}
         />
       </Card>
