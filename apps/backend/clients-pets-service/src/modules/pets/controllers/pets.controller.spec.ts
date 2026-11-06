@@ -21,7 +21,7 @@ describe('PetsController - Endpoints GET [E2]', () => {
     jest.clearAllMocks();
   });
 
-  describe('GET /v1/clients/me/pets (Selector multi-mascota)', () => {
+  describe('GET /v1/pets/my-pets (Selector multi-mascota)', () => {
     it('debe listar únicamente las mascotas activas que pertenecen al cliente autenticado (BR-8, BR-12)', async () => {
       const result = mockPetsService.findMyPets(mockOwnerUser.clientId!);
 
