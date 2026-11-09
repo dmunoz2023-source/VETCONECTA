@@ -1,19 +1,19 @@
 import type { TextareaHTMLAttributes } from "react";
-import "./FormField.css";
+import css from "./TextAreaField.module.css";
 
 interface TextAreaFieldProps extends TextareaHTMLAttributes<HTMLTextAreaElement> {
   label: string;
-  /** Mensaje de validación bajo el campo; `undefined` si no hay error. */
+  /** Validation message under the field; `undefined` when there is no error. */
   error?: string;
 }
 
-/** Igual que FormField, pero para textos largos (observaciones, notas). */
+/** Multi-line text field (notes, observations) with its label and error message. */
 export default function TextAreaField({ label, error, rows = 4, ...textareaProps }: TextAreaFieldProps) {
   return (
-    <label className="vc-field">
+    <label className={css.field}>
       {label}
-      <textarea rows={rows} aria-invalid={error ? true : undefined} {...textareaProps} />
-      {error && <span className="vc-field-error">{error}</span>}
+      <textarea className={css.textarea} rows={rows} aria-invalid={error ? true : undefined} {...textareaProps} />
+      {error && <span className={css.error}>{error}</span>}
     </label>
   );
 }
