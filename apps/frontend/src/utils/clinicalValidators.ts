@@ -3,13 +3,13 @@ import { parseDateOnly } from "./age";
 
 export type ClinicalEventFormErrors = Partial<Record<keyof ClinicalEventFormValues, string>>;
 
-/** Peso mínimo que acepta CreateClinicalEventDto (`@Min(0.1)`). */
+/** Minimum weight accepted by CreateClinicalEventDto (`@Min(0.1)`). */
 const MIN_WEIGHT_KG = 0.1;
 
 /**
- * Mismas reglas que CreateClinicalEventDto (F2): tipo, fecha (no futura), peso (> 0)
- * y observaciones obligatorios. El próximo control o la próxima vacuna es opcional,
- * pero no puede ser anterior al evento. Sin errores no se envía nada (flujo A1 de UC-06).
+ * Same rules as CreateClinicalEventDto (F2): type, date (not in the future), weight (> 0)
+ * and notes are required. The next checkup or next vaccine is optional but cannot be
+ * earlier than the event. With no errors nothing is blocked; with errors nothing is sent (flow A1 of UC-06).
  */
 export function validateClinicalEventForm(
   values: ClinicalEventFormValues,

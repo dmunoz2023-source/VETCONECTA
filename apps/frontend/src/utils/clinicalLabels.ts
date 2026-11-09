@@ -1,21 +1,21 @@
 import type { ClinicalEventType } from "../types/clinical.types";
 
-export const CLINICAL_TYPE_OPTIONS: { value: ClinicalEventType; label: string }[] = [
-  { value: "consultation", label: "Consulta" },
-  { value: "vaccine", label: "Vacuna" },
-  { value: "checkup", label: "Control" },
+export const CLINICAL_TYPE_OPTIONS: { value: ClinicalEventType; label: string; hint: string }[] = [
+  { value: "consultation", label: "Consulta", hint: "Revisión o atención general" },
+  { value: "vaccine", label: "Vacuna", hint: "Aplicación de una vacuna" },
+  { value: "checkup", label: "Control", hint: "Seguimiento del paciente" },
 ];
 
-/** Etiqueta en español del tipo de evento (si no es conocido, muestra el valor tal cual). */
+/** Spanish label of the event type (an unknown type is shown as is). */
 export const formatClinicalType = (type: string): string =>
   CLINICAL_TYPE_OPTIONS.find((option) => option.value === type)?.label ?? type;
 
-/** Peso que llega como número o como texto decimal de PostgreSQL ("8.50") → "8.5 kg". */
+/** Weight that arrives as a number or as a PostgreSQL decimal string ("8.50") → "8.5 kg". */
 export const formatWeight = (weightKg: string | number | null): string => {
   const weight = weightKg === null ? NaN : Number(weightKg);
   return Number.isFinite(weight) ? `${weight.toLocaleString("es-CL")} kg` : "—";
 };
 
-/** Una vacuna agenda la próxima dosis; una consulta o un control, el próximo control. */
+/** A vaccine schedules the next dose; a consultation or checkup schedules the next checkup. */
 export const formatNextDateLabel = (type: string): string =>
   type === "vaccine" ? "Próxima vacuna" : "Próximo control";

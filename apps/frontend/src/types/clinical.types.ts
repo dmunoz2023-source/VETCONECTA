@@ -1,27 +1,27 @@
-/** Tipos de evento de `clinical.clinical_events.type` y de CreateClinicalEventDto (F2). */
+/** Event types of `clinical.clinical_events.type` and of CreateClinicalEventDto (F2). */
 export type ClinicalEventType = "consultation" | "vaccine" | "checkup";
 
-/** Evento clínico tal como lo devuelve clinical-records-service (entidad `clinical.clinical_events`). */
+/** Clinical event as returned by clinical-records-service (`clinical.clinical_events` entity). */
 export interface ClinicalEvent {
   id: string;
   petId: string;
-  /** Usuario veterinario que lo registró; el backend lo toma del JWT (BR-3). */
+  /** Veterinarian who registered it; the backend takes it from the JWT (BR-3). */
   veterinarianId: string;
   type: ClinicalEventType;
-  /** Fecha y hora ISO (columna timestamptz). */
+  /** ISO date and time (timestamptz column). */
   date: string;
-  /** PostgreSQL entrega las columnas decimal como texto, p. ej. "8.50". */
+  /** PostgreSQL returns decimal columns as text, e.g. "8.50". */
   weightKg: string | number | null;
   temperatureC: string | number | null;
   reason: string | null;
   notes: string | null;
-  /** "AAAA-MM-DD": próximo control o, en una vacuna, la próxima dosis. */
+  /** "YYYY-MM-DD": next checkup or, for a vaccine, the next dose. */
   nextCheckup: string | null;
 }
 
-/** Campos que llena el formulario de registro (UC-06). */
+/** Fields filled in by the registration form (UC-06). */
 export interface ClinicalEventFormValues {
-  /** Vacío hasta que el veterinario elige el tipo. */
+  /** Empty until the veterinarian picks a type. */
   type: ClinicalEventType | "";
   date: string;
   weightKg: string;

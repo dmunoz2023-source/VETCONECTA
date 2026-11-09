@@ -2,7 +2,11 @@ import { api } from './axios';
 import type { ClinicalEvent, ClinicalEventFormValues, ClinicalEventType } from '../types/clinical.types';
 import { parseDateOnly, toDateInputValue } from '../utils/age';
 
-/** Cuerpo de POST /v1/clinical/events (CreateClinicalEventDto de F2). El veterinario sale del JWT (BR-3). */
+/**
+ * Body of POST /v1/clinical/events. The key names are dictated by CreateClinicalEventDto
+ * (F2, backend), so they are the only Spanish identifiers left: rename them here when F2 does.
+ * The veterinarian comes from the JWT (BR-3).
+ */
 interface ClinicalEventPayload {
   mascotaId: string;
   tipo: ClinicalEventType;
@@ -13,9 +17,9 @@ interface ClinicalEventPayload {
 }
 
 /**
- * La columna `date` es timestamptz: "AAAA-MM-DD" se guardaría como medianoche UTC
- * y en Chile se vería como el día anterior. Hoy se envía la hora actual; un día
- * pasado, su mediodía local (nunca queda en el futuro, que el backend rechaza).
+ * The `date` column is timestamptz: "YYYY-MM-DD" would be stored as midnight UTC and
+ * show up as the previous day in Chile. Today sends the current time; a past day
+ * sends its local noon (never in the future, which the backend rejects).
  */
 function toEventTimestamp(date: string): string {
   if (date === toDateInputValue(new Date())) return new Date().toISOString();
@@ -25,7 +29,7 @@ function toEventTimestamp(date: string): string {
   return day.toISOString();
 }
 
-/** El formulario ya validó los obligatorios; el próximo control vacío no se envía. */
+/** The form already validated the required fields; an empty next checkup is not sent. */
 function toPayload(petId: string, values: ClinicalEventFormValues): ClinicalEventPayload {
   return {
     mascotaId: petId,
@@ -37,13 +41,13 @@ function toPayload(petId: string, values: ClinicalEventFormValues): ClinicalEven
   };
 }
 
-/** GET /v1/clinical/pets/{petId}/carnet: eventos de la mascota, del más reciente al más antiguo (FR-2, BR-6). */
+/** GET /v1/clinical/pets/{petId}/carnet: the pet's events, newest first (FR-2, BR-6). */
 export async function listClinicalEvents(petId: string): Promise<ClinicalEvent[]> {
   const { data } = await api.get<ClinicalEvent[]>(`/v1/clinical/pets/${petId}/carnet`);
   return data;
 }
 
-/** POST /v1/clinical/events: solo el veterinario (BR-6); 400 si falta un dato, 404 si la mascota no existe. */
+/** POST /v1/clinical/events: veterinarian only (BR-6); 400 if data is missing, 404 if the pet does not exist. */
 export async function createClinicalEvent(petId: string, values: ClinicalEventFormValues): Promise<ClinicalEvent> {
   const { data } = await api.post<ClinicalEvent>('/v1/clinical/events', toPayload(petId, values));
   return data;

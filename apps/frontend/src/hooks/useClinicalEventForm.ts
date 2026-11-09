@@ -11,7 +11,7 @@ interface UseClinicalEventFormOptions {
   onSaved: (event: ClinicalEvent) => void;
 }
 
-/** Formulario vacío con la fecha de hoy por defecto. */
+/** Empty form with today's date by default. */
 const emptyValues = (): ClinicalEventFormValues => ({
   type: "",
   date: toDateInputValue(new Date()),
@@ -21,10 +21,10 @@ const emptyValues = (): ClinicalEventFormValues => ({
 });
 
 /**
- * Estado y envío del formulario de evento clínico (UC-06). Valida con las mismas
- * reglas del backend antes de enviar; los errores aparecen tras el primer intento
- * de guardar. Si la API responde con error (400, 403, 404), el mensaje queda en
- * `serverError` y los datos ingresados se conservan.
+ * State and submission of the clinical event form (UC-06). Validates with the same
+ * rules as the backend before sending; errors show after the first save attempt.
+ * If the API answers with an error (400, 403, 404) the message goes to
+ * `serverError` and the entered data is kept.
  */
 export function useClinicalEventForm({ petId, onSaved }: UseClinicalEventFormOptions) {
   const [values, setValues] = useState(emptyValues);
