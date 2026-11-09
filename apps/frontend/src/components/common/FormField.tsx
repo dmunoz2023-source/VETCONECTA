@@ -1,18 +1,18 @@
 import type { InputHTMLAttributes } from "react";
-import "./FormField.css";
+import css from "./FormField.module.css";
 
 interface FormFieldProps extends InputHTMLAttributes<HTMLInputElement> {
   label: string;
-  /** Mensaje de validación bajo el campo; `undefined` si no hay error. */
+  /** Validation message under the field; `undefined` when there is no error. */
   error?: string;
 }
 
 export default function FormField({ label, error, ...inputProps }: FormFieldProps) {
   return (
-    <label className="vc-field">
+    <label className={css.field}>
       {label}
-      <input aria-invalid={error ? true : undefined} {...inputProps} />
-      {error && <span className="vc-field-error">{error}</span>}
+      <input className={css.control} aria-invalid={error ? true : undefined} {...inputProps} />
+      {error && <span className={css.error}>{error}</span>}
     </label>
   );
 }

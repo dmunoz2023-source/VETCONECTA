@@ -1,19 +1,19 @@
 import type { SelectHTMLAttributes } from "react";
-import "./FormField.css";
+import css from "./FormField.module.css";
 
 interface SelectFieldProps extends SelectHTMLAttributes<HTMLSelectElement> {
   label: string;
   options: { value: string; label: string }[];
-  /** Texto de la opción vacía inicial. */
+  /** Text of the empty first option. */
   placeholder?: string;
   error?: string;
 }
 
 export default function SelectField({ label, options, placeholder = "Selecciona...", error, ...selectProps }: SelectFieldProps) {
   return (
-    <label className="vc-field">
+    <label className={css.field}>
       {label}
-      <select aria-invalid={error ? true : undefined} {...selectProps}>
+      <select className={css.control} aria-invalid={error ? true : undefined} {...selectProps}>
         <option value="">{placeholder}</option>
         {options.map((option) => (
           <option key={option.value} value={option.value}>
@@ -21,7 +21,7 @@ export default function SelectField({ label, options, placeholder = "Selecciona.
           </option>
         ))}
       </select>
-      {error && <span className="vc-field-error">{error}</span>}
+      {error && <span className={css.error}>{error}</span>}
     </label>
   );
 }

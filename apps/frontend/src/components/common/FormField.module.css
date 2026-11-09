@@ -1,0 +1,50 @@
+/* Shared by FormField, SelectField and OwnerPicker: label on top, control, error below. */
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  color: var(--text-h);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.control {
+  width: 100%;
+  padding: 11px 14px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: #fff;
+  color: var(--text-h);
+  color-scheme: light;
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 400;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.control::placeholder {
+  color: #9ca3af;
+}
+
+.control:hover {
+  border-color: var(--accent-secondary);
+}
+
+.control:focus {
+  border-color: var(--accent-secondary);
+  box-shadow: 0 0 0 3px var(--accent-bg-light);
+  outline: none;
+}
+
+.control[aria-invalid="true"] {
+  border-color: #dc2626;
+}
+
+.error {
+  color: #b91c1c;
+  font-size: 0.8rem;
+  font-weight: 400;
+}

@@ -1,0 +1,88 @@
+/* Owner picker: search box, results list and the chosen owner. */
+
+.search :global(.vc-clients-search) {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.results {
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: #fff;
+  overflow: hidden;
+}
+
+.result {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 10px 14px;
+  border: none;
+  border-bottom: 1px solid var(--border);
+  background: #fff;
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.results li:last-child .result {
+  border-bottom: none;
+}
+
+.result:hover,
+.result:focus-visible {
+  background: var(--accent-bg-light);
+  outline: none;
+}
+
+.selected {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border: 1px solid var(--accent-secondary);
+  border-radius: 12px;
+  background: var(--accent-bg-light);
+}
+
+.avatar {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--accent-secondary);
+  color: #fff;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.info {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.name {
+  color: var(--text-h);
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.result .name {
+  flex: 1;
+}
+
+.rut {
+  color: var(--text);
+  font-size: 0.8rem;
+  font-weight: 400;
+}
