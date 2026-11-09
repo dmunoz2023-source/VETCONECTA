@@ -1,0 +1,81 @@
+.layout {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 16px;
+  align-items: start;
+}
+
+@media (max-width: 900px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+.hero {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 6px;
+}
+
+.avatar,
+.ownerAvatar {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--accent-bg-light);
+  color: var(--accent-secondary);
+}
+
+.avatar {
+  width: 56px;
+  height: 56px;
+}
+
+.ownerAvatar {
+  width: 44px;
+  height: 44px;
+  background: var(--accent-secondary);
+  color: #fff;
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.name {
+  margin: 0;
+  color: var(--text-h);
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
+.subtitle {
+  margin: 2px 0 0;
+  color: var(--text);
+  font-size: 0.85rem;
+}
+
+.owner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 6px;
+}
+
+.ownerName {
+  margin: 0;
+  color: var(--text-h);
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.active {
+  background: #ecfdf5;
+  color: #047857;
+}
+
+.inactive {
+  background: #f3f4f6;
+  color: #6b7280;
+}

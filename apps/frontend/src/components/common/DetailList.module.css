@@ -1,0 +1,25 @@
+.list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+  margin: 14px 0 0;
+}
+
+.item {
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: var(--other-bg);
+}
+
+.label {
+  color: var(--text);
+  font-size: 0.75rem;
+}
+
+.value {
+  margin: 4px 0 0;
+  color: var(--text-h);
+  font-size: 0.95rem;
+  font-weight: 500;
+  overflow-wrap: anywhere;
+}

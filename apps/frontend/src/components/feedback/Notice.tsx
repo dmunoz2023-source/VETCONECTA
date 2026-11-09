@@ -1,16 +1,18 @@
-import { X } from "lucide-react";
+import { CheckCircle2, X } from "lucide-react";
 import IconButton from "../common/IconButton";
+import css from "./Notice.module.css";
 
 interface NoticeProps {
   message: string;
   onDismiss: () => void;
 }
 
-/** Aviso de éxito que el usuario puede cerrar. */
+/** Success notice that the user can close. */
 export default function Notice({ message, onDismiss }: NoticeProps) {
   return (
-    <div className="vc-notice" role="status">
-      <span>{message}</span>
+    <div className={css.notice} role="status">
+      <CheckCircle2 size={18} aria-hidden="true" />
+      <span className={css.message}>{message}</span>
       <IconButton label="Cerrar aviso" onClick={onDismiss}>
         <X size={16} />
       </IconButton>
