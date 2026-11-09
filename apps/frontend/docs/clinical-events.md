@@ -1,7 +1,7 @@
 # I2: eventos clínicos (panel web)
 
-Desde la ficha del paciente, «Registrar evento» abre `/mascotas/:id/atencion`
-(solo `vet`) y «Historial» abre `/mascotas/:id/historial`, el carnet de solo
+Desde la ficha del paciente, «Registrar evento» abre `/pets/:id/clinical-event`
+(solo `vet`) y «Historial» abre `/pets/:id/clinical-history`, el carnet de solo
 lectura. Al registrar un evento se vuelve al carnet, donde aparece primero.
 
 ## Estructura
@@ -15,7 +15,7 @@ lectura. Al registrar un evento se vuelve al carnet, donde aparece primero.
 | Hooks | `src/hooks/useClinicalEventForm.ts` | Estado, validación y envío del formulario |
 | Hooks | `src/hooks/useClinicalEvents.ts` | Carga del carnet |
 | UI | `src/pages/clinical/ClinicalEventForm.tsx` | Formulario (presentación) |
-| UI | `src/pages/clinical/ClinicalTimeline.tsx` | Línea de tiempo (presentación) |
+| UI | `src/pages/clinical/ClinicalTimeline.tsx` | Línea de tiempo (presentación; estilos en `*.module.css`) |
 | UI | `src/pages/clinical/ClinicalEventPage.tsx`, `ClinicalHistoryPage.tsx` | Páginas de las rutas |
 
 ## Contrato con F2 (clinical-records-service, PR #77)
@@ -77,7 +77,7 @@ Devuelve un arreglo ordenado del más reciente al más antiguo:
 1. Como veterinario, abrir una ficha y entrar a «Registrar evento».
 2. Guardar con campos vacíos, peso 0 y fecha futura: se muestran los errores y no se envía nada.
 3. Registrar cada tipo: se vuelve al carnet con el aviso y el evento aparece primero; probar el filtro.
-4. Como recepción, comprobar que «Registrar evento» no aparece y que `/atencion` redirige al inicio.
+4. Como recepción, comprobar que «Registrar evento» no aparece y que `/clinical-event` redirige al inicio.
 5. Ver el mismo evento en el carnet de la app del dueño.
 
 Desde la raíz: `npm run build --workspace=apps/frontend` y `npm run lint --workspace=apps/frontend`.
