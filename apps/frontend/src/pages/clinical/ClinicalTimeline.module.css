@@ -1,0 +1,108 @@
+/* Vertical timeline, newest event first. */
+
+.timeline {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.item {
+  --type-color: var(--accent-secondary);
+  position: relative;
+  padding: 0 0 20px 48px;
+}
+
+.item[data-type="vaccine"] {
+  --type-color: #0f9d6b;
+}
+
+.item[data-type="checkup"] {
+  --type-color: var(--accent);
+}
+
+/* Connector line between markers */
+.item::before {
+  content: "";
+  position: absolute;
+  top: 32px;
+  bottom: -4px;
+  left: 15px;
+  width: 2px;
+  background: var(--border);
+}
+
+.item:last-child::before {
+  display: none;
+}
+
+.marker {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--type-color) 14%, #fff);
+  color: var(--type-color);
+}
+
+.card {
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--type-color);
+  border-radius: 10px;
+  background: #fff;
+  overflow-wrap: anywhere;
+}
+
+.header {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 4px 12px;
+}
+
+.header h3 {
+  margin: 0;
+  color: var(--text-h);
+  font-size: 1rem;
+}
+
+.header time {
+  color: var(--text);
+  font-size: 0.8rem;
+}
+
+.facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 10px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.facts li {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--other-bg);
+  font-size: 0.8rem;
+}
+
+.facts strong {
+  color: var(--text-h);
+}
+
+.notes {
+  margin: 12px 0 0;
+  color: var(--text-h);
+  font-size: 0.9rem;
+  white-space: pre-wrap;
+}
