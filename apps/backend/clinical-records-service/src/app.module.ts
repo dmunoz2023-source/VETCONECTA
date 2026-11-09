@@ -1,26 +1,21 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule, ConfigService } from '@nestjs/config';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { ClinicalEventEntity } from './modules/auth/entities/clinical-event.entity';
-import { ClinicalEventModule } from './modules/auth/clinical-event.module';
+import { ConfigModule} from '@nestjs/config';
+import { ClinicalEventModule } from './modules/clinical/clinical-event.module';
+import configuration from './config/configuration';
+import { validationSchema } from './config/validation.schema';
+import { DatabaseModule } from './database/database.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
+      load: [configuration],
+      validationSchema,
     }),
-    TypeOrmModule.forRootAsync({
-      inject: [ConfigService],
-      useFactory: (config: ConfigService) => ({
-        type: 'postgres',
-        url: config.get<string>('DATABASE_URL'),
-        schema: 'clinical',
-        entities: [ClinicalEventEntity],
-        synchronize: false,
-        autoLoadEntities: false,
-      }),
-    }),
+    DatabaseModule,
     ClinicalEventModule,
   ],
+  controllers:[],
+  providers:[]
 })
 export class AppModule {}
