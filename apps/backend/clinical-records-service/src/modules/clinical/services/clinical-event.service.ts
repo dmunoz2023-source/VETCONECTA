@@ -1,16 +1,20 @@
-import {BadRequestException, ForbiddenException, Injectable, InternalServerErrorException, ServiceUnavailableException} from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import {
+  BadRequestException,
+  ForbiddenException,
+  Injectable,
+  InternalServerErrorException,
+  ServiceUnavailableException,
+} from '@nestjs/common';
 import { JwtPayload } from '@app/shared/types/jwt-payload.interface';
 import { ClinicalEventEntity } from '../entities/clinical-event.entity';
 import { CreateClinicalEventDto } from '../dto/create-clinical-event.dto';
 import { GetClinicalHistoryQueryDto } from '../dto/get-clinical-history-query.dto';
+import { ClinicalEventRepository } from '../repositories/clinical-event.repository';
 
 @Injectable()
 export class ClinicalEventService {
   constructor(
-    @InjectRepository(ClinicalEventEntity)
-    private readonly clinicalEventRepository: Repository<ClinicalEventEntity>,
+    private readonly clinicalEventRepository: ClinicalEventRepository,
   ) {}
 
   async create(createDto: CreateClinicalEventDto, veterinarianId: string): Promise<ClinicalEventEntity> {
@@ -19,7 +23,7 @@ export class ClinicalEventService {
       throw new BadRequestException('La fecha del evento clínico no puede ser futura.');
     }
 
-    const clinicalEvent = this.clinicalEventRepository.create({
+    return this.clinicalEventRepository.save({
       petId: createDto.mascotaId,
       veterinarianId: veterinarianId,
       type: createDto.tipo,
@@ -30,11 +34,8 @@ export class ClinicalEventService {
       notes: createDto.observaciones,
       nextCheckup: createDto.proximoControl ?? null,
     });
-
-    return await this.clinicalEventRepository.save(clinicalEvent);
   }
 
-  // El método de consulta vive aquí, usando el repositorio privado del servicio
   async findByPetId(
     petId: string,
     user: JwtPayload,
@@ -43,10 +44,7 @@ export class ClinicalEventService {
       await this.assertPetOwnership(petId, user.sub);
     }
 
-    return await this.clinicalEventRepository.find({
-      where: { petId },
-      order: { date: 'DESC' },
-    });
+    return this.clinicalEventRepository.findByPetId(petId);
   }
 
   private async assertPetOwnership(petId: string, userId: string): Promise<void> {
@@ -89,12 +87,12 @@ export class ClinicalEventService {
     petId: string,
     { page, limit }: GetClinicalHistoryQueryDto,
   ) {
-    const [events, total] = await this.clinicalEventRepository.findAndCount({
-      where: { petId },
-      order: { date: 'DESC' },
-      skip: (page - 1) * limit,
-      take: limit,
-    });
+    const [events, total] =
+      await this.clinicalEventRepository.findHistoryByPetId(
+        petId,
+        page,
+        limit,
+      );
 
     return {
       data: events,
