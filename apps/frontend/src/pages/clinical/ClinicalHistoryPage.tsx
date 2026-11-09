@@ -3,7 +3,7 @@ import { ClipboardPlus } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import Button from "../../components/common/Button";
 import Card from "../../components/common/Card";
-import PageHeader from "../../components/common/PageHeader";
+import PageHeader from "../../components/common/PageHeader/PageHeader";
 import SelectField from "../../components/common/SelectField";
 import Notice from "../../components/feedback/Notice";
 import StatusText from "../../components/feedback/StatusText";

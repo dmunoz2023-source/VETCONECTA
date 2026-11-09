@@ -1,6 +1,6 @@
 import { useNavigate, useParams } from "react-router-dom";
 import Card from "../../components/common/Card";
-import PageHeader from "../../components/common/PageHeader";
+import PageHeader from "../../components/common/PageHeader/PageHeader";
 import StatusText from "../../components/feedback/StatusText";
 import { usePet } from "../../hooks/usePet";
 import ClinicalEventForm from "./ClinicalEventForm";
