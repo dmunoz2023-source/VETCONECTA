@@ -4,10 +4,11 @@ import PageHeader from "../../components/common/PageHeader";
 import StatusText from "../../components/feedback/StatusText";
 import { usePet } from "../../hooks/usePet";
 import ClinicalEventForm from "./ClinicalEventForm";
+import { ROUTES } from "../../utils/navigation";
 import "../pets/Pets.css";
 
 /**
- * Registro de un evento clínico desde la ficha del paciente (/mascotas/:id/atencion, FR-6).
+ * Registro de un evento clínico desde la ficha del paciente (/pets/:id/atencion, FR-6).
  * La ruta solo está disponible para el veterinario (BR-6); al guardar se abre el carnet.
  */
 export default function ClinicalEventPage() {
@@ -30,9 +31,9 @@ export default function ClinicalEventPage() {
           <ClinicalEventForm
             petId={pet.id}
             onSaved={() =>
-              navigate(`/mascotas/${pet.id}/historial`, { state: { notice: "Evento clínico registrado." } })
+              navigate(`${ROUTES.pets}/${pet.id}/historial`, { state: { notice: "Evento clínico registrado." } })
             }
-            onCancel={() => navigate(`/mascotas/${pet.id}`)}
+            onCancel={() => navigate(`${ROUTES.pets}/${pet.id}`)}
           />
         )}
       </Card>

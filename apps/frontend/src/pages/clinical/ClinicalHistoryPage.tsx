@@ -13,11 +13,12 @@ import { usePermissions } from "../../hooks/usePermissions";
 import { usePet } from "../../hooks/usePet";
 import { CLINICAL_TYPE_OPTIONS } from "../../utils/clinicalLabels";
 import ClinicalTimeline from "./ClinicalTimeline";
+import { ROUTES } from "../../utils/navigation";
 import "../pets/Pets.css";
 import "./Clinical.css";
 
 /**
- * Carnet clínico del paciente (/mascotas/:id/historial, FR-2): línea de tiempo con
+ * Carnet clínico del paciente (/pets/:id/historial, FR-2): línea de tiempo con
  * filtro por tipo. Tras registrar un evento se llega aquí y el evento aparece primero.
  */
 export default function ClinicalHistoryPage() {
@@ -39,9 +40,9 @@ export default function ClinicalHistoryPage() {
         description={pet?.name}
         actions={
           <>
-            <Button onClick={() => navigate(`/mascotas/${id}`)}>Volver a la ficha</Button>
+            <Button onClick={() => navigate(`${ROUTES.pets}/${id}`)}>Volver a la ficha</Button>
             {can("registerClinicalEvent") && (
-              <Button variant="primary" onClick={() => navigate(`/mascotas/${id}/atencion`)}>
+              <Button variant="primary" onClick={() => navigate(`${ROUTES.pets}/${id}/atencion`)}>
                 <ClipboardPlus size={16} /> Registrar evento
               </Button>
             )}
