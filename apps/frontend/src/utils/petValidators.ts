@@ -4,9 +4,9 @@ import { parseDateOnly } from "./age";
 export type PetFormErrors = Partial<Record<keyof PetFormValues, string>>;
 
 /**
- * Mismas reglas que CrearMascotaDto / ActualizarMascotaDto (F1): nombre, especie,
- * raza, sexo, fecha de nacimiento y dueño obligatorios; la fecha no puede ser futura.
- * Color y microchip son opcionales. Devuelve un objeto vacío si todo es válido.
+ * Same rules as CrearMascotaDto / ActualizarMascotaDto (F1): name, species,
+ * breed, sex, birth date and owner are required; the date cannot be in the future.
+ * Color and microchip are optional. Returns an empty object when everything is valid.
  */
 export function validatePetForm(values: PetFormValues, today: Date = new Date()): PetFormErrors {
   const errors: PetFormErrors = {};

@@ -14,7 +14,7 @@ export const SEX_OPTIONS: { value: PetSex; label: string }[] = [
 const findLabel = (options: { value: string; label: string }[], value: string | null) =>
   options.find((option) => option.value === value)?.label ?? value ?? "—";
 
-/** Etiqueta en español de la especie guardada (si no es conocida, muestra el valor tal cual). */
+/** Spanish label of the stored species (an unknown one is shown as is). */
 export const formatSpecies = (species: string | null): string => findLabel(SPECIES_OPTIONS, species);
 
 export const formatSex = (sex: string | null): string => findLabel(SEX_OPTIONS, sex);

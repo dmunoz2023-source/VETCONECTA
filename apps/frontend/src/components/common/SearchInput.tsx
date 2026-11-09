@@ -6,7 +6,7 @@ interface SearchInputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, "
   onChange: (value: string) => void;
 }
 
-/** Buscador con icono. Acepta atributos extra del input (p. ej. `aria-labelledby`). */
+/** Search box with an icon. Accepts extra input attributes (e.g. `aria-labelledby`). */
 export default function SearchInput({ value, onChange, placeholder = "Buscar...", ...inputProps }: SearchInputProps) {
   return (
     <div className="vc-clients-search">

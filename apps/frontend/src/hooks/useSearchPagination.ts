@@ -4,8 +4,8 @@ import { useDebouncedValue } from "./useDebouncedValue";
 const SEARCH_DEBOUNCE_MS = 300;
 
 /**
- * Estado del buscador y la paginación de un listado: al escribir vuelve a la página 1,
- * y `debouncedSearch` solo cambia cuando el usuario deja de escribir (es el que se envía a la API).
+ * Search and pagination state of a list: typing goes back to page 1,
+ * and `debouncedSearch` only changes when the user stops typing (it is the one sent to the API).
  */
 export function useSearchPagination() {
   const [search, setSearchValue] = useState("");

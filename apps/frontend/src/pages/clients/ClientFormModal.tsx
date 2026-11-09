@@ -5,9 +5,9 @@ import Modal from "../../components/feedback/Modal";
 import type { Client, ClientFormValues } from "../../types/client.types";
 
 interface ClientFormModalProps {
-  /** Cliente a editar; `null` para crear uno nuevo. */
+  /** Client to edit; `null` to create a new one. */
   client: Client | null;
-  /** Mensaje de error del servidor al guardar; `null` si no hay. */
+  /** Server error message on save; `null` if none. */
   error?: string | null;
   onClose: () => void;
   onSubmit: (values: ClientFormValues) => void | Promise<void>;

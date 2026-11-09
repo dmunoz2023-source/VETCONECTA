@@ -2,8 +2,8 @@ import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 
 /**
- * Mensaje de éxito enviado por la pantalla anterior en `navigate(ruta, { state: { notice } })`.
- * Se muestra una sola vez: se limpia del historial para que no reaparezca al recargar.
+ * Success message sent by the previous screen in `navigate(path, { state: { notice } })`.
+ * Shown only once: it is cleared from the history so it does not reappear on reload.
  */
 export function useFlashNotice() {
   const location = useLocation();
@@ -15,7 +15,7 @@ export function useFlashNotice() {
       : null;
   const [notice, setNotice] = useState(incoming);
 
-  // Llega un aviso nuevo sin que la página se desmonte: se toma durante el render.
+  // A new notice arrives without the page unmounting: it is picked up during render.
   if (incoming && incoming !== notice) setNotice(incoming);
 
   useEffect(() => {

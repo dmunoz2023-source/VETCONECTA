@@ -2,7 +2,7 @@ import { api } from './axios';
 import type { Client, ClientDetail, ClientFormValues, ClientsQuery, ClientsResult } from '../types/client.types';
 import type { PetOwner } from '../types/pet.types';
 
-/** Respuesta paginada común: { data, meta: { total, page, limit } } (Diseño §3.4). */
+/** Common paged response: { data, meta: { total, page, limit } } (Design §3.4). */
 interface ClientsPageDto {
   data: Client[];
   meta: { total: number; page: number; limit: number };
@@ -10,11 +10,11 @@ interface ClientsPageDto {
 
 /**
  * Cuerpo de POST/PATCH /v1/clients (NewClientDataDTO).
- * TODO: `userId` es obligatorio en el DTO de alta; confirmar con backend cómo se asigna al crear desde el panel.
+ * TODO: `userId` is required in the create DTO; confirm with the backend how it is assigned when creating from the panel.
  */
 type ClientPayload = Omit<Client, 'id' | 'active'>;
 
-/** Los campos opcionales vacíos se envían como null. */
+/** Empty optional fields are sent as null. */
 function toPayload(values: ClientFormValues): ClientPayload {
   const optional = (value: string) => value.trim() || null;
   return {
@@ -36,13 +36,13 @@ export async function listClients({ search, page, pageSize }: ClientsQuery): Pro
   return { clients: data.data, total: data.meta.total };
 }
 
-/** GET /v1/clients/{id}: ficha del cliente con sus mascotas (FR-5). */
+/** GET /v1/clients/{id}: client file with their pets (FR-5). */
 export async function getClient(id: string): Promise<ClientDetail> {
   const { data } = await api.get<ClientDetail>(`/v1/clients/${id}`);
   return data;
 }
 
-/** Dueño resumido de una mascota, desde GET /v1/clients/{id}: GET /v1/pets/{id} no lo incluye. */
+/** Short owner of a pet, from GET /v1/clients/{id}: GET /v1/pets/{id} does not include it. */
 export async function getOwner(id: string): Promise<PetOwner> {
   const { rut, firstName, lastName } = await getClient(id);
   return { id, rut, firstName, lastName };
@@ -58,7 +58,7 @@ export async function updateClient(id: string, values: ClientFormValues): Promis
   await api.patch(`/v1/clients/${id}`, toPayload(values));
 }
 
-/** DELETE /v1/clients/{id}: baja lógica (`active = false`), nunca borrado físico. */
+/** DELETE /v1/clients/{id}: soft delete (`active = false`), never a physical delete. */
 export async function deleteClient(id: string): Promise<void> {
   await api.delete(`/v1/clients/${id}`);
 }

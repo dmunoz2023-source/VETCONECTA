@@ -8,16 +8,16 @@ import { validatePetForm } from "../utils/petValidators";
 interface UsePetFormOptions {
   initialValues: PetFormValues;
   initialOwner: PetOwner | null;
-  /** Mascota a editar; sin `petId` se crea una nueva. */
+  /** Pet to edit; without `petId` a new one is created. */
   petId?: string;
   onSaved: (pet: Pet) => void;
 }
 
 /**
- * Estado y envío del formulario de mascota. Valida con las mismas reglas del
- * backend antes de enviar; los errores aparecen tras el primer intento de guardar
- * y se actualizan mientras el usuario corrige. Si la API responde con error
- * (400, 403, 404 del dueño), el mensaje queda en `serverError`.
+ * State and submission of the pet form. Validates with the same rules as the
+ * backend before sending; errors show after the first save attempt
+ * and update while the user fixes them. If the API answers with an error
+ * (400, 403, 404 for the owner), the message goes to `serverError`.
  */
 export function usePetForm({ initialValues, initialOwner, petId, onSaved }: UsePetFormOptions) {
   const [values, setValues] = useState(initialValues);

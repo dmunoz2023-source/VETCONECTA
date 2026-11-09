@@ -1,6 +1,6 @@
 import type { Pet } from "./pet.types";
 
-/** Cliente tal como lo devuelve clients-pets-service (entidad `clients_pets.clients`). */
+/** Client as returned by clients-pets-service (`clients_pets.clients` entity). */
 export interface Client {
   id: string;
   rut: string;
@@ -13,12 +13,12 @@ export interface Client {
   active: boolean;
 }
 
-/** GET /v1/clients/{id}: ficha del cliente junto con sus mascotas activas (FR-5). */
+/** GET /v1/clients/{id}: client file with their active pets (FR-5). */
 export interface ClientDetail extends Client {
   pets: Pet[];
 }
 
-/** Campos que llena el formulario de alta y edición. */
+/** Fields filled in by the create and edit form. */
 export interface ClientFormValues {
   rut: string;
   firstName: string;

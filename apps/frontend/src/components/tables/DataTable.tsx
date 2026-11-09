@@ -14,13 +14,13 @@ interface DataTableProps<T> {
   loading?: boolean;
   error?: string | null;
   emptyMessage?: string;
-  /** Si se entrega, se muestra la paginación al pie de la tabla. */
+  /** When provided, the pagination is shown at the bottom of the table. */
   pagination?: TablePaginationProps;
 }
 
 /**
- * Mensaje a mostrar en vez de las filas (null si hay filas que mostrar).
- * Con filas ya cargadas se mantienen visibles mientras llega una nueva consulta.
+ * Message to show instead of the rows (null when there are rows to show).
+ * Already loaded rows stay visible while a new query arrives.
  */
 function getStatusMessage<T>(rows: T[], loading: boolean, error: string | null, emptyMessage: string) {
   if (error) return error;
@@ -29,7 +29,7 @@ function getStatusMessage<T>(rows: T[], loading: boolean, error: string | null, 
   return emptyMessage;
 }
 
-// Orden por columna: pendiente, se agrega aquí para que todas las tablas lo hereden.
+// Column sorting: pending, add it here so every table inherits it.
 export default function DataTable<T>({
   columns,
   rows,

@@ -4,16 +4,16 @@ import "./ConfirmDialog.css";
 
 interface ConfirmDialogProps {
   title: string;
-  /** Texto de la pregunta; puede incluir el nombre del elemento a eliminar. */
+  /** Question text; it can include the name of the item to delete. */
   message: string;
   confirmLabel?: string;
-  /** Mensaje de error del servidor al confirmar; `null` si no hay. */
+  /** Server error message on confirm; `null` if none. */
   error?: string | null;
   onCancel: () => void;
   onConfirm: () => void;
 }
 
-/** Diálogo genérico para confirmar acciones destructivas (eliminar, dar de baja, etc.). */
+/** Generic dialog to confirm destructive actions (delete, deactivate, etc.). */
 export default function ConfirmDialog({
   title,
   message,

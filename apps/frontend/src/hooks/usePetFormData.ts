@@ -45,10 +45,10 @@ async function loadFormData(petId?: string, presetClientId?: string): Promise<Pe
 }
 
 /**
- * Datos iniciales del formulario de mascota:
- * - edición (`petId`): la mascota y su dueño;
- * - alta desde la ficha de un cliente (`presetClientId`): el dueño ya elegido (UC-05, paso 2);
- * - alta sin dueño: formulario vacío.
+ * Initial data of the pet form:
+ * - edit (`petId`): the pet and its owner;
+ * - create from a client's file (`presetClientId`): the owner already chosen (UC-05, step 2);
+ * - create without owner: empty form.
  */
 export function usePetFormData(petId?: string, presetClientId?: string) {
   const load = useCallback(() => loadFormData(petId, presetClientId), [petId, presetClientId]);

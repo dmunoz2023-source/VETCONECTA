@@ -1,4 +1,4 @@
-/** Convierte "AAAA-MM-DD" en una fecha local (evita el desfase de un día que produce `new Date("AAAA-MM-DD")`, que la toma en UTC). */
+/** Converts "YYYY-MM-DD" into a local date (avoids the one-day shift of `new Date("YYYY-MM-DD")`, which reads it as UTC). */
 export function parseDateOnly(value: string): Date | null {
   const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
   if (!match) return null;
@@ -7,16 +7,16 @@ export function parseDateOnly(value: string): Date | null {
   return date.getMonth() === month - 1 ? date : null;
 }
 
-/** Fecha local en formato "AAAA-MM-DD", el que usa <input type="date">. */
+/** Local date as "YYYY-MM-DD", the format <input type="date"> uses. */
 export function toDateInputValue(date: Date): string {
   const pad = (n: number) => String(n).padStart(2, "0");
   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
 }
 
 /**
- * Edad legible a partir de la fecha de nacimiento, con la misma regla que
- * clients-pets-service (age-calculator.util). Se usa como vista previa en el
- * formulario; en la ficha se muestra la edad que entrega la API (BR-2).
+ * Readable age from the birth date, with the same rule as
+ * clients-pets-service (age-calculator.util). Used as a preview in the
+ * form; the pet file shows the age returned by the API (BR-2).
  */
 export function formatAge(birthDate: string, today: Date = new Date()): string | null {
   const birth = parseDateOnly(birthDate);

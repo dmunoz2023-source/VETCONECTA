@@ -6,8 +6,8 @@ import { usePagedRequest } from "./usePagedRequest";
 const EMPTY_RESULT: ClientsResult = { clients: [], total: 0 };
 
 /**
- * Listado de clientes con búsqueda y paginación, más alta, edición y baja.
- * Consume /v1/clients a través del API Gateway; tras cada cambio vuelve a pedir el listado.
+ * Client list with search and pagination, plus create, edit and delete.
+ * Uses /v1/clients through the API Gateway; after each change it requests the list again.
  */
 export function useClients(query: ClientsQuery) {
   const { result, loading, error, reload } = usePagedRequest(
@@ -17,7 +17,7 @@ export function useClients(query: ClientsQuery) {
     "No se pudieron cargar los clientes.",
   );
 
-  /** Crea un cliente (sin `id`) o edita uno existente (con `id`). Si la API falla, la promesa se rechaza. */
+  /** Creates a client (no `id`) or edits an existing one (with `id`). If the API fails, the promise rejects. */
   const saveClient = useCallback(
     async (values: ClientFormValues, id?: string) => {
       if (id) await updateClient(id, values);
@@ -27,7 +27,7 @@ export function useClients(query: ClientsQuery) {
     [reload],
   );
 
-  /** Da de baja al cliente. Si la API falla, la promesa se rechaza. */
+  /** Deactivates the client. If the API fails, the promise rejects. */
   const removeClient = useCallback(
     async (id: string) => {
       await deleteClient(id);

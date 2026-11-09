@@ -2,10 +2,10 @@ import { api } from './axios';
 import { getClient, listClients } from './clients.api';
 import type { Pet, PetFormValues, PetsQuery, PetsResult } from '../types/pet.types';
 
-/** Cuerpo de POST /v1/pets y PATCH /v1/pets/{id} (F1). La edad nunca se envía (BR-2). */
+/** Body of POST /v1/pets and PATCH /v1/pets/{id} (F1). The age is never sent (BR-2). */
 type PetPayload = Omit<Pet, 'id' | 'active' | 'age' | 'photoUrl' | 'client'>;
 
-/** Los campos opcionales vacíos se envían como null. */
+/** Empty optional fields are sent as null. */
 function toPayload(values: PetFormValues): PetPayload {
   const optional = (value: string) => value.trim() || null;
   return {
@@ -21,9 +21,9 @@ function toPayload(values: PetFormValues): PetPayload {
 }
 
 /**
- * Listado de pacientes (FR-5, UC-05). El diseño no tiene GET /v1/pets, así que se buscan
- * los dueños con GET /v1/clients?q= y se piden sus mascotas con GET /v1/clients/{id}.
- * La búsqueda es por nombre o RUT del dueño, y `total` cuenta dueños, no mascotas.
+ * Patient list (FR-5, UC-05). The design has no GET /v1/pets, so owners are searched with
+ * GET /v1/clients?q= and their pets are requested with GET /v1/clients/{id}.
+ * The search is by owner name or RUT, and `total` counts owners, not pets.
  */
 export async function listPets(query: PetsQuery): Promise<PetsResult> {
   const { clients, total } = await listClients(query);
@@ -35,13 +35,13 @@ export async function listPets(query: PetsQuery): Promise<PetsResult> {
   return { pets, total };
 }
 
-/** GET /v1/pets/{id}: ficha con la edad calculada (FR-2, BR-2). */
+/** GET /v1/pets/{id}: file with the calculated age (FR-2, BR-2). */
 export async function getPet(id: string): Promise<Pet> {
   const { data } = await api.get<Pet>(`/v1/pets/${id}`);
   return data;
 }
 
-/** POST /v1/pets: crea la mascota asociada a un cliente existente (FR-5, BR-1). */
+/** POST /v1/pets: creates the pet linked to an existing client (FR-5, BR-1). */
 export async function createPet(values: PetFormValues): Promise<Pet> {
   const { data } = await api.post<Pet>('/v1/pets', toPayload(values));
   return data;
@@ -53,7 +53,7 @@ export async function updatePet(id: string, values: PetFormValues): Promise<Pet>
   return data;
 }
 
-/** DELETE /v1/pets/{id}: baja lógica (`active = false`); el historial clínico se conserva (BR-9). */
+/** DELETE /v1/pets/{id}: soft delete (`active = false`); the clinical record is kept (BR-9). */
 export async function deactivatePet(id: string): Promise<void> {
   await api.delete(`/v1/pets/${id}`);
 }
