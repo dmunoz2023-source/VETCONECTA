@@ -1,4 +1,17 @@
-import { IsUUID, IsEnum, IsString, IsNotEmpty, IsNumber, Min, Max, IsDateString, IsOptional } from 'class-validator';
+import {
+  IsDateString,
+  IsEnum,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+  IsUUID,
+  IsPositive,
+  Max,
+  MaxLength,
+  Min,
+  ValidateIf,
+} from 'class-validator';
 
 export enum ClinicalEventType {
   CONSULTA = 'consultation',
@@ -11,7 +24,9 @@ export class CreateClinicalEventDto {
   @IsNotEmpty()
   mascotaId!: string;
 
-  @IsEnum(ClinicalEventType, { message: 'El tipo debe ser consultation, vaccine o checkup' })
+  @IsEnum(ClinicalEventType, {
+    message: 'El tipo debe ser consultation, vaccine o checkup',
+  })
   @IsNotEmpty()
   tipo!: ClinicalEventType;
 
@@ -20,9 +35,8 @@ export class CreateClinicalEventDto {
   fecha!: string;
 
   @IsNumber({}, { message: 'El peso debe ser numérico' })
-  @IsNotEmpty()
-  @Min(0.1, { message: 'El peso en kg debe ser mayor a 0' })
-  peso?: number;
+  @IsPositive({ message: 'El peso en kg debe ser mayor a 0' })
+  peso!: number;
 
   @IsOptional()
   @IsNumber({}, { message: 'La temperatura debe ser numérica' })
@@ -32,13 +46,46 @@ export class CreateClinicalEventDto {
 
   @IsOptional()
   @IsString()
+  @MaxLength(200)
   motivo?: string;
 
   @IsString()
   @IsNotEmpty({ message: 'Las observaciones son obligatorias' })
   observaciones!: string;
 
-  @IsOptional()
-  @IsDateString({}, { message: 'La fecha de próximo control debe ser un formato válido' })
+  @ValidateIf((dto: CreateClinicalEventDto) => dto.tipo === ClinicalEventType.VACUNA)
+  @IsString()
+  @IsNotEmpty({ message: 'El nombre de la vacuna es obligatorio' })
+  @MaxLength(100)
+  nombreVacuna?: string;
+
+  @ValidateIf((dto: CreateClinicalEventDto) => dto.tipo === ClinicalEventType.VACUNA)
+  @IsString()
+  @IsNotEmpty({ message: 'El lote de la vacuna es obligatorio' })
+  @MaxLength(50)
+  lote?: string;
+
+  @ValidateIf((dto: CreateClinicalEventDto) => dto.tipo === ClinicalEventType.VACUNA)
+  @IsDateString(
+    {},
+    { message: 'La fecha de próxima dosis debe tener un formato ISO válido' },
+  )
+  fechaProximaDosis?: string;
+
+  @ValidateIf(
+    (dto: CreateClinicalEventDto) => dto.tipo !== ClinicalEventType.VACUNA,
+  )
+  @IsString()
+  @IsNotEmpty({ message: 'El diagnóstico es obligatorio' })
+  @MaxLength(200)
+  diagnostico?: string;
+
+  @ValidateIf(
+    (dto: CreateClinicalEventDto) => dto.tipo !== ClinicalEventType.VACUNA,
+  )
+  @IsDateString(
+    {},
+    { message: 'La fecha de próximo control debe tener un formato ISO válido' },
+  )
   proximoControl?: string;
 }

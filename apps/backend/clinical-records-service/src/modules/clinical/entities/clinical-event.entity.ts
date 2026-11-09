@@ -1,4 +1,10 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  OneToOne,
+} from 'typeorm';
+import { VaccinationDetailsEntity } from './vaccination-details.entity';
 
 @Entity({ name: 'clinical_events', schema: 'clinical' })
 export class ClinicalEventEntity {
@@ -12,7 +18,7 @@ export class ClinicalEventEntity {
   veterinarianId!: string;
 
   @Column({ type: 'varchar', length: 20 })
-  type!: string; // 'consultation', 'vaccine', 'checkup'
+  type!: string;
 
   @Column({ name: 'date', type: 'timestamptz' })
   date!: Date;
@@ -26,9 +32,18 @@ export class ClinicalEventEntity {
   @Column({ name: 'reason', type: 'varchar', length: 200, nullable: true })
   reason!: string | null;
 
+  @Column({ name: 'diagnosis', type: 'varchar', length: 200, nullable: true })
+  diagnosis!: string | null;
+
   @Column({ name: 'notes', type: 'text', nullable: true })
   notes!: string | null;
 
   @Column({ name: 'next_checkup', type: 'date', nullable: true })
   nextCheckup!: string | null;
+
+  @OneToOne(
+    () => VaccinationDetailsEntity,
+    (vaccinationDetails) => vaccinationDetails.clinicalEvent,
+  )
+  vaccinationDetails?: VaccinationDetailsEntity | null;
 }

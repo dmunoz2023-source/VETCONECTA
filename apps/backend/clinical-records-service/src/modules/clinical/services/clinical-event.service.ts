@@ -7,7 +7,10 @@ import {
 } from '@nestjs/common';
 import { JwtPayload } from '@app/shared/types/jwt-payload.interface';
 import { ClinicalEventEntity } from '../entities/clinical-event.entity';
-import { CreateClinicalEventDto } from '../dto/create-clinical-event.dto';
+import {
+  CreateClinicalEventDto,
+  ClinicalEventType,
+} from '../dto/create-clinical-event.dto';
 import { GetClinicalHistoryQueryDto } from '../dto/get-clinical-history-query.dto';
 import { ClinicalEventRepository } from '../repositories/clinical-event.repository';
 
@@ -23,17 +26,54 @@ export class ClinicalEventService {
       throw new BadRequestException('La fecha del evento clínico no puede ser futura.');
     }
 
-    return this.clinicalEventRepository.save({
-      petId: createDto.mascotaId,
-      veterinarianId: veterinarianId,
-      type: createDto.tipo,
-      date: eventDate,
-      weightKg: createDto.peso ?? null,
-      temperatureC: createDto.temperatura ?? null,
-      reason: createDto.motivo ?? null,
-      notes: createDto.observaciones,
-      nextCheckup: createDto.proximoControl ?? null,
-    });
+    let vaccinationData:
+      | { vaccine: string; batch: string; boosterDate: string }
+      | undefined;
+    if (createDto.tipo === ClinicalEventType.VACUNA) {
+      if (
+        !createDto.nombreVacuna ||
+        !createDto.lote ||
+        !createDto.fechaProximaDosis ||
+        createDto.diagnostico !== undefined ||
+        createDto.proximoControl !== undefined
+      ) {
+        throw new BadRequestException(
+          'Las vacunas requieren nombre, lote y fecha de próxima dosis, y no aceptan diagnóstico ni próximo control.',
+        );
+      }
+
+      vaccinationData = {
+        vaccine: createDto.nombreVacuna,
+        batch: createDto.lote,
+        boosterDate: createDto.fechaProximaDosis,
+      };
+    } else if (
+      !createDto.diagnostico ||
+      !createDto.proximoControl ||
+      createDto.nombreVacuna !== undefined ||
+      createDto.lote !== undefined ||
+      createDto.fechaProximaDosis !== undefined
+    ) {
+      throw new BadRequestException(
+        'Las consultas y controles requieren diagnóstico y próximo control, y no aceptan datos de vacuna.',
+      );
+    }
+
+    return this.clinicalEventRepository.save(
+      {
+        petId: createDto.mascotaId,
+        veterinarianId: veterinarianId,
+        type: createDto.tipo,
+        date: eventDate,
+        weightKg: createDto.peso ?? null,
+        temperatureC: createDto.temperatura ?? null,
+        reason: createDto.motivo ?? null,
+        diagnosis: createDto.diagnostico ?? null,
+        notes: createDto.observaciones,
+        nextCheckup: createDto.proximoControl ?? null,
+      },
+      vaccinationData,
+    );
   }
 
   async findByPetId(

@@ -148,6 +148,7 @@ CREATE TABLE clinical.clinical_events (
     weight_kg DECIMAL(5,2),
     temperature_c DECIMAL(4,1),
     reason VARCHAR(200),
+    diagnosis VARCHAR(200),
     notes TEXT,
     next_checkup DATE
 );
