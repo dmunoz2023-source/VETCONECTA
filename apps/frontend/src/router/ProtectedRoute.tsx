@@ -3,7 +3,7 @@ import { useAuth } from "../hooks/useAuth";
 import type { Role } from "../types/auth.types";
 
 interface ProtectedRouteProps {
-  allowedRoles?: Role[];
+  allowedRoles?: readonly Role[];
 }
 
 export default function ProtectedRoute({ allowedRoles }: ProtectedRouteProps) {

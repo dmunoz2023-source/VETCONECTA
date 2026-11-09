@@ -1,14 +1,24 @@
 import { OpenAPIObject } from '@nestjs/swagger';
+import { PROXY_ROUTES_CONFIG } from '../config/proxy.config';
+
+const {
+  auth,
+  clients,
+  clinical,
+  scheduling,
+  notifications,
+  catalog
+} = PROXY_ROUTES_CONFIG
 
 // Cada microservicio publica su contrato en /docs-json y el gateway los junta en un solo /docs.
 // Si un servicio no está levantado o todavía no publica su contrato, simplemente se salta.
 const SERVICE_DOCS_URLS = [
-  'http://localhost:3001/docs-json', // auth-service
-  'http://localhost:3002/docs-json', // clients-pets-service
-  'http://localhost:3003/docs-json', // clinical-records-service
-  'http://localhost:3004/docs-json', // scheduling-service
-  'http://localhost:3005/docs-json', // notifications-service
-  'http://localhost:3006/docs-json', // clinic-catalog-service
+  auth.origin + '/docs-json', // auth-service
+  clients.origin + '/docs-json', // clients-pets-service
+  clinical.origin + '/docs-json', // clinical-records-service
+  scheduling.origin + '/docs-json', // scheduling-service
+  notifications.origin + '/docs-json', // notifications-service
+  catalog.origin + '/docs-json', // clinic-catalog-service
 ];
 
 async function fetchServiceDocument(url: string): Promise<OpenAPIObject | null> {
