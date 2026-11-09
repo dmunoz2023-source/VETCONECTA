@@ -58,10 +58,10 @@ export default function AppRouter() {
             <Route path={ROUTES.petDetail} element={<PetDetailPage />} />
             
             <Route element={<ProtectedRoute allowedRoles={rolesFor("registerClinicalEvent")} />}>
-              <Route path={ROUTES.petAttention} element={<ClinicalEventPage />} />
+              <Route path={ROUTES.petClinicalEvent} element={<ClinicalEventPage />} />
             </Route>
-            
-            <Route path={ROUTES.petHistory} element={<ClinicalHistoryPage />} />
+
+            <Route path={ROUTES.petClinicalHistory} element={<ClinicalHistoryPage />} />
             
             {/* Módulos Principales */}
             <Route path={ROUTES.agend} element={<AgendPage />} />
