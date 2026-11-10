@@ -11,7 +11,7 @@ function toPayload(values: PetFormValues): PetPayload {
   return {
     clientId: values.clientId,
     name: values.name.trim(),
-    species: values.species,
+    species: values.species === 'other' ? values.otherSpecies.trim() : values.species,
     breed: optional(values.breed),
     sex: optional(values.sex),
     birthDate: optional(values.birthDate),

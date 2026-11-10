@@ -59,6 +59,16 @@ export default function PetForm({ initialValues, initialOwner, petId, onSaved, o
           onChange={(value) => setValue("species", value)}
           error={errors.species}
         />
+        {values.species === "other" && (
+          <FormField
+            label="¿Qué especie es?"
+            maxLength={50}
+            value={values.otherSpecies}
+            onChange={(e) => setValue("otherSpecies", e.target.value)}
+            placeholder="Conejo, hámster, tortuga..."
+            error={errors.otherSpecies}
+          />
+        )}
         <OptionCards
           label="Sexo"
           options={SEX_CARDS}

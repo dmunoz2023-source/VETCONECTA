@@ -40,7 +40,10 @@ export interface Pet {
 export interface PetFormValues {
   clientId: string;
   name: string;
+  /** "dog", "cat" or "other"; with "other" the real species is written in `otherSpecies`. */
   species: string;
+  /** Free-text species, only used when `species` is "other" (the backend accepts any text). */
+  otherSpecies: string;
   breed: string;
   sex: string;
   birthDate: string;
