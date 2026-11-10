@@ -11,6 +11,19 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
+import {
+  ApiBearerAuth,
+  ApiBadRequestResponse,
+  ApiCreatedResponse,
+  ApiForbiddenResponse,
+  ApiNotFoundResponse,
+  ApiOkResponse,
+  ApiOperation,
+  ApiParam,
+  ApiTags,
+  ApiUnauthorizedResponse,
+  ApiServiceUnavailableResponse,
+} from '@nestjs/swagger';
 import { ClinicalEventService } from '../services/clinical-event.service';
 import {
   CreateClinicalEventDto,
@@ -25,6 +38,8 @@ import { RolesGuard } from '@app/shared/guards/roles.guard';
 import { JwtPayload } from '@app/shared/types/jwt-payload.interface';
 
 @Controller('v1/clinical')
+@ApiTags('clinical-events')
+@ApiBearerAuth()
 @UseGuards(JwtHeadersGuard, RolesGuard)
 export class ClinicalEventController {
   constructor(private readonly clinicalEventService: ClinicalEventService) {}
@@ -32,6 +47,13 @@ export class ClinicalEventController {
   @Post('events')
   @HttpCode(HttpStatus.CREATED)
   @Roles('vet')
+  @ApiOperation({ summary: 'Registrar un evento clínico' })
+  @ApiCreatedResponse({ description: 'Evento clínico creado.' })
+  @ApiBadRequestResponse({ description: 'Datos obligatorios faltantes o inválidos.' })
+  @ApiForbiddenResponse({ description: 'Solo veterinarios pueden registrar eventos.' })
+  @ApiNotFoundResponse({ description: 'No existe la mascota indicada.' })
+  @ApiServiceUnavailableResponse({ description: 'No se pudo verificar la mascota.' })
+  @ApiUnauthorizedResponse({ description: 'Falta autenticación válida.' })
   async create(
     @Body() createClinicalEventDto: CreateClinicalEventDto,
     @CurrentUser() user: JwtPayload,
@@ -42,6 +64,12 @@ export class ClinicalEventController {
   @Put('events/:id')
   @HttpCode(HttpStatus.OK)
   @Roles('vet', 'admin')
+  @ApiOperation({ summary: 'Editar un evento clínico' })
+  @ApiParam({ name: 'id', description: 'UUID del evento clínico' })
+  @ApiOkResponse({ description: 'Evento clínico actualizado.' })
+  @ApiBadRequestResponse({ description: 'Datos inválidos o mascota modificada.' })
+  @ApiForbiddenResponse({ description: 'Solo el veterinario autor o un administrador pueden editar.' })
+  @ApiNotFoundResponse({ description: 'No se encontró el evento clínico.' })
   async update(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() updateClinicalEventDto: UpdateClinicalEventDto,
@@ -57,6 +85,10 @@ export class ClinicalEventController {
   @Get('pets/:petId/carnet')
   @HttpCode(HttpStatus.OK)
   @Roles('owner', 'vet', 'reception')
+  @ApiOperation({ summary: 'Obtener carnet clínico de una mascota' })
+  @ApiParam({ name: 'petId', description: 'UUID de la mascota' })
+  @ApiOkResponse({ description: 'Eventos clínicos de la mascota.' })
+  @ApiForbiddenResponse({ description: 'El dueño no tiene acceso a esta mascota.' })
   async getCarnet(
     @Param('petId', ParseUUIDPipe) petId: string,
     @CurrentUser() user: JwtPayload,
@@ -67,6 +99,10 @@ export class ClinicalEventController {
   @Get('pets/:petId/history')
   @HttpCode(HttpStatus.OK)
   @Roles('vet', 'reception')
+  @ApiOperation({ summary: 'Obtener historial clínico paginado' })
+  @ApiParam({ name: 'petId', description: 'UUID de la mascota' })
+  @ApiOkResponse({ description: 'Eventos clínicos y metadatos de paginación.' })
+  @ApiForbiddenResponse({ description: 'Rol sin permiso para consultar el historial.' })
   async getHistory(
     @Param('petId', ParseUUIDPipe) petId: string,
     @Query() query: GetClinicalHistoryQueryDto,
