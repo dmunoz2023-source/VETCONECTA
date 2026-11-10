@@ -17,7 +17,10 @@ const emptyValues = (): ClinicalEventFormValues => ({
   date: toDateInputValue(new Date()),
   weightKg: "",
   notes: "",
+  diagnosis: "",
   nextCheckup: "",
+  vaccineName: "",
+  batch: "",
 });
 
 /**

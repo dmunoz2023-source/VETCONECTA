@@ -22,6 +22,12 @@ lectura. Al registrar un evento se vuelve al carnet, donde aparece primero.
 
 ### `POST /v1/clinical/events` — rol `vet`
 
+Las claves del cuerpo las define `CreateClinicalEventDto` de F2 (rama
+`feat/F2-clinical-events-creation`, aún sin unir a `develop`). F2 valida según
+el tipo y responde 400 si llegan campos del otro tipo.
+
+Consulta o control (`consultation` | `checkup`):
+
 ```json
 {
   "mascotaId": "UUID",
@@ -29,13 +35,29 @@ lectura. Al registrar un evento se vuelve al carnet, donde aparece primero.
   "fecha": "2026-11-06T15:30:00.000Z",
   "peso": 8.5,
   "observaciones": "Paciente estable",
+  "diagnostico": "Gastritis leve",
   "proximoControl": "2026-12-06"
 }
 ```
 
-- `tipo`: `consultation` | `vaccine` | `checkup`.
-- Obligatorios: `mascotaId`, `tipo`, `fecha` (no futura), `peso` (≥ 0.1) y `observaciones`.
-- `proximoControl` es opcional; en una vacuna se muestra como «Próxima vacuna».
+Vacuna (`vaccine`):
+
+```json
+{
+  "mascotaId": "UUID",
+  "tipo": "vaccine",
+  "fecha": "2026-11-06T15:30:00.000Z",
+  "peso": 8.5,
+  "observaciones": "Sin reacciones",
+  "nombreVacuna": "Antirrábica",
+  "lote": "L-2026-014",
+  "fechaProximaDosis": "2026-12-06"
+}
+```
+
+- Obligatorios siempre: `mascotaId`, `tipo`, `fecha` (no futura), `peso` (> 0) y `observaciones`.
+- Consulta y control: `diagnostico` y `proximoControl` obligatorios; no aceptan datos de vacuna.
+- Vacuna: `nombreVacuna`, `lote` y `fechaProximaDosis` obligatorios; no acepta `diagnostico` ni `proximoControl`.
 - El veterinario no se envía: F2 lo toma del JWT (BR-3).
 - `fecha` va con hora porque la columna es `timestamptz`: hoy se envía la hora
   actual y un día pasado su mediodía local, para que no cambie de día en Chile.
@@ -69,8 +91,8 @@ Devuelve un arreglo ordenado del más reciente al más antiguo:
 ## Pendiente del backend (fuera de I2)
 
 - El carnet no admite el rol `admin` (recibe 403).
-- Nombre, lote y fecha de la vacuna (`clinical.vaccination_details`) y el
-  diagnóstico no están en el DTO de F2; el panel no los pide.
+- Las claves del POST están en español (`mascotaId`, `tipo`...); hay que pedir a F2 que las pase a inglés.
+- Si F2 cambia el DTO, el único lugar a ajustar es `toPayload` en `src/api/clinical.api.ts`.
 
 ## Verificación manual
 

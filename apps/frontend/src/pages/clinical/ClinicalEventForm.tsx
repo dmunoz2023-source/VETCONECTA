@@ -107,15 +107,59 @@ export default function ClinicalEventForm({ petId, onSaved, onCancel }: Clinical
             placeholder="8.5"
             error={errors.weightKg}
           />
-          <FormField
-            label={`${formatNextDateLabel(values.type)} (opcional)`}
-            type="date"
-            min={values.date}
-            value={values.nextCheckup}
-            onChange={(e) => setValue("nextCheckup", e.target.value)}
-            error={errors.nextCheckup}
-          />
         </div>
+
+        {values.type === "vaccine" && (
+          <div className={css.grid}>
+            <FormField
+              label="Nombre de la vacuna"
+              maxLength={100}
+              value={values.vaccineName}
+              onChange={(e) => setValue("vaccineName", e.target.value)}
+              placeholder="Antirrábica"
+              error={errors.vaccineName}
+            />
+            <FormField
+              label="Lote"
+              maxLength={50}
+              value={values.batch}
+              onChange={(e) => setValue("batch", e.target.value)}
+              placeholder="L-2026-014"
+              error={errors.batch}
+            />
+            <FormField
+              label={formatNextDateLabel(values.type)}
+              type="date"
+              min={values.date}
+              value={values.nextCheckup}
+              onChange={(e) => setValue("nextCheckup", e.target.value)}
+              error={errors.nextCheckup}
+            />
+          </div>
+        )}
+
+        {values.type && values.type !== "vaccine" && (
+          <div className={css.grid}>
+            <FormField
+              label="Diagnóstico"
+              maxLength={200}
+              value={values.diagnosis}
+              onChange={(e) => setValue("diagnosis", e.target.value)}
+              placeholder="Gastritis leve"
+              error={errors.diagnosis}
+            />
+            <FormField
+              label={formatNextDateLabel(values.type)}
+              type="date"
+              min={values.date}
+              value={values.nextCheckup}
+              onChange={(e) => setValue("nextCheckup", e.target.value)}
+              error={errors.nextCheckup}
+            />
+          </div>
+        )}
+
+        {!values.type && <p className={css.hint}>Elige un tipo de evento para ver los campos que corresponden.</p>}
         <TextAreaField
           label="Observaciones"
           value={values.notes}

@@ -18,4 +18,4 @@ export const formatWeight = (weightKg: string | number | null): string => {
 
 /** A vaccine schedules the next dose; a consultation or checkup schedules the next checkup. */
 export const formatNextDateLabel = (type: string): string =>
-  type === "vaccine" ? "Próxima vacuna" : "Próximo control";
+  type === "vaccine" ? "Próxima dosis" : "Próximo control";

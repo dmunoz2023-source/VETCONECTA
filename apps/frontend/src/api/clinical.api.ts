@@ -6,6 +6,10 @@ import { parseDateOnly, toDateInputValue } from '../utils/age';
  * Body of POST /v1/clinical/events. The key names are dictated by CreateClinicalEventDto
  * (F2, backend), so they are the only Spanish identifiers left: rename them here when F2 does.
  * The veterinarian comes from the JWT (BR-3).
+ *
+ * F2 validates by type and rejects (400) the fields of the other type:
+ * - vaccine: nombreVacuna, lote and fechaProximaDosis are required; no diagnostico or proximoControl.
+ * - consultation / checkup: diagnostico and proximoControl are required; no vaccine fields.
  */
 interface ClinicalEventPayload {
   mascotaId: string;
@@ -13,6 +17,10 @@ interface ClinicalEventPayload {
   fecha: string;
   peso: number;
   observaciones: string;
+  nombreVacuna?: string;
+  lote?: string;
+  fechaProximaDosis?: string;
+  diagnostico?: string;
   proximoControl?: string;
 }
 
@@ -29,16 +37,25 @@ function toEventTimestamp(date: string): string {
   return day.toISOString();
 }
 
-/** The form already validated the required fields; an empty next checkup is not sent. */
+/** The form already validated the required fields; only the fields of the chosen type are sent. */
 function toPayload(petId: string, values: ClinicalEventFormValues): ClinicalEventPayload {
-  return {
+  const common = {
     mascotaId: petId,
     tipo: values.type as ClinicalEventType,
     fecha: toEventTimestamp(values.date),
     peso: Number(values.weightKg),
     observaciones: values.notes.trim(),
-    proximoControl: values.nextCheckup || undefined,
   };
+
+  if (values.type === "vaccine") {
+    return {
+      ...common,
+      nombreVacuna: values.vaccineName.trim(),
+      lote: values.batch.trim(),
+      fechaProximaDosis: values.nextCheckup,
+    };
+  }
+  return { ...common, diagnostico: values.diagnosis.trim(), proximoControl: values.nextCheckup };
 }
 
 /** GET /v1/clinical/pets/{petId}/carnet: the pet's events, newest first (FR-2, BR-6). */
