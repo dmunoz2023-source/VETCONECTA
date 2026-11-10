@@ -9,7 +9,16 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBadRequestResponse,
+  ApiBearerAuth,
+  ApiForbiddenResponse,
+  ApiOkResponse,
+  ApiOperation,
+  ApiTags,
+  ApiUnauthorizedResponse,
+} from '@nestjs/swagger';
+import { ERROR_RESPONSE_SCHEMA } from '@app/shared/swagger/error-response.schema';
 import { CurrentUser } from '@app/shared/decorators/current-user.decorator';
 import { Roles } from '@app/shared/decorators/roles.decorator';
 import { JwtHeadersGuard } from '@app/shared/guards/jwt-headers.guard';
@@ -41,6 +50,9 @@ export class AppointmentsController {
       'canceladas), con filtro opcional por estado y paginación (FR-3, BR-8).',
   })
   @ApiOkResponse({ description: 'Listado de citas del dueño.' })
+  @ApiBadRequestResponse({ description: 'VALIDATION_ERROR: filtros o paginación inválidos.', schema: ERROR_RESPONSE_SCHEMA })
+  @ApiUnauthorizedResponse({ description: 'UNAUTHORIZED: falta el token o expiró.', schema: ERROR_RESPONSE_SCHEMA })
+  @ApiForbiddenResponse({ description: 'FORBIDDEN: el rol no es owner o no tiene client_id (BR-8, BR-14).', schema: ERROR_RESPONSE_SCHEMA })
   async getMyCitas(@CurrentUser() user: JwtPayload, @Query() query: GetCitasQueryDto) {
     return this.appointmentsService.findMyCitas(user.clientId, query);
   }
