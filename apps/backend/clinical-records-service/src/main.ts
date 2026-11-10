@@ -1,10 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
-<<<<<<< HEAD
 import { HttpExceptionFilter } from '@app/shared/filters/http-exception.filter';
-=======
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
->>>>>>> origin/feat/F2-clinical-events-creation
 import { AppModule } from './app.module';
 
 async function bootstrap() {
