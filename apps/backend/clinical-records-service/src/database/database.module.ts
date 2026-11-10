@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ClinicalEventEntity } from '../modules/clinical/entities/clinical-event.entity';
+import { TreatmentEntity } from '../modules/clinical/entities/treatment.entity';
 import { VaccinationDetailsEntity } from '../modules/clinical/entities/vaccination-details.entity';
 
 @Module({
@@ -17,7 +18,11 @@ import { VaccinationDetailsEntity } from '../modules/clinical/entities/vaccinati
         password: configService.get<string>('database.password'),
         database: configService.get<string>('database.name'),
         schema: 'clinical',
-        entities: [ClinicalEventEntity, VaccinationDetailsEntity],
+        entities: [
+          ClinicalEventEntity,
+          VaccinationDetailsEntity,
+          TreatmentEntity,
+        ],
         synchronize: false,
       }),
     }),

@@ -2,8 +2,10 @@ import {
   Entity,
   PrimaryGeneratedColumn,
   Column,
+  OneToMany,
   OneToOne,
 } from 'typeorm';
+import { TreatmentEntity } from './treatment.entity';
 import { VaccinationDetailsEntity } from './vaccination-details.entity';
 
 @Entity({ name: 'clinical_events', schema: 'clinical' })
@@ -46,4 +48,7 @@ export class ClinicalEventEntity {
     (vaccinationDetails) => vaccinationDetails.clinicalEvent,
   )
   vaccinationDetails?: VaccinationDetailsEntity | null;
+
+  @OneToMany(() => TreatmentEntity, (treatment) => treatment.clinicalEvent)
+  treatments?: TreatmentEntity[];
 }

@@ -23,6 +23,8 @@ type NewVaccinationDetails = Pick<
   'vaccine' | 'batch' | 'boosterDate'
 >;
 
+type UpdatedClinicalEvent = Omit<NewClinicalEvent, 'veterinarianId'>;
+
 @Injectable()
 export class ClinicalEventRepository {
   constructor(
@@ -51,6 +53,53 @@ export class ClinicalEventRepository {
       }
 
       return event;
+    });
+  }
+
+  findById(id: string): Promise<ClinicalEventEntity | null> {
+    return this.repository.findOne({
+      where: { id },
+      relations: { vaccinationDetails: true },
+    });
+  }
+
+  async update(
+    id: string,
+    eventData: UpdatedClinicalEvent,
+    vaccinationData?: NewVaccinationDetails,
+  ): Promise<ClinicalEventEntity | null> {
+    return this.repository.manager.transaction(async (manager) => {
+      const event = await manager.findOne(ClinicalEventEntity, {
+        where: { id },
+        relations: { vaccinationDetails: true },
+      });
+      if (!event) {
+        return null;
+      }
+
+      Object.assign(event, eventData);
+      const updatedEvent = await manager.save(ClinicalEventEntity, event);
+
+      if (vaccinationData) {
+        const details = updatedEvent.vaccinationDetails
+          ? Object.assign(updatedEvent.vaccinationDetails, vaccinationData)
+          : manager.create(VaccinationDetailsEntity, {
+              ...vaccinationData,
+              clinicalEvent: updatedEvent,
+            });
+        updatedEvent.vaccinationDetails = await manager.save(
+          VaccinationDetailsEntity,
+          details,
+        );
+      } else if (updatedEvent.vaccinationDetails) {
+        await manager.remove(
+          VaccinationDetailsEntity,
+          updatedEvent.vaccinationDetails,
+        );
+        updatedEvent.vaccinationDetails = null;
+      }
+
+      return updatedEvent;
     });
   }
 

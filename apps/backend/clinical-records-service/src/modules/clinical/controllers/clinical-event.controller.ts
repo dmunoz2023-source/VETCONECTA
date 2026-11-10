@@ -7,11 +7,15 @@ import {
   Param,
   ParseUUIDPipe,
   Post,
+  Put,
   Query,
   UseGuards,
 } from '@nestjs/common';
 import { ClinicalEventService } from '../services/clinical-event.service';
-import { CreateClinicalEventDto } from '../dto/create-clinical-event.dto';
+import {
+  CreateClinicalEventDto,
+  UpdateClinicalEventDto,
+} from '../dto/create-clinical-event.dto';
 import { GetClinicalHistoryQueryDto } from '../dto/get-clinical-history-query.dto';
 import { ClinicalEventEntity } from '../entities/clinical-event.entity';
 import { CurrentUser } from '@app/shared/decorators/current-user.decorator';
@@ -33,6 +37,21 @@ export class ClinicalEventController {
     @CurrentUser() user: JwtPayload,
   ): Promise<ClinicalEventEntity> {
     return this.clinicalEventService.create(createClinicalEventDto, user.sub);
+  }
+
+  @Put('events/:id')
+  @HttpCode(HttpStatus.OK)
+  @Roles('vet', 'admin')
+  async update(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() updateClinicalEventDto: UpdateClinicalEventDto,
+    @CurrentUser() user: JwtPayload,
+  ): Promise<ClinicalEventEntity> {
+    return this.clinicalEventService.update(
+      id,
+      updateClinicalEventDto,
+      user,
+    );
   }
 
   @Get('pets/:petId/carnet')

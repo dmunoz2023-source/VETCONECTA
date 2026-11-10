@@ -167,7 +167,7 @@ CREATE TABLE clinical.vaccination_details (
 
 CREATE TABLE clinical.treatments (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    clinical_event_id UUID NOT NULL,
+    clinical_event_id UUID,
     pet_id UUID NOT NULL,
     medication VARCHAR(100),
     dose VARCHAR(50),

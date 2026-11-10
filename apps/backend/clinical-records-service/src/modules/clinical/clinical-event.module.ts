@@ -2,12 +2,19 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ClinicalEventController } from './controllers/clinical-event.controller';
 import { ClinicalEventEntity } from './entities/clinical-event.entity';
+import { TreatmentEntity } from './entities/treatment.entity';
 import { VaccinationDetailsEntity } from './entities/vaccination-details.entity';
 import { ClinicalEventRepository } from './repositories/clinical-event.repository';
 import { ClinicalEventService } from './services/clinical-event.service';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([ClinicalEventEntity, VaccinationDetailsEntity])],
+  imports: [
+    TypeOrmModule.forFeature([
+      ClinicalEventEntity,
+      VaccinationDetailsEntity,
+      TreatmentEntity,
+    ]),
+  ],
   controllers: [ClinicalEventController],
   providers: [
     ClinicalEventRepository,

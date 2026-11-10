@@ -89,3 +89,6 @@ export class CreateClinicalEventDto {
   )
   proximoControl?: string;
 }
+
+// PUT reemplaza los datos del evento y requiere el mismo conjunto que la creación.
+export class UpdateClinicalEventDto extends CreateClinicalEventDto {}
