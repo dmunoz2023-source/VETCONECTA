@@ -9,6 +9,15 @@ export interface FindByClientOptions {
   limit: number;
 }
 
+export interface FindPastByPetOptions {
+  /** Inicio del rango (inclusivo). */
+  from?: Date;
+  /** Fin del rango (exclusivo). */
+  toExclusive?: Date;
+  /** Instante de referencia: solo cuentan las citas que empezaron antes. */
+  now: Date;
+}
+
 /**
  * [A3] Repositorio tipado de scheduling.appointments. `findByClient` queda
  * listo para que la tarea C3 (GET /citas) lo use directamente: filtra por
@@ -55,5 +64,27 @@ export class AppointmentsRepository {
     }
 
     return qb.getManyAndCount();
+  }
+
+  /**
+   * [F3] Citas pasadas de una mascota (inicio anterior a `now`), de la más reciente
+   * a la más antigua y con cualquier estado. `from` es inclusivo y `toExclusive` exclusivo.
+   */
+  findPastByPet(petId: string, { from, toExclusive, now }: FindPastByPetOptions): Promise<Appointment[]> {
+    const qb = this.repo
+      .createQueryBuilder('appointment')
+      .where('appointment.petId = :petId', { petId })
+      .andWhere('appointment.startTime < :now', { now })
+      .orderBy('appointment.startTime', 'DESC')
+      .addOrderBy('appointment.id', 'DESC');
+
+    if (from) {
+      qb.andWhere('appointment.startTime >= :from', { from });
+    }
+    if (toExclusive) {
+      qb.andWhere('appointment.startTime < :toExclusive', { toExclusive });
+    }
+
+    return qb.getMany();
   }
 }
