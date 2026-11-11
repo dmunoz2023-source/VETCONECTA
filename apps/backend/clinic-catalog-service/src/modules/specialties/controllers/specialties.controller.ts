@@ -10,7 +10,7 @@ import {
   Post,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Roles } from '@app/shared/decorators/roles.decorator';
 import { JwtHeadersGuard } from '@app/shared/guards/jwt-headers.guard';
 import { RolesGuard } from '@app/shared/guards/roles.guard';
@@ -28,6 +28,24 @@ export class SpecialtiesController {
 
   @Get()
   @ApiOperation({ summary: 'Listar especialidades activas con su duración' })
+  @ApiOkResponse({
+    schema: {
+      example: [
+        {
+          id: '44444444-4444-4444-4444-444444444441',
+          name: 'General Medicine',
+          durationMinutes: 30,
+          active: true,
+        },
+        {
+          id: '44444444-4444-4444-4444-444444444442',
+          name: 'Vaccination',
+          durationMinutes: 15,
+          active: true,
+        },
+      ],
+    },
+  })
   findActive() {
     return this.specialtiesService.findActive();
   }
