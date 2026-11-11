@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { AppConfig } from '../config/configuration';
 import { AvailabilitySlot } from '../modules/availability/entities/availability-slot.entity';
 import { Appointment } from '../modules/appointments/entities/appointment.entity';
 import { Rating } from '../modules/appointments/entities/rating.entity';
@@ -13,7 +12,7 @@ import { VetSchedule } from '../modules/schedules/entities/vet-schedule.entity';
  *
  * Aislamiento por esquema (regla de oro de la arquitectura, §3 del doc de
  * arquitectura): este módulo solo registra las entidades de `scheduling`
- * y fija `schema: dbSchema` ('scheduling'). Ningún repositorio de este
+ * y fija `schema: 'scheduling'`. Ningún repositorio de este
  * servicio puede terminar apuntando, ni por accidente, a una tabla de
  * `clients_pets`, `clinical`, `catalog`, etc.
  *
@@ -27,26 +26,25 @@ import { VetSchedule } from '../modules/schedules/entities/vet-schedule.entity';
  * conexión usa el mismo usuario que el resto de servicios en local; el
  * aislamiento real hoy lo da `schema` + la revisión de código (Módulo 8),
  * no un GRANT de PostgreSQL. Si el equipo agrega esos roles más adelante,
- * aquí solo cambia el DATABASE_URL del .env, no este archivo.
+ * aquí solo cambian DB_USERNAME y DB_PASSWORD del .env, no este archivo.
  */
 @Module({
   imports: [
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: (configService: ConfigService<AppConfig, true>) => {
-        const databaseUrl = configService.get('databaseUrl', { infer: true });
-        const dbSchema = configService.get('dbSchema', { infer: true });
-
-        return {
-          type: 'postgres',
-          url: databaseUrl,
-          schema: dbSchema,
-          entities: [AvailabilitySlot, Appointment, Rating, VetSchedule, VetBlock],
-          synchronize: false,
-          logging: process.env.NODE_ENV !== 'production',
-        };
-      },
+      useFactory: (configService: ConfigService) => ({
+        type: 'postgres',
+        host: configService.get<string>('database.host'),
+        port: configService.get<number>('database.port'),
+        username: configService.get<string>('database.username'),
+        password: configService.get<string>('database.password'),
+        database: configService.get<string>('database.name'),
+        schema: 'scheduling',
+        entities: [AvailabilitySlot, Appointment, Rating, VetSchedule, VetBlock],
+        synchronize: false,
+        logging: process.env.NODE_ENV !== 'production',
+      }),
     }),
   ],
 })

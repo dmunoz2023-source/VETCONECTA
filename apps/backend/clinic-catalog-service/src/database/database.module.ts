@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { AppConfig } from '../config/configuration';
 import { Clinic } from '../modules/clinic/entities/clinic.entity';
 import { Specialty } from '../modules/specialties/entities/specialty.entity';
 import { Vet } from '../modules/vets/entities/vet.entity';
@@ -16,10 +15,14 @@ import { VetSpecialty } from '../modules/vets/entities/vet-specialty.entity';
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: (config: ConfigService<AppConfig, true>) => ({
+      useFactory: (configService: ConfigService) => ({
         type: 'postgres',
-        url: config.get('databaseUrl', { infer: true }),
-        schema: config.get('dbSchema', { infer: true }),
+        host: configService.get<string>('database.host'),
+        port: configService.get<number>('database.port'),
+        username: configService.get<string>('database.username'),
+        password: configService.get<string>('database.password'),
+        database: configService.get<string>('database.name'),
+        schema: 'catalog',
         entities: [Clinic, Specialty, Vet, VetSpecialty],
         synchronize: false,
       }),
