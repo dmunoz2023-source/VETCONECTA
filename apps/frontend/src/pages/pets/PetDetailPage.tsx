@@ -7,7 +7,7 @@ import PageHeader from "../../components/common/PageHeader/PageHeader";
 import ConfirmDialog from "../../components/feedback/ConfirmDialog";
 import Notice from "../../components/feedback/Notice";
 import StatusText from "../../components/feedback/StatusText";
-import { getErrorMessage } from "../../api/axios";
+import { getErrorMessage } from "../../api/http/errors";
 import { useFlashNotice } from "../../hooks/common/useFlashNotice";
 import { usePermissions } from "../../hooks/auth/usePermissions";
 import { usePet } from "../../hooks/pets/usePet";

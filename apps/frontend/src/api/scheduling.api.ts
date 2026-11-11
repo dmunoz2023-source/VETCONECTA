@@ -1,4 +1,5 @@
-import { api, getErrorMessage } from "./axios";
+import { api } from "./http/client";
+import { getErrorMessage } from "./http/errors";
 import type { CalendarEvent, NewBookingPayload } from "../types/scheduling.types";
 import axios from "axios";
 

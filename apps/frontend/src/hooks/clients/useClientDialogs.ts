@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { getErrorMessage } from "../../api/axios";
+import { getErrorMessage } from "../../api/http/errors";
 import type { Client, ClientFormValues } from "../../types/client.types";
 
 interface ClientMutations {
