@@ -1,5 +1,731 @@
 openapi: 3.0.0
-paths: {}
+paths:
+  /v1/auth/register:
+    post:
+      operationId: AuthController_register
+      summary: Registrar un dueño
+      description: >-
+        Público. Registra un dueño con rol owner (FR-1). Por ahora responde con
+        una estructura de ejemplo; la creación real de la cuenta llega con el
+        AuthService.
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterDTO'
+      responses:
+        '201':
+          description: Estructura de registro lista para integrar.
+          content:
+            application/json:
+              schema:
+                example:
+                  message: Estructura de registro lista para integrar
+                  dataRecibida:
+                    email: dueno@vetconecta.cl
+                    password: contrasena123
+        '400':
+          description: Cuerpo mal formado o campos inválidos.
+      tags:
+        - auth
+  /v1/auth/login:
+    post:
+      operationId: AuthController_login
+      summary: Iniciar sesión
+      description: >-
+        Público. Sirve tanto a dueños como a personal clínico (FR-1, FR-13,
+        BR-14). Por ahora responde con un token de ejemplo; la emisión real del
+        JWT llega con el AuthService.
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginDTO'
+      responses:
+        '201':
+          description: Estructura de login lista para integrar.
+          content:
+            application/json:
+              schema:
+                example:
+                  token: jwt_placeholder
+                  message: Estructura de login lista para integrar
+        '400':
+          description: Cuerpo mal formado o campos inválidos.
+      tags:
+        - auth
+  /v1/auth/me:
+    get:
+      operationId: AuthController_getProfile
+      summary: Obtener el usuario autenticado
+      description: >-
+        Todos los roles. Devuelve id, correo, rol y clientId (solo si es owner)
+        del usuario que hace la petición (FR-1).
+      parameters: []
+      responses:
+        '200':
+          description: Datos del usuario autenticado.
+          content:
+            application/json:
+              schema:
+                example:
+                  id: 3fa85f64-5717-4562-b3fc-2c963f66afa6
+                  correo: dueno@vetconecta.cl
+                  rol: owner
+                  clientId: 22222222-2222-2222-2222-222222222222
+        '401':
+          description: Falta el token o venció.
+      tags:
+        - auth
+      security:
+        - bearer: []
+  /health:
+    get:
+      operationId: HealthController_check
+      parameters: []
+      responses:
+        '200':
+          description: ''
+  /v1/scheduling/availability:
+    get:
+      operationId: AvailabilityController_findFreeBlocks
+      summary: Bloques libres de un veterinario para una especialidad
+      description: >-
+        Rango máximo de 30 días. 422 si el veterinario está inactivo o no
+        atiende la especialidad.
+      parameters:
+        - name: specialtyId
+          required: true
+          in: query
+          schema:
+            format: uuid
+            example: 44444444-4444-4444-4444-444444444441
+            type: string
+        - name: vetId
+          required: true
+          in: query
+          schema:
+            format: uuid
+            example: 55555555-5555-5555-5555-555555555551
+            type: string
+        - name: from
+          required: true
+          in: query
+          description: 'Fecha local de la clínica, inclusive.'
+          schema:
+            example: '2026-11-09'
+            type: string
+        - name: to
+          required: true
+          in: query
+          description: 'Fecha local de la clínica, inclusive. Máximo 30 días desde `from`.'
+          schema:
+            example: '2026-11-15'
+            type: string
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AvailabilityBlockDto'
+      tags:
+        - scheduling
+      security:
+        - bearer: []
+  '/v1/scheduling/vets/{vetId}/schedules':
+    get:
+      operationId: VetSchedulesController_findAll
+      summary: Listar el horario semanal de un veterinario
+      parameters:
+        - name: vetId
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+      tags:
+        - scheduling
+      security:
+        - bearer: []
+    post:
+      operationId: VetSchedulesController_create
+      summary: Agregar un turno; 409 si se solapa con otro
+      parameters:
+        - name: vetId
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateVetScheduleDto'
+      responses:
+        '201':
+          description: ''
+      tags:
+        - scheduling
+      security:
+        - bearer: []
+  '/v1/scheduling/vets/{vetId}/schedules/{id}':
+    patch:
+      operationId: VetSchedulesController_update
+      summary: Editar un turno; 409 si se solapa con otro
+      parameters:
+        - name: vetId
+          required: true
+          in: path
+          schema:
+            type: string
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateVetScheduleDto'
+      responses:
+        '200':
+          description: ''
+      tags:
+        - scheduling
+      security:
+        - bearer: []
+    delete:
+      operationId: VetSchedulesController_remove
+      summary: Eliminar un turno
+      parameters:
+        - name: vetId
+          required: true
+          in: path
+          schema:
+            type: string
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '204':
+          description: ''
+      tags:
+        - scheduling
+      security:
+        - bearer: []
+  '/v1/scheduling/vets/{vetId}/blocks':
+    get:
+      operationId: VetBlocksController_findAll
+      summary: 'Listar bloqueos, con filtro opcional por fechas'
+      parameters:
+        - name: vetId
+          required: true
+          in: path
+          schema:
+            type: string
+        - name: from
+          required: false
+          in: query
+          description: 'Desde esta fecha, inclusive.'
+          schema:
+            example: '2026-12-01'
+            type: string
+        - name: to
+          required: false
+          in: query
+          description: 'Hasta esta fecha, inclusive.'
+          schema:
+            example: '2026-12-31'
+            type: string
+      responses:
+        '200':
+          description: ''
+      tags:
+        - scheduling
+      security:
+        - bearer: []
+    post:
+      operationId: VetBlocksController_create
+      summary: Crear un bloqueo
+      description: >-
+        Si cae sobre citas vigentes, las devuelve en affectedAppointments como
+        advertencia.
+      parameters:
+        - name: vetId
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateVetBlockDto'
+      responses:
+        '201':
+          description: ''
+      tags:
+        - scheduling
+      security:
+        - bearer: []
+  '/v1/scheduling/vets/{vetId}/blocks/{id}':
+    patch:
+      operationId: VetBlocksController_update
+      summary: Editar un bloqueo; devuelve las citas afectadas
+      parameters:
+        - name: vetId
+          required: true
+          in: path
+          schema:
+            type: string
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateVetBlockDto'
+      responses:
+        '200':
+          description: ''
+      tags:
+        - scheduling
+      security:
+        - bearer: []
+    delete:
+      operationId: VetBlocksController_remove
+      summary: Eliminar un bloqueo
+      parameters:
+        - name: vetId
+          required: true
+          in: path
+          schema:
+            type: string
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '204':
+          description: ''
+      tags:
+        - scheduling
+      security:
+        - bearer: []
+  /v1/citas:
+    get:
+      operationId: AppointmentsController_getMyCitas
+      summary: Listar mis citas
+      description: >-
+        Solo owner. Devuelve las citas del dueño autenticado (agendadas,
+        históricas y canceladas), con filtro opcional por estado y paginación
+        (FR-3, BR-8).
+      parameters:
+        - name: status
+          required: false
+          in: query
+          description: 'Filtro de estado(s) de la cita, separados por coma.'
+          schema:
+            example: 'booked,confirmed'
+            type: array
+            items:
+              type: string
+              enum:
+                - booked
+                - confirmed
+                - completed
+                - cancelled
+                - no_show
+        - name: page
+          required: false
+          in: query
+          description: Número de página (paginación).
+          schema:
+            minimum: 1
+            default: 1
+            type: number
+        - name: limit
+          required: false
+          in: query
+          description: Cantidad de resultados por página (máximo 50).
+          schema:
+            minimum: 1
+            maximum: 50
+            default: 10
+            type: number
+      responses:
+        '200':
+          description: Listado de citas del dueño.
+        '400':
+          description: 'VALIDATION_ERROR: filtros o paginación inválidos.'
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - statusCode
+                  - error
+                  - message
+                  - path
+                  - requestId
+                  - timestamp
+                properties:
+                  statusCode:
+                    type: integer
+                    example: 409
+                  error:
+                    type: string
+                    example: SLOT_ALREADY_TAKEN
+                    description: >-
+                      Código estable para la lógica del cliente. Comunes:
+                      VALIDATION_ERROR (400), UNAUTHORIZED (401), FORBIDDEN /
+                      ACCESS_DENIED (403), NOT_FOUND / RESOURCE_NOT_FOUND (404),
+                      CONFLICT / SLOT_ALREADY_TAKEN / DUPLICATE_RESOURCE (409),
+                      BUSINESS_RULE_VIOLATION / RELATED_RESOURCE_CONSTRAINT
+                      (422), INTERNAL_SERVER_ERROR (500).
+                  message:
+                    type: string
+                    example: La hora seleccionada ya fue reservada.
+                  details:
+                    type: array
+                    items:
+                      type: string
+                    example:
+                      - limit must not be greater than 50
+                    description: 'Solo en VALIDATION_ERROR: cada regla del DTO que falló.'
+                  path:
+                    type: string
+                    example: /v1/scheduling/appointments
+                  requestId:
+                    type: string
+                    example: a41f9c2e-7b3d-4e8a-9f10-2c6d5b8e1a77
+                  timestamp:
+                    type: string
+                    format: date-time
+                    example: '2026-08-28T14:21:03.512Z'
+        '401':
+          description: 'UNAUTHORIZED: falta el token o expiró.'
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - statusCode
+                  - error
+                  - message
+                  - path
+                  - requestId
+                  - timestamp
+                properties:
+                  statusCode:
+                    type: integer
+                    example: 409
+                  error:
+                    type: string
+                    example: SLOT_ALREADY_TAKEN
+                    description: >-
+                      Código estable para la lógica del cliente. Comunes:
+                      VALIDATION_ERROR (400), UNAUTHORIZED (401), FORBIDDEN /
+                      ACCESS_DENIED (403), NOT_FOUND / RESOURCE_NOT_FOUND (404),
+                      CONFLICT / SLOT_ALREADY_TAKEN / DUPLICATE_RESOURCE (409),
+                      BUSINESS_RULE_VIOLATION / RELATED_RESOURCE_CONSTRAINT
+                      (422), INTERNAL_SERVER_ERROR (500).
+                  message:
+                    type: string
+                    example: La hora seleccionada ya fue reservada.
+                  details:
+                    type: array
+                    items:
+                      type: string
+                    example:
+                      - limit must not be greater than 50
+                    description: 'Solo en VALIDATION_ERROR: cada regla del DTO que falló.'
+                  path:
+                    type: string
+                    example: /v1/scheduling/appointments
+                  requestId:
+                    type: string
+                    example: a41f9c2e-7b3d-4e8a-9f10-2c6d5b8e1a77
+                  timestamp:
+                    type: string
+                    format: date-time
+                    example: '2026-08-28T14:21:03.512Z'
+        '403':
+          description: 'FORBIDDEN: el rol no es owner o no tiene client_id (BR-8, BR-14).'
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - statusCode
+                  - error
+                  - message
+                  - path
+                  - requestId
+                  - timestamp
+                properties:
+                  statusCode:
+                    type: integer
+                    example: 409
+                  error:
+                    type: string
+                    example: SLOT_ALREADY_TAKEN
+                    description: >-
+                      Código estable para la lógica del cliente. Comunes:
+                      VALIDATION_ERROR (400), UNAUTHORIZED (401), FORBIDDEN /
+                      ACCESS_DENIED (403), NOT_FOUND / RESOURCE_NOT_FOUND (404),
+                      CONFLICT / SLOT_ALREADY_TAKEN / DUPLICATE_RESOURCE (409),
+                      BUSINESS_RULE_VIOLATION / RELATED_RESOURCE_CONSTRAINT
+                      (422), INTERNAL_SERVER_ERROR (500).
+                  message:
+                    type: string
+                    example: La hora seleccionada ya fue reservada.
+                  details:
+                    type: array
+                    items:
+                      type: string
+                    example:
+                      - limit must not be greater than 50
+                    description: 'Solo en VALIDATION_ERROR: cada regla del DTO que falló.'
+                  path:
+                    type: string
+                    example: /v1/scheduling/appointments
+                  requestId:
+                    type: string
+                    example: a41f9c2e-7b3d-4e8a-9f10-2c6d5b8e1a77
+                  timestamp:
+                    type: string
+                    format: date-time
+                    example: '2026-08-28T14:21:03.512Z'
+      tags:
+        - citas
+      security:
+        - bearer: []
+  /v1/catalog/clinic/contact:
+    get:
+      operationId: ClinicController_getContact
+      summary: Teléfono y WhatsApp oficiales de la clínica (BR-11)
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                example:
+                  phone: '+56452000000'
+                  emergencyPhone: '+56912345678'
+                  whatsapp: '+56912345678'
+      tags:
+        - catalog
+      security:
+        - bearer: []
+  /v1/catalog/specialties:
+    get:
+      operationId: SpecialtiesController_findActive
+      summary: Listar especialidades activas con su duración
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                example:
+                  - id: 44444444-4444-4444-4444-444444444441
+                    name: General Medicine
+                    durationMinutes: 30
+                    active: true
+                  - id: 44444444-4444-4444-4444-444444444442
+                    name: Vaccination
+                    durationMinutes: 15
+                    active: true
+      tags:
+        - catalog
+      security:
+        - bearer: []
+    post:
+      operationId: SpecialtiesController_create
+      summary: Crear una especialidad
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateSpecialtyDto'
+      responses:
+        '201':
+          description: ''
+      tags:
+        - catalog
+      security:
+        - bearer: []
+  '/v1/catalog/specialties/{id}':
+    get:
+      operationId: SpecialtiesController_findOne
+      summary: Obtener una especialidad
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+      tags:
+        - catalog
+      security:
+        - bearer: []
+    patch:
+      operationId: SpecialtiesController_update
+      summary: Editar o reactivar una especialidad
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateSpecialtyDto'
+      responses:
+        '200':
+          description: ''
+      tags:
+        - catalog
+      security:
+        - bearer: []
+    delete:
+      operationId: SpecialtiesController_remove
+      summary: Desactivar una especialidad (baja lógica)
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '204':
+          description: ''
+      tags:
+        - catalog
+      security:
+        - bearer: []
+  /v1/catalog/vets:
+    get:
+      operationId: VetsController_findActive
+      summary: 'Listar veterinarios activos, filtrables por especialidad'
+      parameters:
+        - name: specialtyId
+          required: false
+          in: query
+          description: Solo veterinarios que atienden esta especialidad.
+          schema:
+            format: uuid
+            type: string
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                example:
+                  - userId: 55555555-5555-5555-5555-555555555551
+                    firstName: Vet
+                    lastName: One
+                    professionalLicense: MV-0001
+                    photoUrl: null
+                    active: true
+      tags:
+        - catalog
+      security:
+        - bearer: []
+  '/v1/catalog/vets/{vetId}/specialties':
+    get:
+      operationId: VetSpecialtiesController_findAll
+      summary: Listar las especialidades de un veterinario
+      parameters:
+        - name: vetId
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+      tags:
+        - catalog
+      security:
+        - bearer: []
+    post:
+      operationId: VetSpecialtiesController_assign
+      summary: Asignar una especialidad a un veterinario
+      parameters:
+        - name: vetId
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AssignSpecialtyDto'
+      responses:
+        '201':
+          description: ''
+      tags:
+        - catalog
+      security:
+        - bearer: []
+  '/v1/catalog/vets/{vetId}/specialties/{specialtyId}':
+    delete:
+      operationId: VetSpecialtiesController_unassign
+      summary: Quitar una especialidad a un veterinario
+      parameters:
+        - name: vetId
+          required: true
+          in: path
+          schema:
+            type: string
+        - name: specialtyId
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '204':
+          description: ''
+      tags:
+        - catalog
+      security:
+        - bearer: []
 info:
   title: VetConecta API
   description: Contrato de la API de VetConecta para las apps web y mobile.
@@ -13,4 +739,164 @@ components:
       scheme: bearer
       bearerFormat: JWT
       type: http
-  schemas: {}
+  schemas:
+    RegisterDTO:
+      type: object
+      properties:
+        email:
+          type: string
+          example: dueno@vetconecta.cl
+          description: Correo electrónico del nuevo usuario.
+        password:
+          type: string
+          example: contrasena123
+          description: Contraseña del nuevo usuario.
+          minLength: 6
+      required:
+        - email
+        - password
+    LoginDTO:
+      type: object
+      properties:
+        identifier:
+          type: string
+          example: vet@vetconecta.cl
+          description: RUT o correo electrónico del usuario.
+        password:
+          type: string
+          example: contrasena123
+          description: Contraseña del usuario.
+          minLength: 6
+      required:
+        - identifier
+        - password
+    AvailabilityBlockDto:
+      type: object
+      properties:
+        startTime:
+          type: string
+          example: '2026-11-09T09:00:00-03:00'
+          description: >-
+            ISO 8601 con el desfase de America/Santiago. Es el startTime para
+            reservar.
+        endTime:
+          type: string
+          example: '2026-11-09T09:30:00-03:00'
+      required:
+        - startTime
+        - endTime
+    CreateVetScheduleDto:
+      type: object
+      properties:
+        dayOfWeek:
+          type: number
+          example: 1
+          minimum: 0
+          maximum: 6
+          description: 0 = domingo ... 6 = sábado.
+        startTime:
+          type: string
+          example: '09:00'
+          description: Hora local de la clínica.
+        endTime:
+          type: string
+          example: '13:00'
+          description: Hora local de la clínica.
+      required:
+        - dayOfWeek
+        - startTime
+        - endTime
+    UpdateVetScheduleDto:
+      type: object
+      properties:
+        dayOfWeek:
+          type: number
+          example: 1
+          minimum: 0
+          maximum: 6
+          description: 0 = domingo ... 6 = sábado.
+        startTime:
+          type: string
+          example: '09:00'
+          description: Hora local de la clínica.
+        endTime:
+          type: string
+          example: '13:00'
+          description: Hora local de la clínica.
+    CreateVetBlockDto:
+      type: object
+      properties:
+        date:
+          type: string
+          example: '2026-12-25'
+          description: Fecha local de la clínica.
+        startTime:
+          type: object
+          example: '09:00'
+          description: Omitir junto con endTime para bloquear el día completo.
+        endTime:
+          type: object
+          example: '13:00'
+          description: Omitir junto con startTime para bloquear el día completo.
+        reason:
+          type: string
+          example: Feriado
+      required:
+        - date
+        - reason
+    UpdateVetBlockDto:
+      type: object
+      properties:
+        date:
+          type: string
+          example: '2026-12-25'
+          description: Fecha local de la clínica.
+        startTime:
+          type: object
+          example: '09:00'
+          description: Omitir junto con endTime para bloquear el día completo.
+        endTime:
+          type: object
+          example: '13:00'
+          description: Omitir junto con startTime para bloquear el día completo.
+        reason:
+          type: string
+          example: Feriado
+    CreateSpecialtyDto:
+      type: object
+      properties:
+        name:
+          type: string
+          example: Dermatología
+        durationMinutes:
+          type: number
+          example: 30
+          minimum: 5
+          maximum: 480
+          description: Duración del bloque en minutos.
+      required:
+        - name
+        - durationMinutes
+    UpdateSpecialtyDto:
+      type: object
+      properties:
+        name:
+          type: string
+          example: Dermatología
+        durationMinutes:
+          type: number
+          example: 30
+          minimum: 5
+          maximum: 480
+          description: Duración del bloque en minutos.
+        active:
+          type: boolean
+          description: false desactiva la especialidad.
+    AssignSpecialtyDto:
+      type: object
+      properties:
+        specialtyId:
+          type: string
+          format: uuid
+      required:
+        - specialtyId
