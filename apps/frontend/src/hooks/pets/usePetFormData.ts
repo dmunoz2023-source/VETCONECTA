@@ -1,7 +1,7 @@
 import { useCallback } from "react";
 import { getOwner } from "../../api/clients.api";
 import { getPet } from "../../api/pets.api";
-import type { PetFormValues, PetOwner } from "../../types/pet.types";
+import type { Pet, PetFormValues, PetOwner } from "../../types/pet.types";
 import { useAsync } from "../common/useAsync";
 
 export const EMPTY_PET_FORM: PetFormValues = {
@@ -20,22 +20,24 @@ interface PetFormData {
   initialOwner: PetOwner | null;
 }
 
+/** Los campos nulos de la API se muestran como texto vacío en el formulario. */
+function toFormValues(pet: Pet): PetFormValues {
+  return {
+    clientId: pet.clientId,
+    name: pet.name,
+    species: pet.species,
+    breed: pet.breed ?? "",
+    sex: pet.sex ?? "",
+    birthDate: pet.birthDate ?? "",
+    color: pet.color ?? "",
+    microchip: pet.microchip ?? "",
+  };
+}
+
 async function loadFormData(petId?: string, presetClientId?: string): Promise<PetFormData> {
   if (petId) {
     const pet = await getPet(petId);
-    return {
-      initialValues: {
-        clientId: pet.clientId,
-        name: pet.name,
-        species: pet.species,
-        breed: pet.breed ?? "",
-        sex: pet.sex ?? "",
-        birthDate: pet.birthDate ?? "",
-        color: pet.color ?? "",
-        microchip: pet.microchip ?? "",
-      },
-      initialOwner: await getOwner(pet.clientId),
-    };
+    return { initialValues: toFormValues(pet), initialOwner: await getOwner(pet.clientId) };
   }
   if (presetClientId) {
     const owner = await getOwner(presetClientId);

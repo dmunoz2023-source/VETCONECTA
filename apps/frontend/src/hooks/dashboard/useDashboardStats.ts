@@ -1,50 +1,24 @@
-import { useEffect, useState } from "react";
 import type { DashboardStat, WeeklyActivityPoint } from "../../types/dashboard.types";
 import { DASHBOARD_STATS_MOCK, WEEKLY_ACTIVITY_MOCK } from "../../mocks/dashboard.mock";
+import { mockRequest } from "../../mocks/mockRequest";
+import { useAsync } from "../common/useAsync";
 
 interface DashboardData {
   stats: DashboardStat[];
   weeklyActivity: WeeklyActivityPoint[];
 }
 
-/** Métricas del panel de inicio (mock por ahora). */
+const EMPTY_DASHBOARD: DashboardData = { stats: [], weeklyActivity: [] };
+
+/**
+ * Métricas del panel de inicio (mock por ahora).
+ * TODO (API real): el contrato no define un endpoint de resumen, así que las métricas
+ * se calcularían a partir de GET /v1/scheduling/appointments con un helper en utils/.
+ */
+const loadDashboard = (): Promise<DashboardData> =>
+  mockRequest({ stats: DASHBOARD_STATS_MOCK, weeklyActivity: WEEKLY_ACTIVITY_MOCK });
+
 export function useDashboardStats() {
-  const [data, setData] = useState<DashboardData>({ stats: [], weeklyActivity: [] });
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    let cancelled = false;
-
-    // ------------------------------------------------------------------
-    // TODO (API real) — reemplazar este bloque cuando exista el cliente HTTP:
-    //
-    //   const request = api
-    //     .get<{ data: DashboardData }>("/v1/scheduling/appointments")
-    //     .then((res) => buildDashboardData(res.data.data));
-    //
-    // El contrato actual no define un endpoint de resumen, por eso las métricas
-    // se calcularían a partir de las citas (buildDashboardData sería un helper
-    // en utils/). Siempre contra el Gateway :3000 y con el JWT en Authorization.
-    // ------------------------------------------------------------------
-    const request = new Promise<DashboardData>((resolve) =>
-      setTimeout(
-        () => resolve({ stats: DASHBOARD_STATS_MOCK, weeklyActivity: WEEKLY_ACTIVITY_MOCK }),
-        300,
-      ),
-    );
-
-    request
-      .then((result) => {
-        if (!cancelled) setData(result);
-      })
-      .finally(() => {
-        if (!cancelled) setLoading(false);
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  return { ...data, loading };
+  const { data, loading } = useAsync(loadDashboard, "No se pudieron cargar las métricas.");
+  return { ...(data ?? EMPTY_DASHBOARD), loading };
 }
