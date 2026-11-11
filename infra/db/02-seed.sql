@@ -30,3 +30,17 @@ INSERT INTO clients_pets.pets (client_id, name, species, birth_date) VALUES
 ('22222222-2222-2222-2222-222222222222', 'Luna', 'dog', '2021-08-20'),
 -- Client 2 pet
 ('22222222-2222-2222-2222-222222222223', 'Rex', 'dog', '2020-01-15');
+
+-- 5. [G3] Vet profile, specialties and weekly schedule (Mon-Fri, 09:00-13:00 and 14:00-18:00)
+INSERT INTO catalog.vets (user_id, first_name, last_name, professional_license) VALUES
+('55555555-5555-5555-5555-555555555551', 'Vet', 'One', 'MV-0001');
+
+INSERT INTO catalog.vet_specialties (vet_user_id, specialty_id) VALUES
+('55555555-5555-5555-5555-555555555551', '44444444-4444-4444-4444-444444444441'),
+('55555555-5555-5555-5555-555555555551', '44444444-4444-4444-4444-444444444442');
+
+INSERT INTO scheduling.vet_schedules (vet_user_id, day_of_week, start_time, end_time)
+SELECT '55555555-5555-5555-5555-555555555551', day, shift.start_time, shift.end_time
+FROM generate_series(1, 5) AS day
+CROSS JOIN (VALUES ('09:00'::TIME, '13:00'::TIME), ('14:00'::TIME, '18:00'::TIME))
+    AS shift(start_time, end_time);

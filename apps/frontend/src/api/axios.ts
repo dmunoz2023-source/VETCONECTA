@@ -1,5 +1,8 @@
 import axios from 'axios';
-import { clearToken, getToken } from '../utils/tokenStorage';
+import {
+  // clearToken,
+  getToken
+} from '../utils/tokenStorage';
 
 /** URL base del API Gateway. Se define en apps/frontend/.env (ver .env.example). */
 const API_URL: string = import.meta.env.VITE_API_URL || 'http://localhost:3000';
@@ -18,19 +21,27 @@ api.interceptors.response.use(
   (error: unknown) => {
     // 401 con sesión activa: el token venció, se vuelve al login.
     // Sin sesión (credenciales incorrectas en el login) el error lo muestra la pantalla.
-    if (axios.isAxiosError(error) && error.response?.status === 401 && getToken()) {
-      clearToken();
-      window.location.assign('/login');
-    }
+    
+    // if (axios.isAxiosError(error) && error.response?.status === 401 && getToken()) {
+    //   clearToken();
+    //   window.location.assign('/login');
+    // }
     return Promise.reject(error);
   },
 );
 
-/** Mensaje legible del formato de error común (`message`), o `fallback` si no viene. */
+/**
+ * Mensaje legible del formato de error común (`message`), o `fallback` si no viene.
+ * Los 400 de class-validator traen `message` como lista: se unen en un solo texto.
+ */
 export function getErrorMessage(error: unknown, fallback: string): string {
   if (axios.isAxiosError(error)) {
     const message: unknown = error.response?.data?.message;
     if (typeof message === 'string' && message.trim()) return message;
+    if (Array.isArray(message)) {
+      const parts = message.filter((part): part is string => typeof part === 'string' && part.trim() !== '');
+      if (parts.length) return parts.join(' ');
+    }
   }
   return fallback;
 }
