@@ -1,8 +1,8 @@
 import { useCallback } from "react";
-import { getOwner } from "../api/clients.api";
-import { deactivatePet, getPet } from "../api/pets.api";
-import type { Pet } from "../types/pet.types";
-import { useAsync } from "./useAsync";
+import { getOwner } from "../../api/clients.api";
+import { deactivatePet, getPet } from "../../api/pets.api";
+import type { Pet } from "../../types/pet.types";
+import { useAsync } from "../common/useAsync";
 
 /** GET /v1/pets/{id} no trae el dueño, así que se pide aparte con GET /v1/clients/{id}. */
 async function loadPetWithOwner(id: string): Promise<Pet> {

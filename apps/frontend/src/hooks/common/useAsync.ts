@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { getErrorMessage } from "../api/axios";
+import { getErrorMessage } from "../../api/axios";
 
 interface AsyncState<T> {
   /** Carga que produjo este estado; si no coincide con la actual, hay una carga en curso. */

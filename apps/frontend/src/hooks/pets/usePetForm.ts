@@ -1,9 +1,9 @@
 import { useState } from "react";
 import type { FormEvent } from "react";
-import { getErrorMessage } from "../api/axios";
-import { createPet, updatePet } from "../api/pets.api";
-import type { Pet, PetFormValues, PetOwner } from "../types/pet.types";
-import { validatePetForm } from "../utils/petValidators";
+import { getErrorMessage } from "../../api/axios";
+import { createPet, updatePet } from "../../api/pets.api";
+import type { Pet, PetFormValues, PetOwner } from "../../types/pet.types";
+import { validatePetForm } from "../../utils/petValidators";
 
 interface UsePetFormOptions {
   initialValues: PetFormValues;

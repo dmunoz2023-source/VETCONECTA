@@ -1,4 +1,4 @@
-import { useLoginForm } from '../../hooks/useLoginForm';
+import { useLoginForm } from '../../hooks/auth/useLoginForm';
 import type { AuthUser } from '../../types/auth.types';
 import LoginField from './LoginField';
 

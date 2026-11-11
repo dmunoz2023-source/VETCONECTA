@@ -3,7 +3,7 @@ import { AgendFilters } from "./components/AgendFilters";
 import { CalendarView } from "./components/CalendarView";
 import { NewPhoneBooking } from "./components/Modal/NewPhoneBooking";
 import { AppointmentDetail } from "./components/Modal/AppointmentDetail";
-import { useScheduling } from "../../hooks/useScheduling";
+import { useScheduling } from "../../hooks/scheduling/useScheduling";
 import type { CalendarEvent } from "../../types/scheduling.types";
 import css from "./AgendPage.module.css";
 

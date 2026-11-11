@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useState } from "react";
-import type { CalendarEvent, NewBookingPayload } from "../types/scheduling.types";
+import type { CalendarEvent, NewBookingPayload } from "../../types/scheduling.types";
 import {
   cancelAppointment,
   createPhoneBooking,
   fetchAppointments,
   updateAppointmentStatus,
-} from "../api/scheduling.api";
+} from "../../api/scheduling.api";
 
 // Datos iniciales de resguardo mientras se conecta al API Gateway
 const INITIAL_MOCK_EVENTS: CalendarEvent[] = [

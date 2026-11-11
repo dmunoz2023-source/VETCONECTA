@@ -8,8 +8,8 @@ import StatCard from "../../components/common/StatCard";
 import MiniCalendar from "../../components/dashboard/MiniCalendar";
 import WeeklyActivityChart from "../../components/dashboard/WeeklyActivityChart";
 import AppointmentsTable from "../../components/tables/AppointmentsTable";
-import { useAppointments } from "../../hooks/useAppointments";
-import { useDashboardStats } from "../../hooks/useDashboardStats";
+import { useAppointments } from "../../hooks/scheduling/useAppointments";
+import { useDashboardStats } from "../../hooks/dashboard/useDashboardStats";
 import "./DashboardHome.css";
 
 // Icono por tarjeta de métrica (los datos vienen del hook, el icono es visual).

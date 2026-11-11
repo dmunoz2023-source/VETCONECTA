@@ -1,8 +1,8 @@
 import { useCallback } from "react";
-import { getOwner } from "../api/clients.api";
-import { getPet } from "../api/pets.api";
-import type { PetFormValues, PetOwner } from "../types/pet.types";
-import { useAsync } from "./useAsync";
+import { getOwner } from "../../api/clients.api";
+import { getPet } from "../../api/pets.api";
+import type { PetFormValues, PetOwner } from "../../types/pet.types";
+import { useAsync } from "../common/useAsync";
 
 export const EMPTY_PET_FORM: PetFormValues = {
   clientId: "",

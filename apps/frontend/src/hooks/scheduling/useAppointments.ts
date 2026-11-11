@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import type { Appointment } from "../types/appointment.types";
-import { APPOINTMENTS_MOCK } from "../mocks/appointments.mock";
+import type { Appointment } from "../../types/appointment.types";
+import { APPOINTMENTS_MOCK } from "../../mocks/appointments.mock";
 
 interface UseAppointmentsResult {
   data: Appointment[];
