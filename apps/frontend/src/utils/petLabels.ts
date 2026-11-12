@@ -3,6 +3,10 @@ import type { PetSex, PetSpecies } from "../types/pet.types";
 export const SPECIES_OPTIONS: { value: PetSpecies; label: string }[] = [
   { value: "dog", label: "Perro" },
   { value: "cat", label: "Gato" },
+  { value: "rabbit", label: "Conejo" },
+  { value: "bird", label: "Ave" },
+  { value: "rodent", label: "Roedor" },
+  { value: "reptile", label: "Reptil" },
   { value: "other", label: "Otro" },
 ];
 

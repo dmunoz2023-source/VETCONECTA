@@ -1,5 +1,5 @@
 /** Supported species. Stored in English in `clients_pets.pets.species` (see infra/db/02-seed.sql). */
-export type PetSpecies = "dog" | "cat" | "other";
+export type PetSpecies = "dog" | "cat" | "rabbit" | "bird" | "rodent" | "reptile" | "other";
 
 export type PetSex = "male" | "female";
 
@@ -40,7 +40,7 @@ export interface Pet {
 export interface PetFormValues {
   clientId: string;
   name: string;
-  /** "dog", "cat" or "other"; with "other" the real species is written in `otherSpecies`. */
+  /** A listed species ("dog", "cat", "rabbit"...) or "other"; with "other" the real species is written in `otherSpecies`. */
   species: string;
   /** Free-text species, only used when `species` is "other" (the backend accepts any text). */
   otherSpecies: string;

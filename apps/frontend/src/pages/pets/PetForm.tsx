@@ -65,7 +65,7 @@ export default function PetForm({ initialValues, initialOwner, petId, onSaved, o
             maxLength={50}
             value={values.otherSpecies}
             onChange={(e) => setValue("otherSpecies", e.target.value)}
-            placeholder="Conejo, hámster, tortuga..."
+            placeholder="Hámster, pez, hurón..."
             error={errors.otherSpecies}
           />
         )}

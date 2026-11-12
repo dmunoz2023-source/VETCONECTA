@@ -2,6 +2,7 @@ import { useCallback } from "react";
 import { getOwner } from "../api/clients.api";
 import { getPet } from "../api/pets.api";
 import type { PetFormValues, PetOwner } from "../types/pet.types";
+import { SPECIES_OPTIONS } from "../utils/petLabels";
 import { useAsync } from "./useAsync";
 
 export const EMPTY_PET_FORM: PetFormValues = {
@@ -17,7 +18,7 @@ export const EMPTY_PET_FORM: PetFormValues = {
 };
 
 /** Species with their own card in the form; any other value is a free-text species. */
-const KNOWN_SPECIES = ["dog", "cat"];
+const KNOWN_SPECIES: string[] = SPECIES_OPTIONS.map((option) => option.value).filter((value) => value !== "other");
 
 interface PetFormData {
   initialValues: PetFormValues;
@@ -31,7 +32,7 @@ async function loadFormData(petId?: string, presetClientId?: string): Promise<Pe
       initialValues: {
         clientId: pet.clientId,
         name: pet.name,
-        // A species that is not dog or cat was typed by hand: show it under "Otro".
+        // A species that is not one of the listed ones was typed by hand: show it under "Otro".
         species: KNOWN_SPECIES.includes(pet.species) ? pet.species : "other",
         otherSpecies: KNOWN_SPECIES.includes(pet.species) || pet.species === "other" ? "" : pet.species,
         breed: pet.breed ?? "",
