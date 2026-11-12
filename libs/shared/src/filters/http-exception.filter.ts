@@ -43,6 +43,12 @@ const DB_ERRORS: Record<string, Omit<ResolvedError, 'logDetail'>> = {
     error: 'RELATED_RESOURCE_CONSTRAINT',
     message: 'La operación hace referencia a un recurso inexistente o que está en uso.',
   },
+  // check_violation (respaldo de la BD cuando una regla no se validó antes)
+  '23514': {
+    statusCode: HttpStatus.BAD_REQUEST,
+    error: 'CONSTRAINT_VIOLATION',
+    message: 'Uno de los valores enviados no cumple las reglas del recurso.',
+  },
   // invalid_text_representation (ej. un UUID mal formado)
   '22P02': {
     statusCode: HttpStatus.BAD_REQUEST,
