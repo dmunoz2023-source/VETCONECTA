@@ -1,6 +1,7 @@
 import Button from "../../components/common/Button";
 import FormField from "../../components/common/FormField";
 import TextAreaField from "../../components/common/TextAreaField/TextAreaField";
+import { useAuth } from "../../hooks/useAuth";
 import { useClinicalEventForm } from "../../hooks/useClinicalEventForm";
 import type { ClinicalEvent } from "../../types/clinical.types";
 import { toDateInputValue } from "../../utils/age";
@@ -44,6 +45,7 @@ export default function ClinicalEventForm({ petId, onSaved, onCancel }: Clinical
     petId,
     onSaved,
   });
+  const { user } = useAuth();
 
   return (
     <form className={css.form} onSubmit={handleSubmit} noValidate data-type={values.type || undefined}>
@@ -88,6 +90,8 @@ export default function ClinicalEventForm({ petId, onSaved, onCancel }: Clinical
           subtitle="Completa la fecha, el peso y lo observado en el paciente."
         />
         <div className={css.grid}>
+          {/* Read-only: the backend takes the veterinarian from the JWT, never from the body (BR-3). */}
+          <FormField label="Veterinario a cargo" value={user?.email ?? ""} readOnly />
           <FormField
             label="Fecha"
             type="date"
