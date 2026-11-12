@@ -26,10 +26,14 @@ export class ClinicalEventService {
     await this.assertPetExists(createDto.mascotaId);
     const { eventData, vaccinationData } = this.prepareEventData(createDto);
 
-    return this.clinicalEventRepository.save({
-      ...eventData,
+    return this.clinicalEventRepository.save(
+      {
+        ...eventData,
+        veterinarianId,
+      },
       veterinarianId,
-    }, vaccinationData);
+      vaccinationData,
+    );
   }
 
   async update(
@@ -58,6 +62,7 @@ export class ClinicalEventService {
     const updatedEvent = await this.clinicalEventRepository.update(
       id,
       eventData,
+      user.sub,
       vaccinationData,
     );
     if (!updatedEvent) {

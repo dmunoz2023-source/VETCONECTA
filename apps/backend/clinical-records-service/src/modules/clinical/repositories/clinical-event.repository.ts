@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { EntityManager, Repository } from 'typeorm';
 import { ClinicalEventEntity } from '../entities/clinical-event.entity';
 import { VaccinationDetailsEntity } from '../entities/vaccination-details.entity';
 
@@ -34,6 +34,7 @@ export class ClinicalEventRepository {
 
   async save(
     eventData: NewClinicalEvent,
+    actorUserId: string,
     vaccinationData?: NewVaccinationDetails,
   ): Promise<ClinicalEventEntity> {
     return this.repository.manager.transaction(async (manager) => {
@@ -52,6 +53,13 @@ export class ClinicalEventRepository {
         );
       }
 
+      await this.writeAuditEntry(
+        manager,
+        actorUserId,
+        'CREATE',
+        event,
+      );
+
       return event;
     });
   }
@@ -66,6 +74,7 @@ export class ClinicalEventRepository {
   async update(
     id: string,
     eventData: UpdatedClinicalEvent,
+    actorUserId: string,
     vaccinationData?: NewVaccinationDetails,
   ): Promise<ClinicalEventEntity | null> {
     return this.repository.manager.transaction(async (manager) => {
@@ -99,8 +108,46 @@ export class ClinicalEventRepository {
         updatedEvent.vaccinationDetails = null;
       }
 
+      await this.writeAuditEntry(
+        manager,
+        actorUserId,
+        'UPDATE',
+        updatedEvent,
+      );
+
       return updatedEvent;
     });
+  }
+
+  private async writeAuditEntry(
+    manager: EntityManager,
+    actorUserId: string,
+    action: 'CREATE' | 'UPDATE',
+    event: ClinicalEventEntity,
+  ): Promise<void> {
+    const data = {
+      ...event,
+      vaccinationDetails: event.vaccinationDetails
+        ? {
+            vaccine: event.vaccinationDetails.vaccine,
+            batch: event.vaccinationDetails.batch,
+            boosterDate: event.vaccinationDetails.boosterDate,
+          }
+        : null,
+    };
+
+    await manager.query(
+      `INSERT INTO clinical.audit_log
+        (actor_user_id, action, entity, entity_id, data)
+       VALUES ($1, $2, $3, $4, $5::jsonb)`,
+      [
+        actorUserId,
+        action,
+        'clinical_event',
+        event.id,
+        JSON.stringify(data),
+      ],
+    );
   }
 
   findByPetId(petId: string): Promise<ClinicalEventEntity[]> {
