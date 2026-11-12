@@ -11,8 +11,8 @@ import { ClinicalEventEntity } from '../entities/clinical-event.entity';
 import {
   CreateClinicalEventDto,
   ClinicalEventType,
-  UpdateClinicalEventDto,
 } from '../dto/create-clinical-event.dto';
+import { UpdateClinicalEventDto } from '../dto/update-clinical-event.dto';
 import { GetClinicalHistoryQueryDto } from '../dto/get-clinical-history-query.dto';
 import { ClinicalEventRepository } from '../repositories/clinical-event.repository';
 
@@ -26,14 +26,10 @@ export class ClinicalEventService {
     await this.assertPetExists(createDto.mascotaId);
     const { eventData, vaccinationData } = this.prepareEventData(createDto);
 
-    return this.clinicalEventRepository.save(
-      {
-        ...eventData,
-        veterinarianId,
-      },
+    return this.clinicalEventRepository.save({
+      ...eventData,
       veterinarianId,
-      vaccinationData,
-    );
+    }, vaccinationData);
   }
 
   async update(
@@ -62,7 +58,6 @@ export class ClinicalEventService {
     const updatedEvent = await this.clinicalEventRepository.update(
       id,
       eventData,
-      user.sub,
       vaccinationData,
     );
     if (!updatedEvent) {
