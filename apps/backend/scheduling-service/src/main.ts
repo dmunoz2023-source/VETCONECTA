@@ -1,9 +1,14 @@
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { HttpExceptionFilter } from '@app/shared/filters/http-exception.filter';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+
+  // [J3] Formato de error único en todas las respuestas (Diseño §3.3).
+  app.useGlobalFilters(new HttpExceptionFilter());
 
   // Validación global de DTOs
   app.useGlobalPipes(
@@ -13,6 +18,18 @@ async function bootstrap() {
       transform: true,
     }),
   );
+
+  // Solo publica el contrato en JSON (/docs-json). La interfaz de Swagger vive en el api-gateway
+  const swaggerConfig = new DocumentBuilder()
+    .setTitle('VetConecta - Scheduling Service')
+    .setVersion('0.1.0')
+    .addBearerAuth()
+    .build();
+  const document = SwaggerModule.createDocument(app, swaggerConfig);
+  SwaggerModule.setup('docs', app, document, {
+    jsonDocumentUrl: 'docs-json',
+    swaggerUiEnabled: false,
+  });
 
   const port = process.env.PORT || 3004;
   await app.listen(port);
