@@ -4,7 +4,7 @@ import { CancelRemindersQueryDto } from '../modules/reminders/dto/cancel-reminde
 import { CreateReminderDto } from '../modules/reminders/dto/create-reminder.dto';
 import { ReminderResponse } from '../modules/reminders/dto/reminder-response.dto';
 import { RemindersService } from '../modules/reminders/services/reminders.service';
-import { InternalKeyGuard } from './guards/internal-key.guard';
+import { InternalKeyGuard } from '@app/shared/guards/internal-key.guard';
 
 /**
  * [H1] Capa de presentación — rutas privadas entre servicios.
