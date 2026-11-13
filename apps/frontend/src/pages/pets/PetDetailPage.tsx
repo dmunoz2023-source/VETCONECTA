@@ -73,9 +73,11 @@ export default function PetDetailPage() {
                 <ClipboardPlus size={16} /> Registrar evento
               </Button>
             )}
-            <Button onClick={() => navigate(petClinicalHistoryPath(pet.id))}>
-              <History size={16} /> Historial
-            </Button>
+            {can("viewClinicalHistory") && (
+              <Button onClick={() => navigate(petClinicalHistoryPath(pet.id))}>
+                <History size={16} /> Historial
+              </Button>
+            )}
             {can("editPet") && (
               <Button onClick={() => navigate(`${ROUTES.pets}/${pet.id}/editar`)}>
                 <Pencil size={16} /> Editar
