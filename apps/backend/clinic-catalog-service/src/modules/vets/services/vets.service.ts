@@ -23,6 +23,10 @@ export class VetsService {
     private readonly specialtiesService: SpecialtiesService,
   ) {}
 
+  findActive(specialtyId?: string): Promise<Vet[]> {
+    return this.vets.findActive(specialtyId);
+  }
+
   async findSpecialties(vetUserId: string): Promise<Specialty[]> {
     await this.findVet(vetUserId);
     return this.vets.findSpecialties(vetUserId);

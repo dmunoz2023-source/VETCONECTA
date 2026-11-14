@@ -19,6 +19,25 @@ export class VetsRepository {
     return this.vets.findOne({ where: { userId } });
   }
 
+  /** [G1] Veterinarios activos, opcionalmente solo los que atienden una especialidad. */
+  findActive(specialtyId?: string): Promise<Vet[]> {
+    const query = this.vets
+      .createQueryBuilder('vet')
+      .where('vet.active = true')
+      .orderBy('vet.lastName', 'ASC')
+      .addOrderBy('vet.firstName', 'ASC');
+
+    if (specialtyId) {
+      query.innerJoin(
+        VetSpecialty,
+        'vetSpecialty',
+        'vetSpecialty.vetUserId = vet.userId AND vetSpecialty.specialtyId = :specialtyId',
+        { specialtyId },
+      );
+    }
+    return query.getMany();
+  }
+
   async findSpecialties(vetUserId: string): Promise<Specialty[]> {
     const rows = await this.vetSpecialties.find({
       where: { vetUserId },

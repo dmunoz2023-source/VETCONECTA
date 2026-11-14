@@ -7,11 +7,18 @@ const MONDAY = '2026-11-09';
 
 describe('DayBlocksService', () => {
   const findByVetAndDay = jest.fn();
-  const service = new DayBlocksService({ findByVetAndDay } as unknown as VetSchedulesRepository);
-  const shift = (startTime: string, endTime: string) =>
-    ({ startTime, endTime }) as VetSchedule;
+  const findByVet = jest.fn();
+  const service = new DayBlocksService({
+    findByVetAndDay,
+    findByVet,
+  } as unknown as VetSchedulesRepository);
+  const shift = (startTime: string, endTime: string, dayOfWeek = 1) =>
+    ({ startTime, endTime, dayOfWeek }) as VetSchedule;
 
-  beforeEach(() => findByVetAndDay.mockReset());
+  beforeEach(() => {
+    findByVetAndDay.mockReset();
+    findByVet.mockReset();
+  });
 
   it('divide los turnos del día según la duración, en instantes reales', async () => {
     findByVetAndDay.mockResolvedValue([shift('09:00', '10:00'), shift('14:00', '14:30')]);
@@ -37,5 +44,17 @@ describe('DayBlocksService', () => {
     findByVetAndDay.mockResolvedValue([]);
 
     expect(await service.generate(VET, MONDAY, 30)).toEqual([]);
+  });
+
+  it('genera un rango respetando el día de cada turno y con una sola consulta', async () => {
+    findByVet.mockResolvedValue([shift('09:00', '09:30', 1), shift('10:00', '10:30', 3)]);
+
+    const blocks = await service.generateRange(VET, '2026-11-09', '2026-11-11', 30);
+
+    expect(findByVet).toHaveBeenCalledTimes(1);
+    expect(blocks.map((block) => block.startTime.toISOString())).toEqual([
+      '2026-11-09T12:00:00.000Z',
+      '2026-11-11T13:00:00.000Z',
+    ]);
   });
 });
