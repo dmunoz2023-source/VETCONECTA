@@ -11,7 +11,6 @@ import {
   ClinicalEventType,
   UpdateClinicalEventDto,
 } from '../dto/create-clinical-event.dto';
-import { GetClinicalHistoryQueryDto } from '../dto/get-clinical-history-query.dto';
 import { ClinicalEventRepository } from '../repositories/clinical-event.repository';
 import { ClientsPetsClient } from '../clients/clients-pets.client';
 
@@ -155,27 +154,5 @@ export class ClinicalEventService {
     }
 
     return this.clinicalEventRepository.findByPetId(petId);
-  }
-
-  async findHistoryByPetId(
-    petId: string,
-    { page, limit }: GetClinicalHistoryQueryDto,
-  ) {
-    const [events, total] =
-      await this.clinicalEventRepository.findHistoryByPetId(
-        petId,
-        page,
-        limit,
-      );
-
-    return {
-      data: events,
-      meta: {
-        total,
-        page,
-        limit,
-        totalPages: Math.ceil(total / limit),
-      },
-    };
   }
 }

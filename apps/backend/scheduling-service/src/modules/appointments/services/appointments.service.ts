@@ -1,6 +1,7 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
 import { AppointmentsRepository } from '../repositories/appointments.repository';
 import { GetCitasQueryDto } from '../dto/get-citas-query.dto';
+import { PastAppointmentsQueryDto } from '../dto/past-appointments-query.dto';
 
 /**
  * [C3] Logica de negocio de GET /v1/citas: el dueño solo puede ver sus
@@ -31,6 +32,29 @@ export class AppointmentsService {
         limit,
         totalPages: Math.ceil(total / limit) || 0,
       },
+    };
+  }
+
+  /**
+   * [F3] Citas pasadas de una mascota con su estado, para el historial clínico
+   * (FR-8). Solo expone los campos que clinical necesita, no los datos internos.
+   */
+  async findPastByPet(query: PastAppointmentsQueryDto, now: Date = new Date()) {
+    const appointments = await this.appointmentsRepository.findPastByPet(query.petId, {
+      from: query.from ? new Date(query.from) : undefined,
+      toExclusive: query.to ? new Date(query.to) : undefined,
+      now,
+    });
+
+    return {
+      data: appointments.map((appointment) => ({
+        id: appointment.id,
+        startTime: appointment.startTime,
+        endTime: appointment.endTime,
+        status: appointment.status,
+        vetUserId: appointment.vetUserId,
+        specialtyId: appointment.specialtyId,
+      })),
     };
   }
 }

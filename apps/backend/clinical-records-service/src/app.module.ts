@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule} from '@nestjs/config';
+import { ConfigModule } from '@nestjs/config';
 import { ClinicalEventModule } from './modules/clinical/clinical-event.module';
+import { HistoryModule } from './modules/history/history.module';
 import configuration from './config/configuration';
 import { validationSchema } from './config/validation.schema';
 import { DatabaseModule } from './database/database.module';
@@ -14,8 +15,9 @@ import { DatabaseModule } from './database/database.module';
     }),
     DatabaseModule,
     ClinicalEventModule,
+    HistoryModule,
   ],
-  controllers:[],
-  providers:[]
+  controllers: [],
+  providers: [],
 })
 export class AppModule {}

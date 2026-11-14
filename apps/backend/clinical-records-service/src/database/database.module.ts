@@ -5,6 +5,17 @@ import { ClinicalEventEntity } from '../modules/clinical/entities/clinical-event
 import { TreatmentEntity } from '../modules/clinical/entities/treatment.entity';
 import { VaccinationDetailsEntity } from '../modules/clinical/entities/vaccination-details.entity';
 
+/**
+ * Punto único de conexión de clinical-records-service a PostgreSQL.
+ *
+ * Aislamiento por esquema: solo se registran entidades de `clinical` y se fija
+ * `schema: 'clinical'`. Ningún repositorio de este servicio apunta a tablas de
+ * otros esquemas (no hay JOIN entre esquemas: mascotas, veterinarios y citas se
+ * consultan por HTTP a rutas /internal).
+ *
+ * `synchronize: false` siempre: la única fuente de verdad del esquema es
+ * infra/db/01-tables.sql.
+ */
 @Module({
   imports: [
     TypeOrmModule.forRootAsync({
