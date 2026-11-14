@@ -1,6 +1,7 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import type { ReactNode } from "react";
 import { getSessionUser, login as loginRequest } from "../api/auth.api";
+import { onUnauthorized } from "../api/http/sessionEvents";
 import type { AuthContextValue, AuthUser, LoginCredentials } from "../types/auth.types";
 import { clearToken, getToken, setToken } from "../utils/tokenStorage";
 import { AuthContext } from "./auth.context";
@@ -30,6 +31,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     clearToken();
     setUser(null);
   }, []);
+
+  // 401 con sesión activa (token vencido): se cierra la sesión y ProtectedRoute lleva a /login.
+  useEffect(() => onUnauthorized(logout), [logout]);
 
   const value = useMemo<AuthContextValue>(
     () => ({ user, isAuthenticated: user !== null, login, logout }),
