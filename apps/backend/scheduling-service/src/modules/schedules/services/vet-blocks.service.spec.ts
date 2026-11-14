@@ -36,7 +36,7 @@ describe('VetBlocksService', () => {
 
     const result = await service.create(
       VET,
-      { date: '2026-11-09', startTime: '09:00', endTime: '13:00', reason: 'Congreso' },
+      { date: '2026-11-09', startTime: '09:00', endTime: '13:00', reason: 'training' },
       USER,
     );
 
@@ -52,7 +52,7 @@ describe('VetBlocksService', () => {
   });
 
   it('sin horas revisa el día completo en hora de la clínica', async () => {
-    await service.create(VET, { date: '2026-12-25', reason: 'Feriado' }, USER);
+    await service.create(VET, { date: '2026-12-25', reason: 'holiday' }, USER);
 
     expect(appointments.findActiveByVetBetween).toHaveBeenCalledWith(
       VET,
@@ -67,7 +67,7 @@ describe('VetBlocksService', () => {
     ['fin antes del inicio', { startTime: '10:00', endTime: '09:00' }],
   ])('rechaza con 400 un rango inválido: %s', async (_, range) => {
     await expect(
-      service.create(VET, { date: '2026-12-25', reason: 'x', ...range }, USER),
+      service.create(VET, { date: '2026-12-25', reason: 'holiday', ...range }, USER),
     ).rejects.toThrow(BadRequestException);
     expect(repo.save).not.toHaveBeenCalled();
   });
@@ -75,7 +75,7 @@ describe('VetBlocksService', () => {
   it('rechaza con 404 un veterinario inexistente', async () => {
     catalog.findVet.mockResolvedValue(null);
 
-    await expect(service.create(VET, { date: '2026-12-25', reason: 'x' }, USER)).rejects.toThrow(
+    await expect(service.create(VET, { date: '2026-12-25', reason: 'holiday' }, USER)).rejects.toThrow(
       NotFoundException,
     );
   });
@@ -87,12 +87,31 @@ describe('VetBlocksService', () => {
       date: '2026-12-25',
       startTime: '09:00',
       endTime: '10:00',
-      reason: 'x',
+      reason: 'holiday',
     });
 
     const result = await service.update(VET, 'b1', { startTime: null, endTime: null });
 
     expect(result.block).toMatchObject({ startTime: null, endTime: null });
+  });
+
+  it('rechaza con 400 el motivo other sin notes', async () => {
+    await expect(service.create(VET, { date: '2026-12-25', reason: 'other' }, USER)).rejects.toThrow(
+      BadRequestException,
+    );
+    expect(repo.save).not.toHaveBeenCalled();
+  });
+
+  it('acepta el motivo other con notes', async () => {
+    await service.create(VET, { date: '2026-12-25', reason: 'other', notes: 'Corte de luz' }, USER);
+
+    expect(repo.save).toHaveBeenCalledWith(expect.objectContaining({ reason: 'other', notes: 'Corte de luz' }));
+  });
+
+  it('al editar a other exige notes', async () => {
+    repo.findOne.mockResolvedValue({ id: 'b1', vetUserId: VET, date: '2026-12-25', reason: 'holiday', notes: null });
+
+    await expect(service.update(VET, 'b1', { reason: 'other' })).rejects.toThrow(BadRequestException);
   });
 
   it('no permite borrar un bloqueo de otro veterinario', async () => {
