@@ -87,15 +87,19 @@
   gap: 14px 18px;
 }
 
-/* Inputs of the shared FormField, restyled only inside this form (TextAreaField styles itself). */
-.form :global(.vc-field) {
+/*
+ * Inputs of the shared FormField, restyled only inside this form (TextAreaField styles itself).
+ * Selected by structure (label > input), not by FormField's own class, so the look is the same
+ * whether FormField uses the global `vc-field` class or a CSS module.
+ */
+.form label:has(> input:not([type="radio"])) {
   gap: 6px;
   color: var(--text-h);
   font-size: 0.85rem;
   font-weight: 600;
 }
 
-.form :global(.vc-field) > input {
+.form label > input:not([type="radio"]) {
   width: 100%;
   min-height: 48px;
   padding: 11px 14px;
@@ -111,25 +115,25 @@
     box-shadow 0.2s ease;
 }
 
-.form :global(.vc-field) > input::placeholder {
+.form label > input:not([type="radio"])::placeholder {
   color: #9ca3af;
 }
 
-.form :global(.vc-field) > input:hover {
+.form label > input:not([type="radio"]):hover {
   border-color: var(--accent-secondary);
 }
 
-.form :global(.vc-field) > input:focus {
+.form label > input:not([type="radio"]):focus {
   border-color: var(--accent-secondary);
   box-shadow: 0 0 0 3px var(--accent-bg-light);
   outline: none;
 }
 
-.form :global(.vc-field) > [aria-invalid="true"] {
+.form label > input[aria-invalid="true"] {
   border-color: #dc2626;
 }
 
-.form :global(.vc-field-error) {
+.form label > input:not([type="radio"]) + span {
   font-size: 0.8rem;
   font-weight: 400;
 }
@@ -255,7 +259,7 @@
 }
 
 /* Read-only field (veterinarian in charge): looks disabled so it is not mistaken for an input. */
-.form :global(.vc-field) input[readonly] {
+.form label > input[readonly] {
   background: var(--surface-muted, #f3f4f6);
   color: var(--text);
   cursor: default;
