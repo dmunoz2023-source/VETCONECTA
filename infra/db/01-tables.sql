@@ -178,6 +178,7 @@ CREATE TABLE clinical.clinical_events (
     weight_kg DECIMAL(5,2),
     temperature_c DECIMAL(4,1),
     reason VARCHAR(200),
+    diagnosis VARCHAR(200),
     notes TEXT,
     next_checkup DATE
 );
@@ -196,7 +197,7 @@ CREATE TABLE clinical.vaccination_details (
 
 CREATE TABLE clinical.treatments (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    clinical_event_id UUID NOT NULL,
+    clinical_event_id UUID,
     pet_id UUID NOT NULL,
     medication VARCHAR(100),
     dose VARCHAR(50),
