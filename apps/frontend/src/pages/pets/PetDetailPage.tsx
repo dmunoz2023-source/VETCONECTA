@@ -14,7 +14,7 @@ import { usePermissions } from "../../hooks/usePermissions";
 import { usePet } from "../../hooks/usePet";
 import PetSummary from "./PetSummary";
 import css from "./PetDetailPage.module.css";
-import { ROUTES } from "../../utils/navigation";
+import { petClinicalEventPath, petClinicalHistoryPath, ROUTES } from "../../utils/navigation";
 
 /** Patient file: data, owner and shortcuts to register an event (I2) and the clinical record (FR-5, FR-2). */
 export default function PetDetailPage() {
@@ -69,13 +69,15 @@ export default function PetDetailPage() {
         actions={
           <>
             {can("registerClinicalEvent") && (
-              <Button variant="primary" onClick={() => navigate(`${ROUTES.pets}/${pet.id}/atencion`)}>
+              <Button variant="primary" onClick={() => navigate(petClinicalEventPath(pet.id))}>
                 <ClipboardPlus size={16} /> Registrar evento
               </Button>
             )}
-            <Button onClick={() => navigate(`${ROUTES.pets}/${pet.id}/historial`)}>
-              <History size={16} /> Historial
-            </Button>
+            {can("viewClinicalHistory") && (
+              <Button onClick={() => navigate(petClinicalHistoryPath(pet.id))}>
+                <History size={16} /> Historial
+              </Button>
+            )}
             {can("editPet") && (
               <Button onClick={() => navigate(`${ROUTES.pets}/${pet.id}/edit`)}>
                 <Pencil size={16} /> Editar
