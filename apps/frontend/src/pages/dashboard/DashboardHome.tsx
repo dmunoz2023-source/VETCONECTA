@@ -5,6 +5,7 @@ import Button from "../../components/common/Button";
 import Card from "../../components/common/Card";
 import PageHeader from "../../components/common/PageHeader/PageHeader";
 import StatCard from "../../components/common/StatCard";
+import StatusText from "../../components/feedback/StatusText";
 import MiniCalendar from "../../components/dashboard/MiniCalendar";
 import WeeklyActivityChart from "../../components/dashboard/WeeklyActivityChart";
 import AppointmentsTable from "../../components/tables/AppointmentsTable";
@@ -21,7 +22,7 @@ const STAT_ICONS: Record<string, ReactNode> = {
 
 export default function DashboardHome() {
   const { data: appointments, loading, error } = useAppointments();
-  const { stats, weeklyActivity } = useDashboardStats();
+  const dashboard = useDashboardStats();
   const today = new Date();
 
   return (
@@ -37,11 +38,21 @@ export default function DashboardHome() {
         }
       />
 
-      <div className="vc-stats-row">
-        {stats.map(({ id, label, value, trend, tone }) => (
-          <StatCard key={id} icon={STAT_ICONS[id]} label={label} value={value} trend={trend} tone={tone} />
-        ))}
-      </div>
+      {dashboard.loading ? (
+        <StatusText>Cargando métricas...</StatusText>
+      ) : dashboard.error ? (
+        <p className="vc-modal-error" role="alert">
+          {dashboard.error}
+        </p>
+      ) : dashboard.stats.length === 0 ? (
+        <StatusText>Aún no hay métricas para mostrar.</StatusText>
+      ) : (
+        <div className="vc-stats-row">
+          {dashboard.stats.map(({ id, label, value, trend, tone }) => (
+            <StatCard key={id} icon={STAT_ICONS[id]} label={label} value={value} trend={trend} tone={tone} />
+          ))}
+        </div>
+      )}
 
       <div className="vc-dash-grid">
         <Card
@@ -62,7 +73,9 @@ export default function DashboardHome() {
 
         <div>
           <MiniCalendar date={today} selectedDay={today.getDate()} />
-          <WeeklyActivityChart data={weeklyActivity} subtitle="Pacientes atendidos esta semana" />
+          {dashboard.weeklyActivity.length > 0 && (
+            <WeeklyActivityChart data={dashboard.weeklyActivity} subtitle="Pacientes atendidos esta semana" />
+          )}
         </div>
       </div>
     </div>

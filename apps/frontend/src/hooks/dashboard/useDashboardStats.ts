@@ -18,7 +18,8 @@ const EMPTY_DASHBOARD: DashboardData = { stats: [], weeklyActivity: [] };
 const loadDashboard = (): Promise<DashboardData> =>
   mockRequest({ stats: DASHBOARD_STATS_MOCK, weeklyActivity: WEEKLY_ACTIVITY_MOCK });
 
+/** Métricas del inicio con los 4 estados de Panel web §5: carga, error, vacío (listas vacías) y éxito. */
 export function useDashboardStats() {
-  const { data, loading } = useAsync(loadDashboard, "No se pudieron cargar las métricas.");
-  return { ...(data ?? EMPTY_DASHBOARD), loading };
+  const { data, loading, error, reload } = useAsync(loadDashboard, "No se pudieron cargar las métricas.");
+  return { ...(data ?? EMPTY_DASHBOARD), loading, error, reload };
 }
