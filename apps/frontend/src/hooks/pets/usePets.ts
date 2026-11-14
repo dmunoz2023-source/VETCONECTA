@@ -1,6 +1,6 @@
-import { listPets } from "../api/pets.api";
-import type { PetsQuery, PetsResult } from "../types/pet.types";
-import { usePagedRequest } from "./usePagedRequest";
+import { listPets } from "../../api/pets.api";
+import type { PetsQuery, PetsResult } from "../../types/pet.types";
+import { usePagedRequest } from "../common/usePagedRequest";
 
 const EMPTY_RESULT: PetsResult = { pets: [], total: 0 };
 

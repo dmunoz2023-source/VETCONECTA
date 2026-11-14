@@ -8,7 +8,7 @@ import PetFormPage from "../pages/pets/PetFormPage";
 import PetsPage from "../pages/pets/PetsPage";
 import { rolesFor } from "../utils/permissions";
 import Login from "../pages/auth/Login";
-import { useAuth } from "../hooks/useAuth";
+import { useAuth } from "../hooks/auth/useAuth";
 import ProtectedRoute from "./ProtectedRoute";
 import { AgendPage } from "../pages/scheduling/AgendPage";
 import { ROUTES } from "../utils/navigation";

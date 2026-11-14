@@ -1,5 +1,5 @@
 import { useCallback } from "react";
-import { can, type Permission } from "../utils/permissions";
+import { can, type Permission } from "../../utils/permissions";
 import { useAuth } from "./useAuth";
 
 /** Devuelve `can(permiso)` para el rol de la sesión activa (para ocultar botones según el rol). */

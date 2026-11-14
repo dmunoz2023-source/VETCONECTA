@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { getErrorMessage } from "../api/axios";
-import type { Client, ClientFormValues } from "../types/client.types";
+import { getErrorMessage } from "../../api/http/errors";
+import type { Client, ClientFormValues } from "../../types/client.types";
 
 interface ClientMutations {
   saveClient: (values: ClientFormValues, id?: string) => Promise<void>;

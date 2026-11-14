@@ -3,13 +3,19 @@ import { AgendFilters } from "./components/AgendFilters";
 import { CalendarView } from "./components/CalendarView";
 import { NewPhoneBooking } from "./components/Modal/NewPhoneBooking";
 import { AppointmentDetail } from "./components/Modal/AppointmentDetail";
-import { useScheduling } from "../../hooks/useScheduling";
+import Notice from "../../components/feedback/Notice";
+import StatusText from "../../components/feedback/StatusText";
+import { useScheduling } from "../../hooks/scheduling/useScheduling";
 import type { CalendarEvent } from "../../types/scheduling.types";
 import css from "./AgendPage.module.css";
 
 export const AgendPage: React.FC = () => {
   const {
     events,
+    loading,
+    error,
+    actionError,
+    dismissActionError,
     searchQuery,
     setSearchQuery,
     selectedVet,
@@ -40,6 +46,18 @@ export const AgendPage: React.FC = () => {
         selectedStatus={selectedStatus}
         onStatusChange={setSelectedStatus}
       />
+
+      {/* Estados de la petición (Panel web §5): carga, error y vacío; el éxito es el calendario */}
+      {loading && <StatusText>Cargando citas...</StatusText>}
+      {!loading && !error && events.length === 0 && (
+        <StatusText>No hay citas para mostrar. Agenda una nueva o ajusta los filtros.</StatusText>
+      )}
+      {error && (
+        <p className="vc-modal-error" role="alert">
+          {error}
+        </p>
+      )}
+      {actionError && <Notice tone="error" message={actionError} onDismiss={dismissActionError} />}
 
       {/* Vista principal de calendario (Semana/Día con distinción de colores) */}
       <CalendarView

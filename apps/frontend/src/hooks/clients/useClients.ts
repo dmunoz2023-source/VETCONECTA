@@ -1,7 +1,7 @@
 import { useCallback } from "react";
-import type { ClientFormValues, ClientsQuery, ClientsResult } from "../types/client.types";
-import { createClient, deleteClient, listClients, updateClient } from "../api/clients.api";
-import { usePagedRequest } from "./usePagedRequest";
+import type { ClientFormValues, ClientsQuery, ClientsResult } from "../../types/client.types";
+import { createClient, deleteClient, listClients, updateClient } from "../../api/clients.api";
+import { usePagedRequest } from "../common/usePagedRequest";
 
 const EMPTY_RESULT: ClientsResult = { clients: [], total: 0 };
 

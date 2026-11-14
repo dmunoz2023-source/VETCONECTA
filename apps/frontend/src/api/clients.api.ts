@@ -1,4 +1,5 @@
-import { api } from './axios';
+import { api } from './http/client';
+import { blankToNull } from './http/payload';
 import type { Client, ClientDetail, ClientFormValues, ClientsQuery, ClientsResult } from '../types/client.types';
 import type { PetOwner } from '../types/pet.types';
 
@@ -14,17 +15,15 @@ interface ClientsPageDto {
  */
 type ClientPayload = Omit<Client, 'id' | 'active'>;
 
-/** Los campos opcionales vacíos se envían como null. */
 function toPayload(values: ClientFormValues): ClientPayload {
-  const optional = (value: string) => value.trim() || null;
   return {
     rut: values.rut.trim(),
     firstName: values.firstName.trim(),
     lastName: values.lastName.trim(),
     email: values.email.trim(),
-    phone: optional(values.phone),
-    address: optional(values.address),
-    district: optional(values.district),
+    phone: blankToNull(values.phone),
+    address: blankToNull(values.address),
+    district: blankToNull(values.district),
   };
 }
 

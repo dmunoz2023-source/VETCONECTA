@@ -1,6 +1,6 @@
 import { useContext } from "react";
-import { AuthContext } from "../context/auth.context";
-import type { AuthContextValue } from "../types/auth.types";
+import { AuthContext } from "../../context/auth.context";
+import type { AuthContextValue } from "../../types/auth.types";
 
 /** Acceso a la sesión activa (usuario, login y logout). Debe usarse dentro de <AuthProvider>. */
 export function useAuth(): AuthContextValue {

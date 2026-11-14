@@ -1,22 +1,21 @@
-import { api } from './axios';
+import { api } from './http/client';
+import { blankToNull } from './http/payload';
 import { getClient, listClients } from './clients.api';
 import type { Pet, PetFormValues, PetsQuery, PetsResult } from '../types/pet.types';
 
 /** Cuerpo de POST /v1/pets y PATCH /v1/pets/{id} (F1). La edad nunca se envía (BR-2). */
 type PetPayload = Omit<Pet, 'id' | 'active' | 'age' | 'photoUrl' | 'client'>;
 
-/** Los campos opcionales vacíos se envían como null. */
 function toPayload(values: PetFormValues): PetPayload {
-  const optional = (value: string) => value.trim() || null;
   return {
     clientId: values.clientId,
     name: values.name.trim(),
     species: values.species,
-    breed: optional(values.breed),
-    sex: optional(values.sex),
-    birthDate: optional(values.birthDate),
-    color: optional(values.color),
-    microchip: optional(values.microchip),
+    breed: blankToNull(values.breed),
+    sex: blankToNull(values.sex),
+    birthDate: blankToNull(values.birthDate),
+    color: blankToNull(values.color),
+    microchip: blankToNull(values.microchip),
   };
 }
 
