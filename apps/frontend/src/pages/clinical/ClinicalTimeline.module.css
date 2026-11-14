@@ -1,0 +1,144 @@
+/* Vertical timeline, newest event first. */
+
+.timeline {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.item {
+  --type-color: var(--accent-secondary);
+  position: relative;
+  padding: 0 0 20px 48px;
+}
+
+.item[data-type="vaccine"] {
+  --type-color: #0f9d6b;
+}
+
+.item[data-type="checkup"] {
+  --type-color: var(--accent);
+}
+
+/* Connector line between markers */
+.item::before {
+  content: "";
+  position: absolute;
+  top: 40px;
+  bottom: -4px;
+  left: 17px;
+  width: 2px;
+  background: var(--border);
+}
+
+.item:last-child::before {
+  display: none;
+}
+
+.marker {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--type-color) 16%, #fff);
+  box-shadow: 0 0 0 4px #fff;
+  color: var(--type-color);
+}
+
+.card {
+  padding: 16px 18px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(34, 43, 39, 0.04), 0 8px 20px rgba(142, 78, 219, 0.06);
+  overflow-wrap: anywhere;
+}
+
+.header {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 4px 12px;
+}
+
+/* The event type as a chip: a dot in the type's colour, dark text (the tint alone would not pass contrast). */
+.header h3 {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  padding: 4px 14px 4px 10px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--type-color) 12%, #fff);
+  color: var(--text-h);
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.header h3::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--type-color);
+}
+
+.header time {
+  color: var(--text);
+  font-size: 0.8rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 10px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.facts li {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--other-bg);
+  font-size: 0.8rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.facts strong {
+  color: var(--text-h);
+}
+
+.diagnosis {
+  margin: 12px 0 0;
+  color: var(--text-h);
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.diagnosis span {
+  margin-right: 4px;
+  color: var(--text);
+  font-size: 0.8rem;
+  font-weight: 400;
+}
+
+.notes {
+  margin: 12px 0 0;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: var(--other-bg);
+  color: var(--text-h);
+  font-size: 0.9rem;
+  white-space: pre-wrap;
+}

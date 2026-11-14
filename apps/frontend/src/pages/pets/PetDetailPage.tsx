@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { ClipboardPlus, History, Pencil, PowerOff } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
+import BackButton from "../../components/common/BackButton/BackButton";
 import Button from "../../components/common/Button";
 import Card from "../../components/common/Card";
 import PageHeader from "../../components/common/PageHeader/PageHeader";
@@ -13,7 +14,7 @@ import { usePermissions } from "../../hooks/usePermissions";
 import { usePet } from "../../hooks/usePet";
 import PetSummary from "./PetSummary";
 import "./Pets.css";
-import { ROUTES } from "../../utils/navigation";
+import { petClinicalEventPath, petClinicalHistoryPath, ROUTES } from "../../utils/navigation";
 
 /** Ficha del paciente: datos, dueño y accesos a registrar evento (I2) e historial (FR-5, FR-2). */
 export default function PetDetailPage() {
@@ -44,6 +45,7 @@ export default function PetDetailPage() {
   if (loading || !pet) {
     return (
       <div className="vc-dashboard">
+        <BackButton to={ROUTES.pets} label="Volver a pacientes" />
         <PageHeader title="Ficha del paciente" />
         <Card>
           {error ? (
@@ -60,19 +62,22 @@ export default function PetDetailPage() {
 
   return (
     <div className="vc-dashboard">
+      <BackButton to={ROUTES.pets} label="Volver a pacientes" />
       <PageHeader
         title={pet.name}
         description="Ficha del paciente"
         actions={
           <>
             {can("registerClinicalEvent") && (
-              <Button variant="primary" onClick={() => navigate(`${ROUTES.pets}/${pet.id}/atencion`)}>
+              <Button variant="primary" onClick={() => navigate(petClinicalEventPath(pet.id))}>
                 <ClipboardPlus size={16} /> Registrar evento
               </Button>
             )}
-            <Button onClick={() => navigate(`${ROUTES.pets}/${pet.id}/historial`)}>
-              <History size={16} /> Historial
-            </Button>
+            {can("viewClinicalHistory") && (
+              <Button onClick={() => navigate(petClinicalHistoryPath(pet.id))}>
+                <History size={16} /> Historial
+              </Button>
+            )}
             {can("editPet") && (
               <Button onClick={() => navigate(`${ROUTES.pets}/${pet.id}/editar`)}>
                 <Pencil size={16} /> Editar

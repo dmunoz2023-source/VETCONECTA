@@ -11,6 +11,8 @@ const PERMISSIONS = {
   editPet: ["reception", "admin", "vet"],
   /** DELETE /v1/pets/{id} (baja lógica) */
   deactivatePet: ["admin"],
+  /** GET /v1/clinical/pets/{id}/carnet: F2 only allows owner, vet and reception (the admin gets 403). */
+  viewClinicalHistory: ["vet", "reception"],
   /** POST /v1/clinical/events (I2) */
   registerClinicalEvent: ["vet"],
 } as const satisfies Record<string, readonly Role[]>;

@@ -1,0 +1,266 @@
+.form {
+  --type-color: var(--accent-secondary);
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.form[data-type="vaccine"] {
+  --type-color: #0f9d6b;
+}
+
+.form[data-type="checkup"] {
+  --type-color: var(--accent);
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+}
+
+/* Tinted panel whose accent follows the selected event type. */
+.panel {
+  padding: 20px;
+  border: 1px solid var(--border);
+  border-top: 3px solid var(--type-color);
+  border-radius: 14px;
+  background: var(--other-bg);
+  transition: border-color 0.2s ease;
+}
+
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.step {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--type-color);
+  color: #fff;
+  font-size: 0.9rem;
+  font-weight: 700;
+  transition: background 0.2s ease;
+}
+
+.sectionTitle {
+  margin: 0;
+  color: var(--text-h);
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: normal;
+}
+
+.sectionSubtitle {
+  margin: 2px 0 0;
+  color: var(--text);
+  font-size: 0.8rem;
+}
+
+.hint {
+  margin: 0;
+  padding: 10px 12px;
+  border: 1px dashed var(--border);
+  border-radius: 10px;
+  color: var(--text);
+  font-size: 0.85rem;
+}
+
+.counter {
+  align-self: flex-end;
+  margin-top: -8px;
+  color: #9ca3af;
+  font-size: 0.75rem;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 14px 18px;
+}
+
+/*
+ * Inputs of the shared FormField, restyled only inside this form (TextAreaField styles itself).
+ * Selected by structure (label > input), not by FormField's own class, so the look is the same
+ * whether FormField uses the global `vc-field` class or a CSS module.
+ */
+.form label:has(> input:not([type="radio"])) {
+  gap: 6px;
+  color: var(--text-h);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.form label > input:not([type="radio"]) {
+  width: 100%;
+  min-height: 48px;
+  padding: 11px 14px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: #fff;
+  color: var(--text-h);
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 400;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.form label > input:not([type="radio"])::placeholder {
+  color: #9ca3af;
+}
+
+.form label > input:not([type="radio"]):hover {
+  border-color: var(--accent-secondary);
+}
+
+.form label > input:not([type="radio"]):focus {
+  border-color: var(--accent-secondary);
+  box-shadow: 0 0 0 3px var(--accent-bg-light);
+  outline: none;
+}
+
+.form label > input[aria-invalid="true"] {
+  border-color: #dc2626;
+}
+
+.form label > input:not([type="radio"]) + span {
+  font-size: 0.8rem;
+  font-weight: 400;
+}
+
+/* Event type picker: native radios hidden, the card shows the checked state. */
+.typeGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 12px;
+}
+
+.typeOption {
+  --type-color: var(--accent-secondary);
+  position: relative;
+  display: block;
+  cursor: pointer;
+}
+
+.typeOption[data-type="vaccine"] {
+  --type-color: #0f9d6b;
+}
+
+.typeOption[data-type="checkup"] {
+  --type-color: var(--accent);
+}
+
+.typeInput {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.typeCard {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  height: 100%;
+  padding: 16px;
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  background: #fff;
+  color: var(--type-color);
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    scale 0.15s ease-out;
+}
+
+.typeOption:active .typeCard {
+  scale: 0.98;
+}
+
+/* The icon sits on a tinted disc in the type's colour; choosing the card fills the disc. */
+.typeCard svg {
+  box-sizing: content-box;
+  margin-bottom: 6px;
+  padding: 9px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--type-color) 14%, #fff);
+  color: var(--type-color);
+  transition:
+    background 0.2s ease,
+    color 0.2s ease;
+}
+
+.typeInput:checked + .typeCard svg {
+  background: var(--type-color);
+  color: #fff;
+}
+
+.typeCard strong {
+  color: var(--text-h);
+  font-size: 1rem;
+}
+
+.typeCard small {
+  color: var(--text);
+  font-size: 0.8rem;
+  line-height: 1.3;
+}
+
+.typeOption:hover .typeCard {
+  border-color: var(--type-color);
+}
+
+.typeInput:checked + .typeCard {
+  border-color: var(--type-color);
+  background: color-mix(in srgb, var(--type-color) 7%, #fff);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--type-color) 20%, transparent);
+}
+
+.typeInput:focus-visible + .typeCard {
+  outline: 2px solid var(--type-color);
+  outline-offset: 2px;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+
+.error {
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: #fef2f2;
+  color: #b91c1c;
+  font-size: 0.875rem;
+}
+
+.fieldError {
+  color: #b91c1c;
+  font-size: 0.8rem;
+}
+
+@media (max-width: 600px) {
+  .actions {
+    flex-direction: column-reverse;
+  }
+}
+
+/* Read-only field (veterinarian in charge): looks disabled so it is not mistaken for an input. */
+.form label > input[readonly] {
+  background: var(--surface-muted, #f3f4f6);
+  color: var(--text);
+  cursor: default;
+}
