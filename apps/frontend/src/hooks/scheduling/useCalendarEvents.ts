@@ -3,12 +3,10 @@ import {
   cancelAppointment,
   createPhoneBooking,
   fetchAppointments,
-  SlotTakenError,
   updateAppointmentStatus,
 } from "../../api/scheduling.api";
 import type { AttendanceStatus } from "../../api/scheduling.api";
 import { getErrorMessage } from "../../api/http/errors";
-import { CALENDAR_EVENTS_MOCK, mockBookingEvent } from "../../mocks/scheduling.mock";
 import type { CalendarEvent, NewBookingPayload } from "../../types/scheduling.types";
 import { usePolling } from "../common/usePolling";
 
@@ -16,14 +14,15 @@ const POLLING_INTERVAL_MS = 30_000;
 
 /**
  * Citas de la agenda con actualización periódica, más reserva telefónica,
- * cierre (realizada / no asistió) y cancelación.
- * Mientras el backend no responda, se trabaja sobre datos locales de resguardo;
- * un 409 (bloque ya tomado, BR-5) sí se propaga para que la pantalla lo muestre.
+ * cierre (realizada / no asistió) y cancelación. Solo muestra lo que responde
+ * el API Gateway: si una petición falla, la agenda no cambia y se informa el error
+ * (Panel web §5). La reserva relanza el error para que el modal muestre el 409 (BR-5).
  */
 export function useCalendarEvents() {
-  const [events, setEvents] = useState<CalendarEvent[]>(CALENDAR_EVENTS_MOCK);
+  const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
 
   const refresh = useCallback(async () => {
     try {
@@ -41,26 +40,29 @@ export function useCalendarEvents() {
   const setStatus = (id: string, status: CalendarEvent["status"]) =>
     setEvents((prev) => prev.map((event) => (event.id === id ? { ...event, status } : event)));
 
-  const addBooking = async (payload: NewBookingPayload) => {
+  /** Ejecuta un cambio en el backend y lo refleja en la agenda solo si respondió bien. */
+  const runAction = async (request: Promise<void>, apply: () => void, failMessage: string) => {
+    setActionError(null);
     try {
-      const created = await createPhoneBooking(payload);
-      setEvents((prev) => [...prev, created]);
+      await request;
+      apply();
     } catch (err: unknown) {
-      if (err instanceof SlotTakenError) throw err;
-      setEvents((prev) => [...prev, mockBookingEvent(payload)]);
+      setActionError(getErrorMessage(err, failMessage));
     }
   };
 
-  // TODO: con el backend conectado, propagar el error en vez de aplicar el cambio solo en local.
-  const changeStatus = async (id: string, status: AttendanceStatus) => {
-    await updateAppointmentStatus(id, status).catch(() => undefined);
-    setStatus(id, status);
+  const addBooking = async (payload: NewBookingPayload) => {
+    const created = await createPhoneBooking(payload);
+    setEvents((prev) => [...prev, created]);
   };
 
-  const cancel = async (id: string) => {
-    await cancelAppointment(id).catch(() => undefined);
-    setStatus(id, "cancelada");
-  };
+  const changeStatus = (id: string, status: AttendanceStatus) =>
+    runAction(updateAppointmentStatus(id, status), () => setStatus(id, status), "No se pudo actualizar el estado de la cita.");
 
-  return { events, loading, error, refresh, addBooking, changeStatus, cancel };
+  const cancel = (id: string) =>
+    runAction(cancelAppointment(id), () => setStatus(id, "cancelada"), "No se pudo cancelar la cita.");
+
+  const dismissActionError = () => setActionError(null);
+
+  return { events, loading, error, actionError, dismissActionError, refresh, addBooking, changeStatus, cancel };
 }
