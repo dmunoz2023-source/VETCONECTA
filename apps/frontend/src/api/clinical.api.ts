@@ -3,25 +3,24 @@ import type { ClinicalEvent, ClinicalEventFormValues, ClinicalEventType } from '
 import { parseDateOnly, toDateInputValue } from '../utils/age';
 
 /**
- * Body of POST /v1/clinical/events. The key names are dictated by CreateClinicalEventDto
- * (F2, backend), so they are the only Spanish identifiers left: rename them here when F2 does.
+ * Body of POST /v1/clinical/events: the keys of CreateClinicalEventDto (F2, backend).
  * The veterinarian comes from the JWT (BR-3).
  *
- * F2 validates by type and rejects (400) the fields of the other type:
- * - vaccine: nombreVacuna, lote and fechaProximaDosis are required; no diagnostico or proximoControl.
- * - consultation / checkup: diagnostico and proximoControl are required; no vaccine fields.
+ * F2 validates by type, so only the fields of the chosen type are sent:
+ * - vaccine: vaccineName, batch and boosterDate are required; no diagnosis or nextCheckup.
+ * - consultation / checkup: diagnosis and nextCheckup are required; no vaccine fields.
  */
 interface ClinicalEventPayload {
-  mascotaId: string;
-  tipo: ClinicalEventType;
-  fecha: string;
-  peso: number;
-  observaciones: string;
-  nombreVacuna?: string;
-  lote?: string;
-  fechaProximaDosis?: string;
-  diagnostico?: string;
-  proximoControl?: string;
+  petId: string;
+  type: ClinicalEventType;
+  date: string;
+  weightKg: number;
+  notes: string;
+  vaccineName?: string;
+  batch?: string;
+  boosterDate?: string;
+  diagnosis?: string;
+  nextCheckup?: string;
 }
 
 /**
@@ -40,22 +39,22 @@ function toEventTimestamp(date: string): string {
 /** The form already validated the required fields; only the fields of the chosen type are sent. */
 function toPayload(petId: string, values: ClinicalEventFormValues): ClinicalEventPayload {
   const common = {
-    mascotaId: petId,
-    tipo: values.type as ClinicalEventType,
-    fecha: toEventTimestamp(values.date),
-    peso: Number(values.weightKg),
-    observaciones: values.notes.trim(),
+    petId,
+    type: values.type as ClinicalEventType,
+    date: toEventTimestamp(values.date),
+    weightKg: Number(values.weightKg),
+    notes: values.notes.trim(),
   };
 
   if (values.type === "vaccine") {
     return {
       ...common,
-      nombreVacuna: values.vaccineName.trim(),
-      lote: values.batch.trim(),
-      fechaProximaDosis: values.nextCheckup,
+      vaccineName: values.vaccineName.trim(),
+      batch: values.batch.trim(),
+      boosterDate: values.nextCheckup,
     };
   }
-  return { ...common, diagnostico: values.diagnosis.trim(), proximoControl: values.nextCheckup };
+  return { ...common, diagnosis: values.diagnosis.trim(), nextCheckup: values.nextCheckup };
 }
 
 /** GET /v1/clinical/pets/{petId}/carnet: the pet's events, newest first (FR-2, BR-6). */
