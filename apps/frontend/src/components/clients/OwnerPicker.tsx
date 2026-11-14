@@ -7,36 +7,39 @@ import { useDebouncedValue } from "../../hooks/useDebouncedValue";
 import { usePagedRequest } from "../../hooks/usePagedRequest";
 import type { ClientsResult } from "../../types/client.types";
 import type { PetOwner } from "../../types/pet.types";
-import "../common/FormField.css";
-import "./OwnerPicker.css";
+import fieldCss from "../common/FormField.module.css";
+import css from "./OwnerPicker.module.css";
 
 const MAX_RESULTS = 5;
 const EMPTY_RESULT: ClientsResult = { clients: [], total: 0 };
 
 interface OwnerPickerProps {
-  /** Dueño elegido; `null` muestra el buscador. */
+  /** Chosen owner; `null` shows the search box. */
   value: PetOwner | null;
   onChange: (owner: PetOwner | null) => void;
   error?: string;
 }
 
-/** Selector del dueño de la mascota: buscador de clientes por nombre o RUT (BR-1). */
+const initialsOf = ({ firstName, lastName }: PetOwner) => `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
+
+/** Pet owner selector: client search by name or RUT (BR-1). */
 export default function OwnerPicker({ value, onChange, error }: OwnerPickerProps) {
   const labelId = useId();
   const errorId = useId();
 
   return (
-    <div className="vc-field">
-      <span id={labelId} className="vc-field-label">
-        Dueño
-      </span>
+    <div className={fieldCss.field}>
+      <span id={labelId}>Dueño</span>
       {value ? (
-        <div className="vc-owner-selected" role="group" aria-labelledby={labelId}>
-          <div>
-            <div className="vc-pet-name">
+        <div className={css.selected} role="group" aria-labelledby={labelId}>
+          <span className={css.avatar} aria-hidden="true">
+            {initialsOf(value)}
+          </span>
+          <div className={css.info}>
+            <span className={css.name}>
               {value.firstName} {value.lastName}
-            </div>
-            <div className="vc-pet-meta">{value.rut}</div>
+            </span>
+            <span className={css.rut}>{value.rut}</span>
           </div>
           <Button type="button" onClick={() => onChange(null)}>
             Cambiar
@@ -46,7 +49,7 @@ export default function OwnerPicker({ value, onChange, error }: OwnerPickerProps
         <OwnerSearch onSelect={onChange} labelId={labelId} errorId={error ? errorId : undefined} />
       )}
       {error && (
-        <span id={errorId} className="vc-field-error">
+        <span id={errorId} className={fieldCss.error}>
           {error}
         </span>
       )}
@@ -54,15 +57,15 @@ export default function OwnerPicker({ value, onChange, error }: OwnerPickerProps
   );
 }
 
-/** Busca clientes en GET /v1/clients mientras no haya dueño elegido. */
 interface OwnerSearchProps {
   onSelect: (owner: PetOwner) => void;
-  /** Id de la etiqueta "Dueño", para que el lector de pantalla nombre el buscador. */
+  /** Id of the "Dueño" label, so the screen reader names the search box. */
   labelId: string;
-  /** Id del mensaje de error, si lo hay. */
+  /** Id of the error message, if any. */
   errorId?: string;
 }
 
+/** Searches clients in GET /v1/clients while no owner is chosen. */
 function OwnerSearch({ onSelect, labelId, errorId }: OwnerSearchProps) {
   const [search, setSearch] = useState("");
   const debouncedSearch = useDebouncedValue(search, 300);
@@ -76,7 +79,7 @@ function OwnerSearch({ onSelect, labelId, errorId }: OwnerSearchProps) {
   const statusMessage = error ?? (loading ? "Buscando..." : result.clients.length ? null : "No hay clientes que coincidan.");
 
   return (
-    <div className="vc-owner-search">
+    <div className={css.search}>
       <SearchInput
         value={search}
         onChange={setSearch}
@@ -88,14 +91,17 @@ function OwnerSearch({ onSelect, labelId, errorId }: OwnerSearchProps) {
       {statusMessage ? (
         <StatusText>{statusMessage}</StatusText>
       ) : (
-        <ul className="vc-owner-results">
+        <ul className={css.results}>
           {result.clients.map(({ id, rut, firstName, lastName }) => (
             <li key={id}>
-              <button type="button" onClick={() => onSelect({ id, rut, firstName, lastName })}>
-                <span className="vc-pet-name">
+              <button type="button" className={css.result} onClick={() => onSelect({ id, rut, firstName, lastName })}>
+                <span className={css.avatar} aria-hidden="true">
+                  {initialsOf({ id, rut, firstName, lastName })}
+                </span>
+                <span className={css.name}>
                   {firstName} {lastName}
                 </span>
-                <span className="vc-pet-meta">{rut}</span>
+                <span className={css.rut}>{rut}</span>
               </button>
             </li>
           ))}

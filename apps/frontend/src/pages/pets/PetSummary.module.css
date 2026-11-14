@@ -1,0 +1,190 @@
+.layout {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 16px;
+  align-items: start;
+}
+
+@media (max-width: 900px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+.card {
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(34, 43, 39, 0.04), 0 8px 24px rgba(142, 78, 219, 0.07);
+}
+
+/* The one decisive move of the file: a tinted band that holds who the patient is. */
+.banner {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 24px;
+  background: linear-gradient(120deg, #f3e8ff 0%, #fdf2f8 100%);
+  border-bottom: 1px solid var(--border);
+}
+
+.avatar {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 72px;
+  height: 72px;
+  border: 3px solid #fff;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 4px 14px rgba(142, 78, 219, 0.22);
+  color: var(--accent-secondary);
+}
+
+.bannerText {
+  flex: 1;
+  min-width: 0;
+}
+
+.species {
+  margin: 0;
+  color: var(--text-h);
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1.2;
+  text-wrap: balance;
+}
+
+.breed {
+  margin: 2px 0 0;
+  color: var(--text);
+  font-size: 0.95rem;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 12px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.chips li {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: 999px;
+  background: #fff;
+  color: var(--text-h);
+  font-size: 0.85rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  box-shadow: 0 1px 2px rgba(34, 43, 39, 0.08);
+}
+
+.chips svg {
+  color: var(--accent-secondary);
+}
+
+/* The rest of the data: columns split by hairlines, not a box per value. */
+.facts {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1.25fr;
+  margin: 0;
+  padding: 8px 0;
+}
+
+.fact {
+  padding: 14px 18px 14px 22px;
+}
+
+.fact + .fact {
+  border-left: 1px solid var(--border);
+}
+
+@media (max-width: 640px) {
+  .fact + .fact {
+    border-top: 1px solid var(--border);
+    border-left: 0;
+  }
+}
+
+.fact dt {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text);
+  font-size: 0.78rem;
+  white-space: nowrap;
+}
+
+.fact dt svg {
+  color: var(--accent-secondary);
+}
+
+.fact dd {
+  margin: 6px 0 0;
+  overflow-wrap: break-word;
+  color: var(--text-h);
+  font-size: 0.95rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.ownerCard {
+  padding-bottom: 8px;
+}
+
+.ownerTitle {
+  margin: 0;
+  padding: 22px 24px 0;
+  color: var(--text-h);
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.owner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 24px 4px;
+}
+
+.ownerAvatar {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--accent-secondary);
+  color: #fff;
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.ownerName {
+  margin: 0;
+  color: var(--text-h);
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.active {
+  background: #ecfdf5;
+  color: #047857;
+}
+
+.inactive {
+  background: #f3f4f6;
+  color: #6b7280;
+}
+
+.ownerCard .facts {
+  grid-template-columns: 1fr;
+}

@@ -1,0 +1,71 @@
+.group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.label {
+  color: var(--text-h);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.option {
+  position: relative;
+  cursor: pointer;
+}
+
+.input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.card {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 110px;
+  padding: 10px 16px;
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  background: #fff;
+  color: var(--text-h);
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    color 0.2s ease;
+}
+
+.card svg {
+  color: var(--accent-secondary);
+}
+
+.option:hover .card {
+  border-color: var(--accent-secondary);
+}
+
+.input:checked + .card {
+  border-color: var(--accent-secondary);
+  box-shadow: 0 0 0 3px var(--accent-bg-light);
+  color: var(--accent-secondary);
+  font-weight: 600;
+}
+
+.input:focus-visible + .card {
+  outline: 2px solid var(--accent-secondary);
+  outline-offset: 2px;
+}
+
+.error {
+  color: #b91c1c;
+  font-size: 0.8rem;
+}

@@ -11,6 +11,7 @@ import { useClients } from "../../hooks/useClients";
 import { usePermissions } from "../../hooks/usePermissions";
 import { useSearchPagination } from "../../hooks/useSearchPagination";
 import type { Client } from "../../types/client.types";
+import { ROUTES } from "../../utils/navigation";
 import ClientFormModal from "./ClientFormModal";
 import "./ClientsPage.css";
 
@@ -28,8 +29,8 @@ export default function ClientsPage() {
   const navigate = useNavigate();
   const can = usePermissions();
 
-  // Abre el alta de mascota con este cliente ya elegido como dueño (UC-05, paso 2).
-  const handleAddPet = (client: Client) => navigate(`/mascotas/nueva?clientId=${client.id}`);
+  // Opens the new pet form with this client already chosen as the owner (UC-05, step 2).
+  const handleAddPet = (client: Client) => navigate(`${ROUTES.petNew}?clientId=${client.id}`);
 
   return (
     <div className="vc-dashboard">

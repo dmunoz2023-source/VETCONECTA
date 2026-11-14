@@ -4,7 +4,7 @@ import { usePagedRequest } from "./usePagedRequest";
 
 const EMPTY_RESULT: PetsResult = { pets: [], total: 0 };
 
-/** Listado de pacientes con búsqueda por dueño y paginación por dueño (ver listPets). */
+/** Patient list with search by owner and pagination by owner (see listPets). */
 export function usePets(query: PetsQuery) {
   const { result, loading, error } = usePagedRequest(
     listPets,

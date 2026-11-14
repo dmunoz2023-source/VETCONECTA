@@ -18,7 +18,7 @@ export const getInitials = (fullName: string, max = 2): string =>
     .join("")
     .toUpperCase();
 
-/** "AAAA-MM-DD" (formato ISO de la API) → fecha local legible, p. ej. "10-05-2025". */
+/** "YYYY-MM-DD" (ISO format of the API) → readable local date, e.g. "10-05-2025". */
 export const formatDate = (isoDate: string | null): string => {
   const date = isoDate ? parseDateOnly(isoDate) : null;
   return date ? date.toLocaleDateString("es-CL") : "—";

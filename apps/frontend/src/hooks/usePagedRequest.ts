@@ -8,9 +8,9 @@ export interface PageQuery {
 }
 
 /**
- * Pide una página de resultados cada vez que cambian la búsqueda o la página,
- * y expone `reload` para volver a pedirla tras un cambio.
- * `fetchPage` debe ser estable (una función del módulo api/, no una creada en cada render).
+ * Requests a page of results every time the search or the page changes,
+ * and exposes `reload` to request it again after a change.
+ * `fetchPage` must be stable (a function of the api/ module, not one created on every render).
  */
 export function usePagedRequest<R>(
   fetchPage: (query: PageQuery) => Promise<R>,

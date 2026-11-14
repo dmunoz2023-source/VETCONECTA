@@ -1,0 +1,73 @@
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.progress {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.bar {
+  height: 4px;
+  border-radius: 999px;
+  background: var(--border);
+  transition: background 0.2s ease;
+}
+
+.barDone {
+  background: var(--accent-secondary);
+}
+
+/* The numbered section badge already says the step; the text stays for screen readers only. */
+.stepLabel {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.full {
+  grid-column: 1 / -1;
+}
+
+@media (max-width: 480px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+}
+
+.actionsRight {
+  display: flex;
+  gap: 10px;
+  margin-left: auto;
+}
+
+/* Browser surfaces themed from the palette: caret, native date picker, text selection. */
+.form {
+  accent-color: var(--accent-secondary);
+  caret-color: var(--accent-secondary);
+}
+
+.form ::selection {
+  background: var(--accent-bg-light);
+  color: var(--text-h);
+}

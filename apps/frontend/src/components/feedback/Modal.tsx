@@ -8,7 +8,7 @@ interface ModalProps {
   children: ReactNode;
 }
 
-/** Modal generico: cierra al hacer clic fuera o en la X */
+/** Generic modal: closes on click outside or on the X */
 export default function Modal({ title, onClose, children }: ModalProps) {
   return (
     <div className="vc-modal-overlay" onClick={onClose}>

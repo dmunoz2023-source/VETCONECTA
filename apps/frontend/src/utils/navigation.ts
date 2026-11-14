@@ -5,16 +5,21 @@ export const ROUTES = {
   home: '/',
   clients: '/clients',
   pets: '/pets',
-  petNew: '/pets/nueva',
-  petEdit: '/pets/:id/editar',
+  petNew: '/pets/new',
+  petEdit: '/pets/:id/edit',
   petDetail: '/pets/:id',
-  petAttention: '/pets/:id/atencion',
-  petHistory: '/pets/:id/historial',
+  petClinicalEvent: '/pets/:id/clinical-event',
+  petClinicalHistory: '/pets/:id/clinical-history',
   agend: '/agend',
   reports: '/reports',
   history: '/history',
   config: '/config',
 } as const;
+
+/** Concrete paths for the patient screens (the ROUTES entries above are router patterns). */
+export const petDetailPath = (petId: string) => `${ROUTES.pets}/${petId}`;
+export const petClinicalEventPath = (petId: string) => `${ROUTES.pets}/${petId}/clinical-event`;
+export const petClinicalHistoryPath = (petId: string) => `${ROUTES.pets}/${petId}/clinical-history`;
 
 // Ítems del menú lateral. Para restringir por rol, agregar aquí un campo
 // `allowedRoles` y filtrar en el Sidebar con el rol de useAuth().

@@ -6,7 +6,7 @@ export interface TablePaginationProps {
   page: number;
   pageSize: number;
   total: number;
-  /** Nombre de lo que se lista, para el texto "Mostrados 1-8 de 9 {itemLabel}". */
+  /** Name of what is listed, for the text "Mostrados 1-8 de 9 {itemLabel}". */
   itemLabel?: string;
   onPageChange: (page: number) => void;
 }

@@ -1,0 +1,13 @@
+.page {
+  text-align: left;
+  color: var(--text);
+}
+
+.error {
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: #fef2f2;
+  color: #b91c1c;
+  font-size: 0.875rem;
+}

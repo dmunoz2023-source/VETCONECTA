@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { getErrorMessage } from "../api/axios";
 
 interface AsyncState<T> {
-  /** Carga que produjo este estado; si no coincide con la actual, hay una carga en curso. */
+  /** Load that produced this state; if it differs from the current one, a load is in progress. */
   load: (() => Promise<T>) | null;
   version: number;
   data: T | null;
@@ -10,10 +10,10 @@ interface AsyncState<T> {
 }
 
 /**
- * Ejecuta `load` al montar, cada vez que cambia y cuando se llama a `reload`;
- * descarta respuestas de cargas anteriores. `load` debe venir de `useCallback`
- * con sus dependencias, así solo se vuelve a pedir cuando cambian.
- * Mientras llega una nueva respuesta, `data` conserva el último resultado (las tablas no parpadean).
+ * Runs `load` on mount, every time it changes and when `reload` is called;
+ * discards responses of earlier loads. `load` must come from `useCallback`
+ * with its dependencies, so it is only requested again when they change.
+ * While a new response arrives, `data` keeps the last result (tables do not flicker).
  */
 export function useAsync<T>(load: () => Promise<T>, errorMessage: string) {
   const [version, setVersion] = useState(0);

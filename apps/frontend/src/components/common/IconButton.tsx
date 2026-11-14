@@ -2,15 +2,15 @@ import type { ButtonHTMLAttributes } from "react";
 import "./IconButton.css";
 
 interface IconButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, "aria-label"> {
-  /** Texto accesible (obligatorio: el botón solo tiene un icono). */
+  /** Accessible text (required: the button only has an icon). */
   label: string;
-  /** "danger" resalta en rojo al pasar el mouse (acciones destructivas, p. ej. eliminar). */
+  /** "danger" turns red on hover (destructive actions, e.g. delete). */
   variant?: "default" | "danger";
 }
 
 export default function IconButton({ label, variant = "default", className = "", ...rest }: IconButtonProps) {
   const variantClass = variant === "danger" ? "vc-icon-btn-danger" : "";
   return (
-    <button type="button" className={`vc-icon-btn ${variantClass} ${className}`.trim()} aria-label={label} {...rest} />
+    <button type="button" className={`vc-icon-btn ${variantClass} ${className}`.trim()} aria-label={label} title={label} {...rest} />
   );
 }

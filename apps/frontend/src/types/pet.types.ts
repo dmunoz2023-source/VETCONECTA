@@ -1,16 +1,16 @@
-/** Especies admitidas. Se guardan en inglés en `clients_pets.pets.species` (ver infra/db/02-seed.sql). */
-export type PetSpecies = "dog" | "cat" | "other";
+/** Supported species. Stored in English in `clients_pets.pets.species` (see infra/db/02-seed.sql). */
+export type PetSpecies = "dog" | "cat" | "rabbit" | "bird" | "rodent" | "reptile" | "other";
 
 export type PetSex = "male" | "female";
 
-/** Edad calculada por clients-pets-service a partir de `birthDate` (BR-2: no se almacena). */
+/** Age calculated by clients-pets-service from `birthDate` (BR-2: it is not stored). */
 export interface PetAge {
   years: number;
   months: number;
   displayAge: string;
 }
 
-/** Dueño resumido que acompaña a la mascota en el listado y en la ficha. */
+/** Short owner that comes with the pet in the list and the file. */
 export interface PetOwner {
   id: string;
   rut: string;
@@ -18,7 +18,7 @@ export interface PetOwner {
   lastName: string;
 }
 
-/** Mascota tal como la devuelve GET /v1/pets/{id} (entidad `clients_pets.pets` + edad calculada). */
+/** Pet as returned by GET /v1/pets/{id} (`clients_pets.pets` entity + calculated age). */
 export interface Pet {
   id: string;
   clientId: string;
@@ -32,15 +32,18 @@ export interface Pet {
   photoUrl: string | null;
   active: boolean;
   age: PetAge | null;
-  /** Datos del dueño; el listado y la ficha los incluyen para no hacer una segunda llamada. */
+  /** Owner data; the list and the file include it to avoid a second call. */
   client?: PetOwner;
 }
 
-/** Campos que llena el formulario de alta y edición (BR-1: `clientId` es obligatorio). */
+/** Fields filled in by the create and edit form (BR-1: `clientId` is required). */
 export interface PetFormValues {
   clientId: string;
   name: string;
+  /** A listed species ("dog", "cat", "rabbit"...) or "other"; with "other" the real species is written in `otherSpecies`. */
   species: string;
+  /** Free-text species, only used when `species` is "other" (the backend accepts any text). */
+  otherSpecies: string;
   breed: string;
   sex: string;
   birthDate: string;

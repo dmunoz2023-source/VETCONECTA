@@ -57,10 +57,12 @@ export default function AppRouter() {
             
             {/* TODO (I2): reemplazar por el formulario de evento clínico y el carnet */}
             <Route element={<ProtectedRoute allowedRoles={rolesFor("registerClinicalEvent")} />}>
-              <Route path={ROUTES.petAttention} element={<PlaceholderPage title="Registrar evento clinico" />} />
+              <Route path={ROUTES.petClinicalEvent} element={<PlaceholderPage title="Registrar evento clinico" />} />
             </Route>
-            
-            <Route path={ROUTES.petHistory} element={<PlaceholderPage title="Historial clinico" />} />
+
+            <Route element={<ProtectedRoute allowedRoles={rolesFor("viewClinicalHistory")} />}>
+              <Route path={ROUTES.petClinicalHistory} element={<PlaceholderPage title="Historial clinico" />} />
+            </Route>
             
             {/* Módulos Principales */}
             <Route path={ROUTES.agend} element={<AgendPage />} />

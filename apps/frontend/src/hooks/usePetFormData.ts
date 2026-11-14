@@ -2,18 +2,23 @@ import { useCallback } from "react";
 import { getOwner } from "../api/clients.api";
 import { getPet } from "../api/pets.api";
 import type { PetFormValues, PetOwner } from "../types/pet.types";
+import { SPECIES_OPTIONS } from "../utils/petLabels";
 import { useAsync } from "./useAsync";
 
 export const EMPTY_PET_FORM: PetFormValues = {
   clientId: "",
   name: "",
   species: "",
+  otherSpecies: "",
   breed: "",
   sex: "",
   birthDate: "",
   color: "",
   microchip: "",
 };
+
+/** Species with their own card in the form; any other value is a free-text species. */
+const KNOWN_SPECIES: string[] = SPECIES_OPTIONS.map((option) => option.value).filter((value) => value !== "other");
 
 interface PetFormData {
   initialValues: PetFormValues;
@@ -27,7 +32,9 @@ async function loadFormData(petId?: string, presetClientId?: string): Promise<Pe
       initialValues: {
         clientId: pet.clientId,
         name: pet.name,
-        species: pet.species,
+        // A species that is not one of the listed ones was typed by hand: show it under "Otro".
+        species: KNOWN_SPECIES.includes(pet.species) ? pet.species : "other",
+        otherSpecies: KNOWN_SPECIES.includes(pet.species) || pet.species === "other" ? "" : pet.species,
         breed: pet.breed ?? "",
         sex: pet.sex ?? "",
         birthDate: pet.birthDate ?? "",
@@ -45,10 +52,10 @@ async function loadFormData(petId?: string, presetClientId?: string): Promise<Pe
 }
 
 /**
- * Datos iniciales del formulario de mascota:
- * - edición (`petId`): la mascota y su dueño;
- * - alta desde la ficha de un cliente (`presetClientId`): el dueño ya elegido (UC-05, paso 2);
- * - alta sin dueño: formulario vacío.
+ * Initial data of the pet form:
+ * - edit (`petId`): the pet and its owner;
+ * - create from a client's file (`presetClientId`): the owner already chosen (UC-05, step 2);
+ * - create without owner: empty form.
  */
 export function usePetFormData(petId?: string, presetClientId?: string) {
   const load = useCallback(() => loadFormData(petId, presetClientId), [petId, presetClientId]);

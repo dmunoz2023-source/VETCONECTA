@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { ClipboardPlus, History, Pencil, PowerOff } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
+import BackButton from "../../components/common/BackButton/BackButton";
 import Button from "../../components/common/Button";
 import Card from "../../components/common/Card";
 import PageHeader from "../../components/common/PageHeader/PageHeader";
@@ -12,10 +13,10 @@ import { useFlashNotice } from "../../hooks/useFlashNotice";
 import { usePermissions } from "../../hooks/usePermissions";
 import { usePet } from "../../hooks/usePet";
 import PetSummary from "./PetSummary";
-import "./Pets.css";
-import { ROUTES } from "../../utils/navigation";
+import css from "./PetDetailPage.module.css";
+import { petClinicalEventPath, petClinicalHistoryPath, ROUTES } from "../../utils/navigation";
 
-/** Ficha del paciente: datos, dueño y accesos a registrar evento (I2) e historial (FR-5, FR-2). */
+/** Patient file: data, owner and shortcuts to register an event (I2) and the clinical record (FR-5, FR-2). */
 export default function PetDetailPage() {
   const { id = "" } = useParams();
   const navigate = useNavigate();
@@ -30,7 +31,7 @@ export default function PetDetailPage() {
     setDeactivateError(null);
   };
 
-  // Baja lógica: la mascota deja de aparecer, pero su historial clínico se conserva (BR-9).
+  // Soft delete: the pet stops showing up, but its clinical record is kept (BR-9).
   const handleDeactivate = async () => {
     setDeactivateError(null);
     try {
@@ -43,11 +44,12 @@ export default function PetDetailPage() {
 
   if (loading || !pet) {
     return (
-      <div className="vc-dashboard">
+      <div className={css.page}>
+        <BackButton to={ROUTES.pets} label="Volver a pacientes" />
         <PageHeader title="Ficha del paciente" />
         <Card>
           {error ? (
-            <p className="vc-modal-error" role="alert">
+            <p className={css.error} role="alert">
               {error}
             </p>
           ) : (
@@ -59,22 +61,25 @@ export default function PetDetailPage() {
   }
 
   return (
-    <div className="vc-dashboard">
+    <div className={css.page}>
+      <BackButton to={ROUTES.pets} label="Volver a pacientes" />
       <PageHeader
         title={pet.name}
         description="Ficha del paciente"
         actions={
           <>
             {can("registerClinicalEvent") && (
-              <Button variant="primary" onClick={() => navigate(`${ROUTES.pets}/${pet.id}/atencion`)}>
+              <Button variant="primary" onClick={() => navigate(petClinicalEventPath(pet.id))}>
                 <ClipboardPlus size={16} /> Registrar evento
               </Button>
             )}
-            <Button onClick={() => navigate(`${ROUTES.pets}/${pet.id}/historial`)}>
-              <History size={16} /> Historial
-            </Button>
+            {can("viewClinicalHistory") && (
+              <Button onClick={() => navigate(petClinicalHistoryPath(pet.id))}>
+                <History size={16} /> Historial
+              </Button>
+            )}
             {can("editPet") && (
-              <Button onClick={() => navigate(`${ROUTES.pets}/${pet.id}/editar`)}>
+              <Button onClick={() => navigate(`${ROUTES.pets}/${pet.id}/edit`)}>
                 <Pencil size={16} /> Editar
               </Button>
             )}

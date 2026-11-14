@@ -8,9 +8,9 @@ interface ClientMutations {
 }
 
 /**
- * Estado de los diálogos de la página de clientes: formulario de alta/edición
- * y confirmación de baja. Si la API responde con error, el diálogo queda abierto
- * y muestra el `message` del servidor (por ejemplo 409 si el RUT ya existe).
+ * State of the dialogs of the clients page: create/edit form
+ * and delete confirmation. If the API answers with an error, the dialog stays open
+ * and shows the server `message` (for example 409 if the RUT already exists).
  */
 export function useClientDialogs({ saveClient, removeClient }: ClientMutations) {
   const [formOpen, setFormOpen] = useState(false);

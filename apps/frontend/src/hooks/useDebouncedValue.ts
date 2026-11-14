@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-/** Devuelve `value` solo cuando deja de cambiar durante `delay` ms (p. ej. al escribir en un buscador). */
+/** Returns `value` only when it stops changing for `delay` ms (e.g. when typing in a search box). */
 export function useDebouncedValue<T>(value: T, delay: number): T {
   const [debounced, setDebounced] = useState(value);
 

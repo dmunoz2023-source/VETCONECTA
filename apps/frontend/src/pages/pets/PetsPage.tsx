@@ -1,4 +1,4 @@
-import { Plus } from "lucide-react";
+import { PawPrint } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import Button from "../../components/common/Button";
 import Card from "../../components/common/Card";
@@ -10,12 +10,12 @@ import { useFlashNotice } from "../../hooks/useFlashNotice";
 import { usePermissions } from "../../hooks/usePermissions";
 import { usePets } from "../../hooks/usePets";
 import { useSearchPagination } from "../../hooks/useSearchPagination";
-import "./Pets.css";
+import css from "./PetsPage.module.css";
 import { ROUTES } from "../../utils/navigation";
 
 const PAGE_SIZE = 8;
 
-/** Pantalla "Pacientes": mascotas agrupadas por dueño, con búsqueda por nombre o RUT del dueño (FR-5). */
+/** "Pacientes" screen: pets grouped by owner, searchable by owner name or RUT (FR-5). */
 export default function PetsPage() {
   const { search, debouncedSearch, page, setSearch, setPage } = useSearchPagination();
   const navigate = useNavigate();
@@ -25,7 +25,7 @@ export default function PetsPage() {
   const { pets, total, loading, error } = usePets({ search: debouncedSearch, page, pageSize: PAGE_SIZE });
 
   return (
-    <div className="vc-dashboard">
+    <div className={css.page}>
       <PageHeader
         title="Pacientes"
         description="Mascotas registradas en la clínica y sus dueños."
@@ -38,7 +38,7 @@ export default function PetsPage() {
             />
             {can("createPet") && (
               <Button variant="primary" onClick={() => navigate(ROUTES.petNew)}>
-                <Plus size={16} /> Nueva mascota
+                <PawPrint size={16} aria-hidden="true" /> Agregar mascota
               </Button>
             )}
           </>
