@@ -13,12 +13,15 @@ import { NotificationLogRepository } from './repositories/notification-log.repos
 import { RemindersRepository } from './repositories/reminders.repository';
 import { ReminderDispatcherService } from './services/reminder-dispatcher.service';
 import { RemindersService } from './services/reminders.service';
+import { UserNotification } from './entities/user-notification.entity';
+import { UserNotificationsRepository } from './repositories/user-notifications.repository';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([ScheduledReminder, NotificationLog]), DevicesModule],
+  imports: [TypeOrmModule.forFeature([ScheduledReminder, NotificationLog, UserNotification]), DevicesModule],
   providers: [
     RemindersRepository,
     NotificationLogRepository,
+    UserNotificationsRepository,
     RemindersService,
     ReminderDispatcherService,
     ReminderDispatchJob,

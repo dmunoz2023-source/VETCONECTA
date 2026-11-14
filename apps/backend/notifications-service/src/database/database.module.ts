@@ -4,6 +4,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { DeviceToken } from '../modules/devices/entities/device-token.entity';
 import { NotificationLog } from '../modules/reminders/entities/notification-log.entity';
 import { ScheduledReminder } from '../modules/reminders/entities/scheduled-reminder.entity';
+import { UserNotification } from '../modules/reminders/entities/user-notification.entity';
 
 @Module({
   imports: [
@@ -14,7 +15,7 @@ import { ScheduledReminder } from '../modules/reminders/entities/scheduled-remin
         type: 'postgres',
         url: configService.get<string>('databaseUrl'),
         schema: configService.get<string>('dbSchema'),
-        entities: [ScheduledReminder, NotificationLog, DeviceToken],
+        entities: [ScheduledReminder, NotificationLog, DeviceToken, UserNotification],
         synchronize: false,
       }),
     }),

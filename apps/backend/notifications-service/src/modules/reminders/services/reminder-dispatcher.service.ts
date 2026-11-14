@@ -5,6 +5,7 @@ import { ScheduledReminder } from '../entities/scheduled-reminder.entity';
 import { PUSH_SENDER, PushSender } from '../push/push-sender.interface';
 import { NotificationLogRepository } from '../repositories/notification-log.repository';
 import { RemindersRepository } from '../repositories/reminders.repository';
+import { UserNotificationsRepository } from '../repositories/user-notifications.repository';
 
 /**
  * [H1] Capa de aplicación: entrega de recordatorios vencidos.
@@ -22,6 +23,7 @@ export class ReminderDispatcherService {
     private readonly remindersRepository: RemindersRepository,
     private readonly deviceTokensRepository: DeviceTokensRepository,
     private readonly notificationLogRepository: NotificationLogRepository,
+    private readonly userNotificationsRepository: UserNotificationsRepository,
     @Inject(PUSH_SENDER) private readonly pushSender: PushSender,
     configService: ConfigService,
   ) {
@@ -61,12 +63,14 @@ export class ReminderDispatcherService {
   }
 
   private async deliver(reminder: ScheduledReminder): Promise<void> {
+    await this.userNotificationsRepository.createFromReminder(reminder);
+
     const devices = await this.deviceTokensRepository.findActiveByUser(reminder.userId);
     if (devices.length === 0) {
       await this.fail(reminder, 'El usuario no tiene dispositivos registrados');
       return;
     }
-
+    
     const deliveredDeviceIds: string[] = [];
     const invalidTokens: string[] = [];
 
