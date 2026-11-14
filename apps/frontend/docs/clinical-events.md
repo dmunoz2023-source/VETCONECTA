@@ -93,6 +93,16 @@ Devuelve un arreglo ordenado del más reciente al más antiguo:
 - El carnet no admite el rol `admin` (recibe 403); por eso el panel oculta Historial a ese rol.
 - Si F2 cambia el DTO, el único lugar a ajustar es `toPayload` en `src/api/clinical.api.ts`.
 
+## Pruebas automáticas
+
+`npm test --workspace=frontend` (Vitest + Testing Library; el CI las corre con `npm test --workspaces`).
+
+- `utils/clinicalValidators.test.ts`: cada regla del formulario (tipo, fecha, peso, largos, campos por tipo).
+- `api/clinical.api.test.ts`: el cuerpo del POST según el tipo (contrato con F2), sin el veterinario y con la fecha correcta.
+- `api/axios.test.ts`: `getErrorMessage` con `message` en lista y con `details`.
+- `utils/permissions.test.ts`: quién registra eventos y quién ve el carnet.
+- `hooks/useClinicalEventForm.test.ts`: validar antes de enviar, guardar, y errores 400 y 403.
+
 ## Verificación manual
 
 1. Como veterinario, abrir una ficha y entrar a «Registrar evento».
