@@ -24,9 +24,9 @@
 .item::before {
   content: "";
   position: absolute;
-  top: 32px;
+  top: 40px;
   bottom: -4px;
-  left: 15px;
+  left: 17px;
   width: 2px;
   background: var(--border);
 }
@@ -42,19 +42,20 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
-  background: color-mix(in srgb, var(--type-color) 14%, #fff);
+  background: color-mix(in srgb, var(--type-color) 16%, #fff);
+  box-shadow: 0 0 0 4px #fff;
   color: var(--type-color);
 }
 
 .card {
-  padding: 14px 16px;
+  padding: 16px 18px;
   border: 1px solid var(--border);
-  border-left: 3px solid var(--type-color);
-  border-radius: 10px;
+  border-radius: 14px;
   background: #fff;
+  box-shadow: 0 1px 2px rgba(34, 43, 39, 0.04), 0 8px 20px rgba(142, 78, 219, 0.06);
   overflow-wrap: anywhere;
 }
 
@@ -66,15 +67,32 @@
   gap: 4px 12px;
 }
 
+/* The event type as a chip: a dot in the type's colour, dark text (the tint alone would not pass contrast). */
 .header h3 {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
   margin: 0;
+  padding: 4px 14px 4px 10px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--type-color) 12%, #fff);
   color: var(--text-h);
-  font-size: 1rem;
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.header h3::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--type-color);
 }
 
 .header time {
   color: var(--text);
   font-size: 0.8rem;
+  font-variant-numeric: tabular-nums;
 }
 
 .facts {
@@ -94,6 +112,7 @@
   border-radius: 999px;
   background: var(--other-bg);
   font-size: 0.8rem;
+  font-variant-numeric: tabular-nums;
 }
 
 .facts strong {
@@ -110,14 +129,15 @@
 .diagnosis span {
   margin-right: 4px;
   color: var(--text);
-  font-size: 0.75rem;
+  font-size: 0.8rem;
   font-weight: 400;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
 }
 
 .notes {
   margin: 12px 0 0;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: var(--other-bg);
   color: var(--text-h);
   font-size: 0.9rem;
   white-space: pre-wrap;

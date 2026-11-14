@@ -97,6 +97,7 @@
 
 .form :global(.vc-field) > input {
   width: 100%;
+  min-height: 48px;
   padding: 11px 14px;
   border: 1px solid var(--border);
   border-radius: 10px;
@@ -166,19 +167,42 @@
   flex-direction: column;
   gap: 4px;
   height: 100%;
-  padding: 14px 16px;
+  padding: 16px;
   border: 1.5px solid var(--border);
   border-radius: 12px;
   background: #fff;
   color: var(--type-color);
   transition:
     border-color 0.2s ease,
-    box-shadow 0.2s ease;
+    box-shadow 0.2s ease,
+    scale 0.15s ease-out;
+}
+
+.typeOption:active .typeCard {
+  scale: 0.98;
+}
+
+/* The icon sits on a tinted disc in the type's colour; choosing the card fills the disc. */
+.typeCard svg {
+  box-sizing: content-box;
+  margin-bottom: 6px;
+  padding: 9px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--type-color) 14%, #fff);
+  color: var(--type-color);
+  transition:
+    background 0.2s ease,
+    color 0.2s ease;
+}
+
+.typeInput:checked + .typeCard svg {
+  background: var(--type-color);
+  color: #fff;
 }
 
 .typeCard strong {
   color: var(--text-h);
-  font-size: 0.95rem;
+  font-size: 1rem;
 }
 
 .typeCard small {
@@ -193,6 +217,7 @@
 
 .typeInput:checked + .typeCard {
   border-color: var(--type-color);
+  background: color-mix(in srgb, var(--type-color) 7%, #fff);
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--type-color) 20%, transparent);
 }
 
