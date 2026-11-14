@@ -3,15 +3,16 @@ import { Test } from '@nestjs/testing';
 import { DataSource } from 'typeorm';
 import { AppModule } from '../../src/app.module';
 import { AppointmentsClient } from '../../src/modules/history/clients/appointments.client';
-import { PetsLookup } from '../../src/modules/history/clients/pets.lookup';
+import { ClientsPetsClient } from '../../src/modules/clinical/clients/clients-pets.client';
 import { VetsLookup } from '../../src/modules/history/clients/vets.lookup';
-import { FakeAppointmentsClient, FakePetsLookup, FakeVetsLookup } from './fakes';
-import { PETS, VET_NAMES } from './fixtures';
+import { FakeAppointmentsClient, FakeClientsPetsClient, FakeVetsLookup } from './fakes';
+import { CLIENT_OF_USER, PETS, VET_NAMES } from './fixtures';
 
 export interface TestContext {
   app: INestApplication;
   dataSource: DataSource;
   appointments: FakeAppointmentsClient;
+  clientsPets: FakeClientsPetsClient;
 }
 
 /**
@@ -20,10 +21,11 @@ export interface TestContext {
  */
 export async function createTestApp(): Promise<TestContext> {
   const appointments = new FakeAppointmentsClient();
+  const clientsPets = new FakeClientsPetsClient(PETS, CLIENT_OF_USER);
 
   const moduleRef = await Test.createTestingModule({ imports: [AppModule] })
-    .overrideProvider(PetsLookup)
-    .useValue(new FakePetsLookup(PETS))
+    .overrideProvider(ClientsPetsClient)
+    .useValue(clientsPets)
     .overrideProvider(VetsLookup)
     .useValue(new FakeVetsLookup(VET_NAMES))
     .overrideProvider(AppointmentsClient)
@@ -34,5 +36,5 @@ export async function createTestApp(): Promise<TestContext> {
   app.useGlobalPipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true, transform: true }));
   await app.init();
 
-  return { app, dataSource: app.get(DataSource), appointments };
+  return { app, dataSource: app.get(DataSource), appointments, clientsPets };
 }

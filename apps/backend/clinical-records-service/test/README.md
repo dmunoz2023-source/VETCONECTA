@@ -36,5 +36,5 @@ ejecuta (no tiene PostgreSQL).
 | Filtros | Por tipo; por rango de fechas (inclusive); `to` sin hora incluye el día; combinados; el rango se reenvía a scheduling |
 | Paginación | Recorrer las páginas sin repetir ni saltar eventos; página fuera de rango |
 | Validación | `limit` > 50 o 0, `page` 0 o no numérico, tipo inexistente, fecha inválida, rango invertido, parámetro desconocido e id no UUID responden 400 |
-| Permisos (BR-8, NFR-4) | Veterinario, recepción y admin ven cualquier mascota; el dueño ve las suyas; mascota ajena 403; mascota inexistente 404; dueño sin cliente 403; sin cabeceras 401 |
+| Permisos (BR-8, NFR-4) | Veterinario, recepción y admin ven cualquier mascota; el dueño ve las suyas; mascota ajena o inexistente 403 (el dueño se valida por su `sub` con clients-pets); dueño sin cliente 403; clients-pets caído 503 (y el personal clínico no depende de él); sin cabeceras 401 |
 | Rendimiento (NFR-1) | 5.000 eventos de la mascota entre 55.000 en la tabla: menos de 2 s, también con filtros; el plan de la consulta usa el índice |

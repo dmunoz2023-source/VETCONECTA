@@ -4,6 +4,7 @@ import { resetDatabase, seedBulk, seedEvent } from './helpers/db';
 import {
   asAdmin,
   asOwnerA,
+  asOwnerSinCliente,
   asReception,
   asVet,
   PET_A,
@@ -31,6 +32,7 @@ describe('Historial clínico por mascota [F3]', () => {
     await resetDatabase(ctx.dataSource);
     ctx.appointments.appointments = [];
     ctx.appointments.lastCall = null;
+    ctx.clientsPets.unavailable = false;
   });
 
   async function seedFiveEventsForPetA() {
@@ -245,18 +247,30 @@ describe('Historial clínico por mascota [F3]', () => {
 
       const res = await request(ctx.app.getHttpServer()).get(history(PET_B)).set(asOwnerA).expect(403);
 
-      expect(res.body.message).toContain('BR-8');
+      expect(res.body.message).toContain('No tienes permiso');
       expect(JSON.stringify(res.body)).not.toContain('consultation');
     });
 
-    it('el dueño recibe 404 si la mascota no existe', async () => {
-      await request(ctx.app.getHttpServer()).get(history('99999999-9999-4999-8999-999999999999')).set(asOwnerA).expect(404);
+    it('el dueño recibe 403 si la mascota no existe, sin revelar si existe', async () => {
+      await request(ctx.app.getHttpServer()).get(history('99999999-9999-4999-8999-999999999999')).set(asOwnerA).expect(403);
     });
 
     it('un dueño sin cliente asociado recibe 403', async () => {
-      const { 'X-Client-Id': _omitido, ...sinCliente } = asOwnerA;
+      await request(ctx.app.getHttpServer()).get(history(PET_A)).set(asOwnerSinCliente).expect(403);
+    });
 
-      await request(ctx.app.getHttpServer()).get(history(PET_A)).set(sinCliente).expect(403);
+    it('si clients-pets no responde, la consulta del dueño da 503 y no filtra datos', async () => {
+      ctx.clientsPets.unavailable = true;
+
+      const res = await request(ctx.app.getHttpServer()).get(history(PET_A)).set(asOwnerA).expect(503);
+
+      expect(JSON.stringify(res.body)).not.toContain('consultation');
+    });
+
+    it('el personal clínico no depende de clients-pets para ver el historial', async () => {
+      ctx.clientsPets.unavailable = true;
+
+      await request(ctx.app.getHttpServer()).get(history(PET_A)).set(asVet).expect(200);
     });
 
     it('sin las cabeceras del Gateway responde 401', async () => {

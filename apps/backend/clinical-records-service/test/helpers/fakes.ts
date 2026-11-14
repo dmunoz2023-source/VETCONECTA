@@ -1,15 +1,30 @@
 import { AppointmentRange, AppointmentsClient, PastAppointment } from '../../src/modules/history/clients/appointments.client';
-import { PetInfo, PetsLookup } from '../../src/modules/history/clients/pets.lookup';
+import { ForbiddenException, ServiceUnavailableException } from '@nestjs/common';
 import { VetsLookup } from '../../src/modules/history/clients/vets.lookup';
+import { PetRecord } from './fixtures';
 
-/** Doble de clients-pets: solo sabe de las mascotas que se le entregan. */
-export class FakePetsLookup extends PetsLookup {
-  constructor(private readonly pets: PetInfo[]) {
-    super();
-  }
+/**
+ * Doble de clients-pets: responde como GET /internal/pets/:id/owner/:userId. Si el usuario no
+ * tiene cliente o la mascota no es de su cliente, clients-pets responde 404 y el cliente real
+ * lo traduce a 403; `unavailable` simula que el servicio no responde (503).
+ */
+export class FakeClientsPetsClient {
+  unavailable = false;
 
-  async findById(petId: string): Promise<PetInfo | null> {
-    return this.pets.find((pet) => pet.id === petId) ?? null;
+  constructor(
+    private readonly pets: PetRecord[],
+    private readonly clientOfUser: Record<string, string>,
+  ) {}
+
+  async assertPetOwnership(petId: string, userId: string): Promise<void> {
+    if (this.unavailable) {
+      throw new ServiceUnavailableException('No fue posible verificar la mascota en clients-pets-service.');
+    }
+    const clientId = this.clientOfUser[userId];
+    const owned = clientId !== undefined && this.pets.some((pet) => pet.id === petId && pet.clientId === clientId);
+    if (!owned) {
+      throw new ForbiddenException('No tienes permiso para consultar el carnet de esta mascota.');
+    }
   }
 }
 

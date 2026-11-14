@@ -1,4 +1,3 @@
-import { PetInfo } from '../../src/modules/history/clients/pets.lookup';
 
 export const CLIENT_A = '22222222-2222-2222-2222-222222222222';
 export const CLIENT_B = '22222222-2222-2222-2222-222222222223';
@@ -11,10 +10,21 @@ export const VET_ANA = '55555555-5555-5555-5555-555555555551';
 export const VET_LUIS = '55555555-5555-5555-5555-555555555559';
 export const VET_SIN_NOMBRE = '55555555-5555-5555-5555-555555555558';
 
-export const PETS: PetInfo[] = [
-  { id: PET_A, clientId: CLIENT_A, active: true },
-  { id: PET_A2, clientId: CLIENT_A, active: true },
-  { id: PET_B, clientId: CLIENT_B, active: true },
+/** Mascota tal como la conoce clients-pets: a qué cliente pertenece. */
+export interface PetRecord {
+  id: string;
+  clientId: string;
+}
+
+export const OWNER_A_USER = '55555555-5555-5555-5555-555555555553'; // usuario del CLIENT_A
+
+/** Cliente de cada usuario dueño (clients-pets lo resuelve por `user_id`). */
+export const CLIENT_OF_USER: Record<string, string> = { [OWNER_A_USER]: CLIENT_A };
+
+export const PETS: PetRecord[] = [
+  { id: PET_A, clientId: CLIENT_A },
+  { id: PET_A2, clientId: CLIENT_A },
+  { id: PET_B, clientId: CLIENT_B },
 ];
 
 export const VET_NAMES: Record<string, string> = {
@@ -26,8 +36,6 @@ export const VET_NAMES: Record<string, string> = {
 export const asVet = { 'X-User-Id': VET_ANA, 'X-User-Role': 'vet' };
 export const asReception = { 'X-User-Id': '55555555-5555-5555-5555-555555555552', 'X-User-Role': 'reception' };
 export const asAdmin = { 'X-User-Id': '11111111-1111-1111-1111-111111111111', 'X-User-Role': 'admin' };
-export const asOwnerA = {
-  'X-User-Id': '55555555-5555-5555-5555-555555555553',
-  'X-User-Role': 'owner',
-  'X-Client-Id': CLIENT_A,
-};
+export const asOwnerA = { 'X-User-Id': OWNER_A_USER, 'X-User-Role': 'owner' };
+/** Dueño sin ficha de cliente en clients-pets. */
+export const asOwnerSinCliente = { 'X-User-Id': '55555555-5555-5555-5555-555555555560', 'X-User-Role': 'owner' };

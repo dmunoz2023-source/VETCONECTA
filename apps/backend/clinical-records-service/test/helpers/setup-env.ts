@@ -16,7 +16,11 @@ if (!databaseName.endsWith('_test')) {
   throw new Error(`La base "${databaseName}" no termina en _test: las pruebas borran datos y no correrán ahí.`);
 }
 
-process.env.DATABASE_URL = url;
-process.env.DB_SCHEMA = 'clinical';
+const parsed = new URL(url);
+process.env.DB_HOST = parsed.hostname;
+process.env.DB_PORT = parsed.port || '5432';
+process.env.DB_USERNAME = decodeURIComponent(parsed.username);
+process.env.DB_PASSWORD = decodeURIComponent(parsed.password);
+process.env.DB_NAME = databaseName;
 process.env.INTERNAL_KEY = 'clave-de-prueba';
 process.env.NODE_ENV = 'test';
