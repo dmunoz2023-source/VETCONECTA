@@ -21,10 +21,14 @@
   background: var(--accent-secondary);
 }
 
+/* The numbered section badge already says the step; the text stays for screen readers only. */
 .stepLabel {
-  margin: -8px 0 0;
-  color: var(--text);
-  font-size: 0.78rem;
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 
 .grid {
@@ -55,4 +59,15 @@
   display: flex;
   gap: 10px;
   margin-left: auto;
+}
+
+/* Browser surfaces themed from the palette: caret, native date picker, text selection. */
+.form {
+  accent-color: var(--accent-secondary);
+  caret-color: var(--accent-secondary);
+}
+
+.form ::selection {
+  background: var(--accent-bg-light);
+  color: var(--text-h);
 }
