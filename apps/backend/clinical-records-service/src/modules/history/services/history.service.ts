@@ -1,11 +1,12 @@
-import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { JwtPayload } from '@app/shared/types/jwt-payload.interface';
+import { ClientsPetsClient } from '../../clinical/clients/clients-pets.client';
+import { ClinicalEventEntity } from '../../clinical/entities/clinical-event.entity';
 import { AppointmentsClient, AppointmentRange } from '../clients/appointments.client';
-import { PetsLookup } from '../clients/pets.lookup';
 import { VetsLookup } from '../clients/vets.lookup';
 import { HistoryQueryDto } from '../dto/history-query.dto';
 import { HistoryEventDto, HistoryResponseDto } from '../dto/history-response.dto';
-import { ClinicalEvent } from '../entities/clinical-event.entity';
+import { ClinicalEventType } from '../clinical-event-types';
 import { HistoryRepository } from '../repositories/history.repository';
 
 const DATE_ONLY = /^\d{4}-\d{2}-\d{2}$/;
@@ -19,7 +20,7 @@ const DAY_MS = 24 * 60 * 60 * 1000;
 export class HistoryService {
   constructor(
     private readonly history: HistoryRepository,
-    private readonly pets: PetsLookup,
+    private readonly clientsPets: ClientsPetsClient,
     private readonly vets: VetsLookup,
     private readonly appointments: AppointmentsClient,
   ) {}
@@ -37,7 +38,7 @@ export class HistoryService {
       limit: query.limit,
     });
 
-    const vetIds = [...new Set(events.map((event) => event.vetUserId))];
+    const vetIds = [...new Set(events.map((event) => event.veterinarianId))];
     const [vetNames, pastAppointments] = await Promise.all([
       this.vets.findNames(vetIds),
       this.appointments.findPastByPet(petId, range),
@@ -58,22 +59,13 @@ export class HistoryService {
 
   /**
    * BR-8 y NFR-4: el personal clínico ve cualquier mascota; el dueño solo las suyas (403).
-   * La pertenencia se consulta a clients-pets, porque la mascota no vive en este esquema.
+   * La pertenencia se consulta a clients-pets con el id de usuario del token (`sub`), porque
+   * la mascota no vive en este esquema y el token no trae `clientId`. Si la mascota no es del
+   * dueño o no existe, clients-pets responde 404 y aquí sale 403, sin revelar si existe.
    */
   private async assertCanView(user: JwtPayload, petId: string): Promise<void> {
     if (user.role !== 'owner') return;
-
-    if (!user.clientId) {
-      throw new ForbiddenException('El usuario autenticado no tiene un cliente asociado.');
-    }
-
-    const pet = await this.pets.findById(petId);
-    if (!pet) {
-      throw new NotFoundException(`Mascota con ID ${petId} no encontrada`);
-    }
-    if (pet.clientId !== user.clientId) {
-      throw new ForbiddenException('No puedes consultar el historial de una mascota que no es tuya (BR-8).');
-    }
+    await this.clientsPets.assertPetOwnership(petId, user.sub);
   }
 
   /** Las fechas sin hora se interpretan en UTC; un `to` sin hora incluye el día completo. */
@@ -91,25 +83,30 @@ export class HistoryService {
     return { from, toExclusive };
   }
 
-  private toEventDto(event: ClinicalEvent, vetNames: Map<string, string | null>): HistoryEventDto {
+  private toEventDto(event: ClinicalEventEntity, vetNames: Map<string, string | null>): HistoryEventDto {
     return {
       id: event.id,
-      type: event.type,
+      type: event.type as ClinicalEventType,
       date: event.date,
-      weightKg: event.weightKg,
-      temperatureC: event.temperatureC,
+      weightKg: this.toNumber(event.weightKg),
+      temperatureC: this.toNumber(event.temperatureC),
       reason: event.reason,
       notes: event.notes,
       nextCheckup: event.nextCheckup,
-      vaccination: event.vaccination
+      vaccination: event.vaccinationDetails
         ? {
-            vaccine: event.vaccination.vaccine,
-            laboratory: event.vaccination.laboratory,
-            batch: event.vaccination.batch,
-            boosterDate: event.vaccination.boosterDate,
+            vaccine: event.vaccinationDetails.vaccine,
+            laboratory: event.vaccinationDetails.laboratory,
+            batch: event.vaccinationDetails.batch,
+            boosterDate: event.vaccinationDetails.boosterDate,
           }
         : null,
-      vet: { id: event.vetUserId, name: vetNames.get(event.vetUserId) ?? null },
+      vet: { id: event.veterinarianId, name: vetNames.get(event.veterinarianId) ?? null },
     };
+  }
+
+  /** Las columnas DECIMAL llegan de pg como texto; se exponen como número (o null). */
+  private toNumber(value: number | string | null): number | null {
+    return value === null || value === undefined ? null : Number(value);
   }
 }

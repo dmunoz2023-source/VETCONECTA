@@ -1,7 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { ClinicalEvent, ClinicalEventType } from '../entities/clinical-event.entity';
+import { ClinicalEventEntity } from '../../clinical/entities/clinical-event.entity';
+import { ClinicalEventType } from '../clinical-event-types';
 
 export interface EventFilters {
   petId: string;
@@ -17,8 +18,8 @@ export interface EventFilters {
 @Injectable()
 export class HistoryRepository {
   constructor(
-    @InjectRepository(ClinicalEvent)
-    private readonly events: Repository<ClinicalEvent>,
+    @InjectRepository(ClinicalEventEntity)
+    private readonly events: Repository<ClinicalEventEntity>,
   ) {}
 
   /**
@@ -29,10 +30,10 @@ export class HistoryRepository {
    * Se usa limit/offset (y no skip/take) porque no hay JOIN uno-a-muchos: así la página
    * sale en una sola consulta en vez de la estrategia de dos pasos de TypeORM.
    */
-  async findPage(filters: EventFilters): Promise<{ events: ClinicalEvent[]; total: number }> {
+  async findPage(filters: EventFilters): Promise<{ events: ClinicalEventEntity[]; total: number }> {
     const query = this.events
       .createQueryBuilder('event')
-      .leftJoinAndSelect('event.vaccination', 'vaccination')
+      .leftJoinAndSelect('event.vaccinationDetails', 'vaccination')
       .where('event.petId = :petId', { petId: filters.petId });
 
     if (filters.type) query.andWhere('event.type = :type', { type: filters.type });

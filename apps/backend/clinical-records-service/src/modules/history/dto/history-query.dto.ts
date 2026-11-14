@@ -1,7 +1,7 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 import { IsIn, IsInt, IsISO8601, IsOptional, Max, Min } from 'class-validator';
-import { CLINICAL_EVENT_TYPES, ClinicalEventType } from '../entities/clinical-event.entity';
+import { CLINICAL_EVENT_TYPES, ClinicalEventType } from '../clinical-event-types';
 
 /**
  * [F3] Query params de GET /v1/clinical/pets/:petId/history.

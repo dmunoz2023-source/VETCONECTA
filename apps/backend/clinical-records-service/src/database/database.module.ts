@@ -1,15 +1,15 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { AppConfig } from '../config/configuration';
-import { ClinicalEvent } from '../modules/history/entities/clinical-event.entity';
-import { VaccinationDetail } from '../modules/history/entities/vaccination-detail.entity';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ClinicalEventEntity } from '../modules/clinical/entities/clinical-event.entity';
+import { TreatmentEntity } from '../modules/clinical/entities/treatment.entity';
+import { VaccinationDetailsEntity } from '../modules/clinical/entities/vaccination-details.entity';
 
 /**
  * Punto único de conexión de clinical-records-service a PostgreSQL.
  *
  * Aislamiento por esquema: solo se registran entidades de `clinical` y se fija
- * `schema: dbSchema`. Ningún repositorio de este servicio apunta a tablas de
+ * `schema: 'clinical'`. Ningún repositorio de este servicio apunta a tablas de
  * otros esquemas (no hay JOIN entre esquemas: mascotas, veterinarios y citas se
  * consultan por HTTP a rutas /internal).
  *
@@ -21,13 +21,20 @@ import { VaccinationDetail } from '../modules/history/entities/vaccination-detai
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: (configService: ConfigService<AppConfig, true>) => ({
-        type: 'postgres' as const,
-        url: configService.get('databaseUrl', { infer: true }),
-        schema: configService.get('dbSchema', { infer: true }),
-        entities: [ClinicalEvent, VaccinationDetail],
+      useFactory: (configService: ConfigService) => ({
+        type: 'postgres',
+        host: configService.get<string>('database.host'),
+        port: configService.get<number>('database.port'),
+        username: configService.get<string>('database.username'),
+        password: configService.get<string>('database.password'),
+        database: configService.get<string>('database.name'),
+        schema: 'clinical',
+        entities: [
+          ClinicalEventEntity,
+          VaccinationDetailsEntity,
+          TreatmentEntity,
+        ],
         synchronize: false,
-        logging: process.env.NODE_ENV !== 'production',
       }),
     }),
   ],

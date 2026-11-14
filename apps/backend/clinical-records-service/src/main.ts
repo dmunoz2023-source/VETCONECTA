@@ -22,6 +22,7 @@ async function bootstrap() {
   // Solo publica el contrato en JSON (/docs-json). La interfaz de Swagger vive en el api-gateway
   const swaggerConfig = new DocumentBuilder()
     .setTitle('VetConecta - Clinical Records Service')
+    .setDescription('API para registrar y consultar eventos clínicos de mascotas.')
     .setVersion('0.1.0')
     .addBearerAuth()
     .build();

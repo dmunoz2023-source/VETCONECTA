@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { CLINICAL_EVENT_TYPES, ClinicalEventType } from '../entities/clinical-event.entity';
+import { CLINICAL_EVENT_TYPES, ClinicalEventType } from '../clinical-event-types';
 
 export class VetSummaryDto {
   @ApiProperty({ format: 'uuid', description: 'Id del usuario veterinario.' })

@@ -3,7 +3,6 @@ import {
   ApiBadRequestResponse,
   ApiBearerAuth,
   ApiForbiddenResponse,
-  ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
   ApiParam,
@@ -45,8 +44,7 @@ export class HistoryController {
   @ApiOkResponse({ type: HistoryResponseDto, description: 'Historial paginado.' })
   @ApiBadRequestResponse({ description: 'Parámetros inválidos (id, filtros, paginación o rango de fechas).' })
   @ApiUnauthorizedResponse({ description: 'Faltan las cabeceras de autenticación del Gateway.' })
-  @ApiForbiddenResponse({ description: 'El dueño intentó consultar una mascota que no le pertenece.' })
-  @ApiNotFoundResponse({ description: 'La mascota no existe (verificación hecha al consultar como dueño).' })
+  @ApiForbiddenResponse({ description: 'El dueño intentó consultar una mascota que no le pertenece (o que no existe).' })
   @ApiServiceUnavailableResponse({ description: 'No se pudo verificar la mascota en el servicio de clientes.' })
   getHistory(
     @CurrentUser() user: JwtPayload,
