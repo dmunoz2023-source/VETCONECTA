@@ -5,6 +5,7 @@ import FormField from "../../components/common/FormField";
 import FormSection from "../../components/common/FormSection/FormSection";
 import Modal from "../../components/feedback/Modal";
 import type { Client, ClientFormValues } from "../../types/client.types";
+import { isValidRut } from "../../utils/rut";
 import css from "./ClientFormModal.module.css";
 
 interface ClientFormModalProps {
@@ -23,6 +24,17 @@ const RUT_PATTERN = String.raw`(\d{1,2}\.\d{3}\.\d{3}-[0-9kK]|\d{7,8}-[0-9kK])`;
 /** At least one non-space character, so a name made of spaces is not accepted. */
 const NAME_PATTERN = String.raw`.*\S.*`;
 /** Escaped parentheses: browsers compile `pattern` with the `v` flag, where a bare ( ) inside [] is invalid and the whole pattern is ignored. */
+const RUT_DIGIT_MESSAGE = "El dígito verificador del RUT no es válido.";
+
+/**
+ * The pattern only checks the format: this marks the RUT invalid when its check digit does not match.
+ * It stays off while the format is wrong, so the browser shows the format message first.
+ */
+function checkRutDigit(field: HTMLInputElement) {
+  const wrongDigit = field.value !== "" && !field.validity.patternMismatch && !isValidRut(field.value);
+  field.setCustomValidity(wrongDigit ? RUT_DIGIT_MESSAGE : "");
+}
+
 const PHONE_PATTERN = String.raw`\+?[0-9 \(\)\-]{8,15}`;
 
 /**
@@ -37,6 +49,7 @@ export default function ClientFormModal({ client, error, onClose, onSubmit }: Cl
   const goNext = () => {
     const fields = stepOneRef.current?.querySelectorAll<HTMLInputElement>("input") ?? [];
     for (const field of fields) {
+      if (field.name === "rut") checkRutDigit(field);
       if (!field.reportValidity()) return;
     }
     setStep(LAST_STEP);
@@ -69,7 +82,7 @@ export default function ClientFormModal({ client, error, onClose, onSubmit }: Cl
               <FormField label="Nombre" name="firstName" type="text" pattern={NAME_PATTERN} maxLength={60} title="Ingresa el nombre" defaultValue={client?.firstName} placeholder="María" required />
               <FormField label="Apellido" name="lastName" type="text" pattern={NAME_PATTERN} maxLength={60} title="Ingresa el apellido" defaultValue={client?.lastName} placeholder="González" required />
               <div className={css.full}>
-                <FormField label="RUT" name="rut" type="text" pattern={RUT_PATTERN} maxLength={12} title="Formato válido: 12.345.678-K o 12345678-K" defaultValue={client?.rut} placeholder="17.456.932-1" required />
+                <FormField label="RUT" name="rut" type="text" pattern={RUT_PATTERN} maxLength={12} title="Formato válido: 12.345.678-K o 12345678-K" defaultValue={client?.rut} placeholder="17.456.932-0" onInput={(e) => checkRutDigit(e.currentTarget)} required />
               </div>
             </div>
           </FormSection>
@@ -78,7 +91,7 @@ export default function ClientFormModal({ client, error, onClose, onSubmit }: Cl
         <div hidden={step !== LAST_STEP}>
           <FormSection step={2} title="Contacto y ubicación" subtitle="Cómo avisarle y dónde vive.">
             <div className={css.grid}>
-              <FormField label="Teléfono" name="phone" type="tel" pattern={PHONE_PATTERN} maxLength={15} title="Entre 8 y 15 dígitos, ej: +56 9 8765 4321" defaultValue={client?.phone ?? ""} placeholder="+56 9 8765 4321" required />
+              <FormField label="Teléfono (opcional)" name="phone" type="tel" pattern={PHONE_PATTERN} maxLength={15} title="Entre 8 y 15 dígitos, ej: +56 9 8765 4321" defaultValue={client?.phone ?? ""} placeholder="+56 9 8765 4321" />
               <FormField label="Comuna" name="district" type="text" maxLength={60} defaultValue={client?.district ?? ""} placeholder="Santiago" />
               <div className={css.full}>
                 <FormField label="Correo electrónico" name="email" type="email" maxLength={100} defaultValue={client?.email} placeholder="correo@ejemplo.com" required />
