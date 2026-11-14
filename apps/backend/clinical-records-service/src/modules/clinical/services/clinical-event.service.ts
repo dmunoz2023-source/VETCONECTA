@@ -23,7 +23,7 @@ export class ClinicalEventService {
   ) {}
 
   async create(createDto: CreateClinicalEventDto, veterinarianId: string): Promise<ClinicalEventEntity> {
-    await this.clientsPetsClient.assertPetExists(createDto.mascotaId);
+    await this.clientsPetsClient.assertPetExists(createDto.petId);
     const { eventData, vaccinationData } = this.prepareEventData(createDto);
 
     return this.clinicalEventRepository.save(
@@ -52,7 +52,7 @@ export class ClinicalEventService {
       );
     }
 
-    if (updateDto.mascotaId !== existingEvent.petId) {
+    if (updateDto.petId !== existingEvent.petId) {
       throw new BadRequestException(
         'No se puede cambiar la mascota asociada al evento clínico.',
       );
@@ -90,7 +90,7 @@ export class ClinicalEventService {
       | { vaccine: string; batch: string; boosterDate: string }
       | undefined;
   } {
-    const eventDate = new Date(dto.fecha);
+    const eventDate = new Date(dto.date);
     if (eventDate > new Date()) {
       throw new BadRequestException(
         'La fecha del evento clínico no puede ser futura.',
@@ -100,13 +100,13 @@ export class ClinicalEventService {
     let vaccinationData:
       | { vaccine: string; batch: string; boosterDate: string }
       | undefined;
-    if (dto.tipo === ClinicalEventType.VACUNA) {
+    if (dto.type === ClinicalEventType.VACCINE) {
       if (
-        !dto.nombreVacuna ||
-        !dto.lote ||
-        !dto.fechaProximaDosis ||
-        dto.diagnostico !== undefined ||
-        dto.proximoControl !== undefined
+        !dto.vaccineName ||
+        !dto.batch ||
+        !dto.boosterDate ||
+        dto.diagnosis !== undefined ||
+        dto.nextCheckup !== undefined
       ) {
         throw new BadRequestException(
           'Las vacunas requieren nombre, lote y fecha de próxima dosis, y no aceptan diagnóstico ni próximo control.',
@@ -114,16 +114,16 @@ export class ClinicalEventService {
       }
 
       vaccinationData = {
-        vaccine: dto.nombreVacuna,
-        batch: dto.lote,
-        boosterDate: dto.fechaProximaDosis,
+        vaccine: dto.vaccineName,
+        batch: dto.batch,
+        boosterDate: dto.boosterDate,
       };
     } else if (
-      !dto.diagnostico ||
-      !dto.proximoControl ||
-      dto.nombreVacuna !== undefined ||
-      dto.lote !== undefined ||
-      dto.fechaProximaDosis !== undefined
+      !dto.diagnosis ||
+      !dto.nextCheckup ||
+      dto.vaccineName !== undefined ||
+      dto.batch !== undefined ||
+      dto.boosterDate !== undefined
     ) {
       throw new BadRequestException(
         'Las consultas y controles requieren diagnóstico y próximo control, y no aceptan datos de vacuna.',
@@ -132,15 +132,15 @@ export class ClinicalEventService {
 
     return {
       eventData: {
-        petId: dto.mascotaId,
-        type: dto.tipo,
+        petId: dto.petId,
+        type: dto.type,
         date: eventDate,
-        weightKg: dto.peso ?? null,
-        temperatureC: dto.temperatura ?? null,
-        reason: dto.motivo ?? null,
-        diagnosis: dto.diagnostico ?? null,
-        notes: dto.observaciones,
-        nextCheckup: dto.proximoControl ?? null,
+        weightKg: dto.weightKg,
+        temperatureC: dto.temperatureC ?? null,
+        reason: dto.reason ?? null,
+        diagnosis: dto.diagnosis ?? null,
+        notes: dto.notes,
+        nextCheckup: dto.nextCheckup ?? null,
       },
       vaccinationData,
     };
