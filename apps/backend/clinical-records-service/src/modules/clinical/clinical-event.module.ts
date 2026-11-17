@@ -1,5 +1,7 @@
 import { Module } from '@nestjs/common';
+import { HttpModule } from '@nestjs/axios';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { ClientsPetsClient } from './clients/clients-pets.client';
 import { ClinicalEventController } from './controllers/clinical-event.controller';
 import { ClinicalEventEntity } from './entities/clinical-event.entity';
 import { TreatmentEntity } from './entities/treatment.entity';
@@ -9,6 +11,7 @@ import { ClinicalEventService } from './services/clinical-event.service';
 
 @Module({
   imports: [
+    HttpModule.register({ timeout: 3000 }),
     TypeOrmModule.forFeature([
       ClinicalEventEntity,
       VaccinationDetailsEntity,
@@ -17,6 +20,7 @@ import { ClinicalEventService } from './services/clinical-event.service';
   ],
   controllers: [ClinicalEventController],
   providers: [
+    ClientsPetsClient,
     ClinicalEventRepository,
     ClinicalEventService,
   ],

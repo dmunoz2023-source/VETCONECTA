@@ -100,6 +100,36 @@ CREATE TABLE scheduling.availability_slots (
     UNIQUE (vet_user_id, start_time)
 );
 
+-- [G3] Horario semanal del veterinario. day_of_week: 0 = domingo ... 6 = sábado.
+-- Las horas son locales de la clínica (America/Santiago).
+CREATE TABLE scheduling.vet_schedules (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    vet_user_id UUID NOT NULL,
+    day_of_week SMALLINT NOT NULL CHECK (day_of_week BETWEEN 0 AND 6),
+    start_time TIME NOT NULL,
+    end_time TIME NOT NULL,
+    CHECK (end_time > start_time),
+    UNIQUE (vet_user_id, day_of_week, start_time)
+);
+
+-- [G3] Bloqueo puntual de agenda. Sin horas, bloquea el día completo.
+CREATE TABLE scheduling.vet_blocks (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    vet_user_id UUID NOT NULL,
+    block_date DATE NOT NULL,
+    start_time TIME,
+    end_time TIME,
+    reason VARCHAR(200) NOT NULL,
+    created_by UUID,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    CHECK (
+        (start_time IS NULL AND end_time IS NULL)
+        OR (start_time IS NOT NULL AND end_time IS NOT NULL AND end_time > start_time)
+    )
+);
+
+CREATE INDEX idx_vet_blocks_vet_date ON scheduling.vet_blocks (vet_user_id, block_date);
+
 CREATE TABLE scheduling.appointments (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     slot_id UUID NOT NULL UNIQUE,

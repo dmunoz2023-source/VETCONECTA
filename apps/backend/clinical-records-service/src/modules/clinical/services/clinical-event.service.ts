@@ -2,9 +2,7 @@ import {
   BadRequestException,
   ForbiddenException,
   Injectable,
-  InternalServerErrorException,
   NotFoundException,
-  ServiceUnavailableException,
 } from '@nestjs/common';
 import { JwtPayload } from '@app/shared/types/jwt-payload.interface';
 import { ClinicalEventEntity } from '../entities/clinical-event.entity';
@@ -15,21 +13,27 @@ import {
 } from '../dto/create-clinical-event.dto';
 import { GetClinicalHistoryQueryDto } from '../dto/get-clinical-history-query.dto';
 import { ClinicalEventRepository } from '../repositories/clinical-event.repository';
+import { ClientsPetsClient } from '../clients/clients-pets.client';
 
 @Injectable()
 export class ClinicalEventService {
   constructor(
     private readonly clinicalEventRepository: ClinicalEventRepository,
+    private readonly clientsPetsClient: ClientsPetsClient,
   ) {}
 
   async create(createDto: CreateClinicalEventDto, veterinarianId: string): Promise<ClinicalEventEntity> {
-    await this.assertPetExists(createDto.mascotaId);
+    await this.clientsPetsClient.assertPetExists(createDto.petId);
     const { eventData, vaccinationData } = this.prepareEventData(createDto);
 
-    return this.clinicalEventRepository.save({
-      ...eventData,
+    return this.clinicalEventRepository.save(
+      {
+        ...eventData,
+        veterinarianId,
+      },
       veterinarianId,
-    }, vaccinationData);
+      vaccinationData,
+    );
   }
 
   async update(
@@ -48,7 +52,7 @@ export class ClinicalEventService {
       );
     }
 
-    if (updateDto.mascotaId !== existingEvent.petId) {
+    if (updateDto.petId !== existingEvent.petId) {
       throw new BadRequestException(
         'No se puede cambiar la mascota asociada al evento clínico.',
       );
@@ -58,6 +62,7 @@ export class ClinicalEventService {
     const updatedEvent = await this.clinicalEventRepository.update(
       id,
       eventData,
+      user.sub,
       vaccinationData,
     );
     if (!updatedEvent) {
@@ -85,7 +90,7 @@ export class ClinicalEventService {
       | { vaccine: string; batch: string; boosterDate: string }
       | undefined;
   } {
-    const eventDate = new Date(dto.fecha);
+    const eventDate = new Date(dto.date);
     if (eventDate > new Date()) {
       throw new BadRequestException(
         'La fecha del evento clínico no puede ser futura.',
@@ -95,13 +100,13 @@ export class ClinicalEventService {
     let vaccinationData:
       | { vaccine: string; batch: string; boosterDate: string }
       | undefined;
-    if (dto.tipo === ClinicalEventType.VACUNA) {
+    if (dto.type === ClinicalEventType.VACCINE) {
       if (
-        !dto.nombreVacuna ||
-        !dto.lote ||
-        !dto.fechaProximaDosis ||
-        dto.diagnostico !== undefined ||
-        dto.proximoControl !== undefined
+        !dto.vaccineName ||
+        !dto.batch ||
+        !dto.boosterDate ||
+        dto.diagnosis !== undefined ||
+        dto.nextCheckup !== undefined
       ) {
         throw new BadRequestException(
           'Las vacunas requieren nombre, lote y fecha de próxima dosis, y no aceptan diagnóstico ni próximo control.',
@@ -109,16 +114,16 @@ export class ClinicalEventService {
       }
 
       vaccinationData = {
-        vaccine: dto.nombreVacuna,
-        batch: dto.lote,
-        boosterDate: dto.fechaProximaDosis,
+        vaccine: dto.vaccineName,
+        batch: dto.batch,
+        boosterDate: dto.boosterDate,
       };
     } else if (
-      !dto.diagnostico ||
-      !dto.proximoControl ||
-      dto.nombreVacuna !== undefined ||
-      dto.lote !== undefined ||
-      dto.fechaProximaDosis !== undefined
+      !dto.diagnosis ||
+      !dto.nextCheckup ||
+      dto.vaccineName !== undefined ||
+      dto.batch !== undefined ||
+      dto.boosterDate !== undefined
     ) {
       throw new BadRequestException(
         'Las consultas y controles requieren diagnóstico y próximo control, y no aceptan datos de vacuna.',
@@ -127,15 +132,15 @@ export class ClinicalEventService {
 
     return {
       eventData: {
-        petId: dto.mascotaId,
-        type: dto.tipo,
+        petId: dto.petId,
+        type: dto.type,
         date: eventDate,
-        weightKg: dto.peso ?? null,
-        temperatureC: dto.temperatura ?? null,
-        reason: dto.motivo ?? null,
-        diagnosis: dto.diagnostico ?? null,
-        notes: dto.observaciones,
-        nextCheckup: dto.proximoControl ?? null,
+        weightKg: dto.weightKg,
+        temperatureC: dto.temperatureC ?? null,
+        reason: dto.reason ?? null,
+        diagnosis: dto.diagnosis ?? null,
+        notes: dto.notes,
+        nextCheckup: dto.nextCheckup ?? null,
       },
       vaccinationData,
     };
@@ -146,82 +151,10 @@ export class ClinicalEventService {
     user: JwtPayload,
   ): Promise<ClinicalEventEntity[]> {
     if (user.role === 'owner') {
-      await this.assertPetOwnership(petId, user.sub);
+      await this.clientsPetsClient.assertPetOwnership(petId, user.sub);
     }
 
     return this.clinicalEventRepository.findByPetId(petId);
-  }
-
-  private async assertPetOwnership(petId: string, userId: string): Promise<void> {
-    const internalKey =
-      process.env.INTERNAL_API_KEY || process.env.INTERNAL_KEY;
-    if (!internalKey) {
-      throw new InternalServerErrorException(
-        'La clave de comunicación interna no está configurada.',
-      );
-    }
-
-    const clientsServiceUrl = (
-      process.env.CLIENTS_SERVICE_URL || 'http://localhost:3002'
-    ).replace(/\/+$/, '');
-    let response: Response;
-    try {
-      response = await fetch(
-        `${clientsServiceUrl}/internal/pets/${encodeURIComponent(petId)}/owner/${encodeURIComponent(userId)}`,
-        { headers: { 'X-Internal-Key': internalKey } },
-      );
-    } catch {
-      throw new ServiceUnavailableException(
-        'No fue posible verificar la propiedad de la mascota.',
-      );
-    }
-
-    if (response.status === 404) {
-      throw new ForbiddenException(
-        'No tienes permiso para consultar el carnet de esta mascota.',
-      );
-    }
-    if (!response.ok) {
-      throw new ServiceUnavailableException(
-        'No fue posible verificar la propiedad de la mascota.',
-      );
-    }
-  }
-
-  private async assertPetExists(petId: string): Promise<void> {
-    const internalKey =
-      process.env.INTERNAL_API_KEY || process.env.INTERNAL_KEY;
-    if (!internalKey) {
-      throw new InternalServerErrorException(
-        'La clave de comunicación interna no está configurada.',
-      );
-    }
-
-    const clientsServiceUrl = (
-      process.env.CLIENTS_SERVICE_URL || 'http://localhost:3002'
-    ).replace(/\/+$/, '');
-    let response: Response;
-    try {
-      response = await fetch(
-        `${clientsServiceUrl}/internal/pets/${encodeURIComponent(petId)}`,
-        { headers: { 'X-Internal-Key': internalKey } },
-      );
-    } catch {
-      throw new ServiceUnavailableException(
-        'No fue posible verificar que la mascota exista.',
-      );
-    }
-
-    if (response.status === 404) {
-      throw new NotFoundException(
-        `No existe una mascota con el ID ${petId}.`,
-      );
-    }
-    if (!response.ok) {
-      throw new ServiceUnavailableException(
-        'No fue posible verificar que la mascota exista.',
-      );
-    }
   }
 
   async findHistoryByPetId(
