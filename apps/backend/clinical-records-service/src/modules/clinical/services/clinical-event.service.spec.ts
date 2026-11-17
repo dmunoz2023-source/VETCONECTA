@@ -1,16 +1,15 @@
 import {
   BadRequestException,
   ForbiddenException,
-  InternalServerErrorException,
   NotFoundException,
-  ServiceUnavailableException,
 } from '@nestjs/common';
 import { JwtPayload } from '@app/shared/types/jwt-payload.interface';
-import { ClinicalEventRepository } from '../repositories/clinical-event.repository';
+import { ClientsPetsClient } from '../clients/clients-pets.client';
 import {
   ClinicalEventType,
   CreateClinicalEventDto,
 } from '../dto/create-clinical-event.dto';
+import { ClinicalEventRepository } from '../repositories/clinical-event.repository';
 import { ClinicalEventService } from './clinical-event.service';
 
 const PET_ID = '11111111-1111-4111-8111-111111111111';
@@ -24,30 +23,32 @@ const otherVet: JwtPayload = { sub: OTHER_VET_ID, email: 'v2@vet.cl', role: 'vet
 const admin: JwtPayload = { sub: 'adm-1', email: 'a@vet.cl', role: 'admin' };
 const reception: JwtPayload = { sub: 'r1', email: 'r@vet.cl', role: 'reception' };
 
-// Consulta/control: exige diagnostico y proximoControl, no acepta datos de vacuna.
-const consulta = (over: Partial<CreateClinicalEventDto> = {}): CreateClinicalEventDto => ({
-  mascotaId: PET_ID,
-  tipo: ClinicalEventType.CONSULTA,
-  fecha: '2026-11-01T10:00:00.000Z',
-  peso: 12.5,
-  observaciones: 'Control general sin novedades',
-  diagnostico: 'Sano',
-  proximoControl: '2026-12-01',
-  ...over,
-} as CreateClinicalEventDto);
+// Consultation/checkup
+const consultation = (over: Partial<CreateClinicalEventDto> = {}): CreateClinicalEventDto =>
+  ({
+    petId: PET_ID,
+    type: ClinicalEventType.CONSULTATION,
+    date: '2026-11-01T10:00:00.000Z',
+    weightKg: 12.5,
+    notes: 'Control general sin novedades',
+    diagnosis: 'Sano',
+    nextCheckup: '2026-12-01',
+    ...over,
+  }) as CreateClinicalEventDto;
 
-// Vacuna: exige nombre, lote y fecha de proxima dosis, no acepta diagnostico ni proximoControl.
-const vacuna = (over: Partial<CreateClinicalEventDto> = {}): CreateClinicalEventDto => ({
-  mascotaId: PET_ID,
-  tipo: ClinicalEventType.VACUNA,
-  fecha: '2026-11-01T10:00:00.000Z',
-  peso: 10,
-  observaciones: 'Sin reacciones',
-  nombreVacuna: 'Rabia',
-  lote: 'L-123',
-  fechaProximaDosis: '2027-11-01',
-  ...over,
-} as CreateClinicalEventDto);
+  
+const vaccine = (over: Partial<CreateClinicalEventDto> = {}): CreateClinicalEventDto =>
+  ({
+    petId: PET_ID,
+    type: ClinicalEventType.VACCINE,
+    date: '2026-11-01T10:00:00.000Z',
+    weightKg: 10,
+    notes: 'Sin reacciones',
+    vaccineName: 'Rabia',
+    batch: 'L-123',
+    boosterDate: '2027-11-01',
+    ...over,
+  }) as CreateClinicalEventDto;
 
 describe('ClinicalEventService [F2]', () => {
   const repo = {
@@ -57,36 +58,35 @@ describe('ClinicalEventService [F2]', () => {
     findByPetId: jest.fn(),
     findHistoryByPetId: jest.fn(),
   };
+  const petsClient = {
+    assertPetExists: jest.fn(),
+    assertPetOwnership: jest.fn(),
+  };
   let service: ClinicalEventService;
-  const originalEnv = { ...process.env };
-  const fetchMock = jest.fn();
 
   beforeEach(() => {
     jest.resetAllMocks();
     jest.useFakeTimers({ now: new Date('2026-11-09T12:00:00Z'), doNotFake: ['nextTick'] });
-    process.env = { ...originalEnv, INTERNAL_API_KEY: 'k-test', CLIENTS_SERVICE_URL: 'http://clients:3002/' };
-    (global as any).fetch = fetchMock;
-    fetchMock.mockResolvedValue({ ok: true, status: 200 });
-    repo.save.mockImplementation(async (data, vaccination) => ({ id: 'e1', ...data, vaccination }));
-    service = new ClinicalEventService(repo as unknown as ClinicalEventRepository);
+    petsClient.assertPetExists.mockResolvedValue(undefined);
+    petsClient.assertPetOwnership.mockResolvedValue(undefined);
+    repo.save.mockImplementation(async (data, actor, vaccination) => ({ id: 'e1', ...data, vaccination }));
+    service = new ClinicalEventService(
+      repo as unknown as ClinicalEventRepository,
+      petsClient as unknown as ClientsPetsClient,
+    );
   });
 
-  afterEach(() => {
-    jest.useRealTimers();
-    process.env = originalEnv;
-  });
+  afterEach(() => jest.useRealTimers());
 
   describe('create', () => {
     it('consulta: verifica la mascota, toma el veterinario del JWT y guarda sin datos de vacuna', async () => {
-      const result = await service.create(consulta({ temperatura: 38.5, motivo: 'Chequeo' }), VET_ID);
+      const result = await service.create(consultation({ temperatureC: 38.5, reason: 'Chequeo' }), VET_ID);
 
-      expect(fetchMock).toHaveBeenCalledWith(`http://clients:3002/internal/pets/${PET_ID}`, {
-        headers: { 'X-Internal-Key': 'k-test' },
-      });
+      expect(petsClient.assertPetExists).toHaveBeenCalledWith(PET_ID);
       expect(repo.save).toHaveBeenCalledWith(
         {
           petId: PET_ID,
-          type: ClinicalEventType.CONSULTA,
+          type: ClinicalEventType.CONSULTATION,
           date: new Date('2026-11-01T10:00:00.000Z'),
           weightKg: 12.5,
           temperatureC: 38.5,
@@ -96,101 +96,86 @@ describe('ClinicalEventService [F2]', () => {
           nextCheckup: '2026-12-01',
           veterinarianId: VET_ID,
         },
+        VET_ID,
         undefined,
       );
       expect(result.veterinarianId).toBe(VET_ID);
     });
 
-    it('guarda null en los campos opcionales que no vienen', async () => {
-      await service.create(consulta({ peso: undefined }), VET_ID);
+    it('guarda null en temperatura y motivo cuando no vienen', async () => {
+      await service.create(consultation(), VET_ID);
 
       expect(repo.save).toHaveBeenCalledWith(
-        expect.objectContaining({ weightKg: null, temperatureC: null, reason: null }),
+        expect.objectContaining({ temperatureC: null, reason: null }),
+        VET_ID,
         undefined,
       );
     });
 
     it('vacuna: guarda el evento junto con nombre, lote y fecha de refuerzo', async () => {
-      await service.create(vacuna(), VET_ID);
+      await service.create(vaccine(), VET_ID);
 
       expect(repo.save).toHaveBeenCalledWith(
         expect.objectContaining({
-          type: ClinicalEventType.VACUNA,
+          type: ClinicalEventType.VACCINE,
           diagnosis: null,
           nextCheckup: null,
           veterinarianId: VET_ID,
         }),
+        VET_ID,
         { vaccine: 'Rabia', batch: 'L-123', boosterDate: '2027-11-01' },
       );
     });
 
     it('mascota inexistente -> 404 y no se guarda nada', async () => {
-      fetchMock.mockResolvedValue({ ok: false, status: 404 });
+      petsClient.assertPetExists.mockRejectedValue(new NotFoundException());
 
-      await expect(service.create(consulta(), VET_ID)).rejects.toThrow(NotFoundException);
+      await expect(service.create(consultation(), VET_ID)).rejects.toThrow(NotFoundException);
       expect(repo.save).not.toHaveBeenCalled();
     });
 
-    it('servicio de clientes con error -> 503', async () => {
-      fetchMock.mockResolvedValue({ ok: false, status: 500 });
-      await expect(service.create(consulta(), VET_ID)).rejects.toThrow(ServiceUnavailableException);
-    });
-
-    it('sin conexion al servicio de clientes -> 503', async () => {
-      fetchMock.mockRejectedValue(new Error('ECONNREFUSED'));
-      await expect(service.create(consulta(), VET_ID)).rejects.toThrow(ServiceUnavailableException);
-    });
-
-    it('sin clave interna configurada -> 500 y no se consulta', async () => {
-      delete process.env.INTERNAL_API_KEY;
-      delete process.env.INTERNAL_KEY;
-
-      await expect(service.create(consulta(), VET_ID)).rejects.toThrow(InternalServerErrorException);
-      expect(fetchMock).not.toHaveBeenCalled();
-    });
-
     it('rechaza una fecha futura con 400 y no guarda', async () => {
-      await expect(service.create(consulta({ fecha: '2026-11-10T12:00:00Z' }), VET_ID)).rejects.toThrow(
+      await expect(service.create(consultation({ date: '2026-11-10T12:00:00Z' }), VET_ID)).rejects.toThrow(
         BadRequestException,
       );
       expect(repo.save).not.toHaveBeenCalled();
     });
 
     it('acepta un evento de hoy (no es futuro)', async () => {
-      await expect(service.create(consulta({ fecha: '2026-11-09T11:59:00Z' }), VET_ID)).resolves.toBeDefined();
+      await expect(service.create(consultation({ date: '2026-11-09T11:59:00Z' }), VET_ID)).resolves.toBeDefined();
     });
 
     it.each([
-      ['sin nombre de vacuna', { nombreVacuna: undefined }],
-      ['sin lote', { lote: undefined }],
-      ['sin fecha de proxima dosis', { fechaProximaDosis: undefined }],
-      ['con diagnostico', { diagnostico: 'Sano' }],
-      ['con proximo control', { proximoControl: '2026-12-01' }],
-    ])('vacuna %s -> 400', async (_caso, cambio) => {
-      await expect(service.create(vacuna(cambio as any), VET_ID)).rejects.toThrow(BadRequestException);
+      ['sin nombre de vacuna', { vaccineName: undefined }],
+      ['sin lote', { batch: undefined }],
+      ['sin fecha de proxima dosis', { boosterDate: undefined }],
+      ['con diagnostico', { diagnosis: 'Sano' }],
+      ['con proximo control', { nextCheckup: '2026-12-01' }],
+    ])('vacuna %s -> 400', async (_case, change) => {
+      await expect(service.create(vaccine(change as any), VET_ID)).rejects.toThrow(BadRequestException);
       expect(repo.save).not.toHaveBeenCalled();
     });
 
     it.each([
-      ['sin diagnostico', { diagnostico: undefined }],
-      ['sin proximo control', { proximoControl: undefined }],
-      ['con nombre de vacuna', { nombreVacuna: 'Rabia' }],
-      ['con lote', { lote: 'L-1' }],
-      ['con fecha de proxima dosis', { fechaProximaDosis: '2027-01-01' }],
-    ])('consulta %s -> 400', async (_caso, cambio) => {
-      await expect(service.create(consulta(cambio as any), VET_ID)).rejects.toThrow(BadRequestException);
+      ['sin diagnostico', { diagnosis: undefined }],
+      ['sin proximo control', { nextCheckup: undefined }],
+      ['con nombre de vacuna', { vaccineName: 'Rabia' }],
+      ['con lote', { batch: 'L-1' }],
+      ['con fecha de proxima dosis', { boosterDate: '2027-01-01' }],
+    ])('consulta %s -> 400', async (_case, change) => {
+      await expect(service.create(consultation(change as any), VET_ID)).rejects.toThrow(BadRequestException);
       expect(repo.save).not.toHaveBeenCalled();
     });
 
     it('tambien valida las reglas de un control (no solo de consulta)', async () => {
       await expect(
-        service.create(consulta({ tipo: ClinicalEventType.CONTROL, diagnostico: undefined }), VET_ID),
+        service.create(consultation({ type: ClinicalEventType.CHECKUP, diagnosis: undefined }), VET_ID),
       ).rejects.toThrow(BadRequestException);
     });
 
     it('propaga el error si el repositorio falla', async () => {
       repo.save.mockRejectedValue(new Error('db caida'));
-      await expect(service.create(consulta(), VET_ID)).rejects.toThrow('db caida');
+      await expect(service.create(consultation(), VET_ID)).rejects.toThrow('db caida');
     });
   });
 
@@ -201,11 +186,12 @@ describe('ClinicalEventService [F2]', () => {
       repo.findById.mockResolvedValue(existing());
       repo.update.mockResolvedValue({ id: 'e1', notes: 'editado' });
 
-      const result = await service.update('e1', consulta({ observaciones: 'editado' }), vet);
+      const result = await service.update('e1', consultation({ notes: 'editado' }), vet);
 
       expect(repo.update).toHaveBeenCalledWith(
         'e1',
         expect.objectContaining({ petId: PET_ID, notes: 'editado' }),
+        VET_ID,
         undefined,
       );
       expect(result).toEqual({ id: 'e1', notes: 'editado' });
@@ -215,16 +201,17 @@ describe('ClinicalEventService [F2]', () => {
       repo.findById.mockResolvedValue(existing());
       repo.update.mockResolvedValue({ id: 'e1' });
 
-      await expect(service.update('e1', consulta(), admin)).resolves.toEqual({ id: 'e1' });
+      await expect(service.update('e1', consultation(), admin)).resolves.toEqual({ id: 'e1' });
+      expect(repo.update).toHaveBeenCalledWith('e1', expect.any(Object), 'adm-1', undefined);
     });
 
     it('editar una vacuna envia los datos de vacuna al repositorio', async () => {
       repo.findById.mockResolvedValue(existing());
       repo.update.mockResolvedValue({ id: 'e1' });
 
-      await service.update('e1', vacuna(), vet);
+      await service.update('e1', vaccine(), vet);
 
-      expect(repo.update).toHaveBeenCalledWith('e1', expect.any(Object), {
+      expect(repo.update).toHaveBeenCalledWith('e1', expect.any(Object), VET_ID, {
         vaccine: 'Rabia',
         batch: 'L-123',
         boosterDate: '2027-11-01',
@@ -233,27 +220,27 @@ describe('ClinicalEventService [F2]', () => {
 
     it('evento inexistente -> 404', async () => {
       repo.findById.mockResolvedValue(null);
-      await expect(service.update('x', consulta(), vet)).rejects.toThrow(NotFoundException);
+      await expect(service.update('x', consultation(), vet)).rejects.toThrow(NotFoundException);
     });
 
     it('otro veterinario (no autor ni admin) -> 403 y no se modifica', async () => {
       repo.findById.mockResolvedValue(existing());
 
-      await expect(service.update('e1', consulta(), otherVet)).rejects.toThrow(ForbiddenException);
+      await expect(service.update('e1', consultation(), otherVet)).rejects.toThrow(ForbiddenException);
       expect(repo.update).not.toHaveBeenCalled();
     });
 
     it('no permite cambiar la mascota del evento -> 400', async () => {
       repo.findById.mockResolvedValue(existing({ petId: 'otra-mascota' }));
 
-      await expect(service.update('e1', consulta(), vet)).rejects.toThrow(BadRequestException);
+      await expect(service.update('e1', consultation(), vet)).rejects.toThrow(BadRequestException);
       expect(repo.update).not.toHaveBeenCalled();
     });
 
     it('aplica las mismas validaciones que al crear (fecha futura -> 400)', async () => {
       repo.findById.mockResolvedValue(existing());
 
-      await expect(service.update('e1', consulta({ fecha: '2026-11-10T12:00:00Z' }), vet)).rejects.toThrow(
+      await expect(service.update('e1', consultation({ date: '2026-11-10T12:00:00Z' }), vet)).rejects.toThrow(
         BadRequestException,
       );
     });
@@ -262,7 +249,7 @@ describe('ClinicalEventService [F2]', () => {
       repo.findById.mockResolvedValue(existing());
       repo.update.mockResolvedValue(null);
 
-      await expect(service.update('e1', consulta(), vet)).rejects.toThrow(NotFoundException);
+      await expect(service.update('e1', consultation(), vet)).rejects.toThrow(NotFoundException);
     });
   });
 
@@ -271,60 +258,25 @@ describe('ClinicalEventService [F2]', () => {
       ['veterinario', vet],
       ['recepcion', reception],
       ['administrador', admin],
-    ])('%s ve el carnet sin verificar propiedad', async (_rol, user) => {
+    ])('%s ve el carnet sin verificar propiedad', async (_role, user) => {
       repo.findByPetId.mockResolvedValue([{ id: 'e1' }]);
 
       await expect(service.findByPetId(PET_ID, user)).resolves.toEqual([{ id: 'e1' }]);
-      expect(fetchMock).not.toHaveBeenCalled();
+      expect(petsClient.assertPetOwnership).not.toHaveBeenCalled();
     });
 
-    it('el dueño de la mascota ve su carnet (se consulta con la clave interna)', async () => {
+    it('el dueño ve el carnet de su mascota (se verifica la propiedad)', async () => {
       repo.findByPetId.mockResolvedValue([{ id: 'e1' }]);
 
       await expect(service.findByPetId(PET_ID, owner)).resolves.toEqual([{ id: 'e1' }]);
-      expect(fetchMock).toHaveBeenCalledWith(
-        `http://clients:3002/internal/pets/${PET_ID}/owner/${OWNER_ID}`,
-        { headers: { 'X-Internal-Key': 'k-test' } },
-      );
+      expect(petsClient.assertPetOwnership).toHaveBeenCalledWith(PET_ID, OWNER_ID);
     });
 
     it('un dueño ajeno recibe 403 (BR-8) y no se leen eventos', async () => {
-      fetchMock.mockResolvedValue({ ok: false, status: 404 });
+      petsClient.assertPetOwnership.mockRejectedValue(new ForbiddenException());
 
       await expect(service.findByPetId(PET_ID, owner)).rejects.toThrow(ForbiddenException);
       expect(repo.findByPetId).not.toHaveBeenCalled();
-    });
-
-    it('error distinto de 404 al verificar propiedad -> 503', async () => {
-      fetchMock.mockResolvedValue({ ok: false, status: 500 });
-      await expect(service.findByPetId(PET_ID, owner)).rejects.toThrow(ServiceUnavailableException);
-    });
-
-    it('sin conexion al verificar propiedad -> 503', async () => {
-      fetchMock.mockRejectedValue(new Error('ECONNREFUSED'));
-      await expect(service.findByPetId(PET_ID, owner)).rejects.toThrow(ServiceUnavailableException);
-    });
-
-    it('sin clave interna -> 500', async () => {
-      delete process.env.INTERNAL_API_KEY;
-      delete process.env.INTERNAL_KEY;
-
-      await expect(service.findByPetId(PET_ID, owner)).rejects.toThrow(InternalServerErrorException);
-      expect(fetchMock).not.toHaveBeenCalled();
-    });
-
-    it('acepta INTERNAL_KEY como alternativa y usa localhost si no hay URL configurada', async () => {
-      delete process.env.INTERNAL_API_KEY;
-      delete process.env.CLIENTS_SERVICE_URL;
-      process.env.INTERNAL_KEY = 'k-alt';
-      repo.findByPetId.mockResolvedValue([]);
-
-      await service.findByPetId(PET_ID, owner);
-
-      expect(fetchMock).toHaveBeenCalledWith(
-        `http://localhost:3002/internal/pets/${PET_ID}/owner/${OWNER_ID}`,
-        { headers: { 'X-Internal-Key': 'k-alt' } },
-      );
     });
   });
 
