@@ -13,7 +13,12 @@ import { UserNotification } from '../modules/reminders/entities/user-notificatio
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
         type: 'postgres',
-        url: configService.get<string>('databaseUrl'),
+        host: configService.get<string>('database.host'),
+        port: configService.get<number>('database.port'),
+        username: configService.get<string>('database.username'),
+        password: configService.get<string>('database.password'),
+        database: configService.get<string>('database.name'),
+
         schema: configService.get<string>('dbSchema'),
         entities: [ScheduledReminder, NotificationLog, DeviceToken, UserNotification],
         synchronize: false,

@@ -2,7 +2,11 @@ import * as Joi from 'joi';
 
 export const validationSchema = Joi.object({
   PORT: Joi.number().default(3005),
-  DATABASE_URL: Joi.string().required(),
+  DB_HOST: Joi.string().default('localhost'),
+  DB_PORT: Joi.number().integer().default(5432),
+  DB_USERNAME: Joi.string().default('postgres'),
+  DB_PASSWORD: Joi.string().default('postgres'),
+  DB_NAME: Joi.string().default('vetconecta'),
   DB_SCHEMA: Joi.string().default('notifications'),
   REMINDER_LEAD_MINUTES: Joi.number().integer().min(1).default(1440),
   REMINDER_POLL_SECONDS: Joi.number().integer().min(1).default(300),

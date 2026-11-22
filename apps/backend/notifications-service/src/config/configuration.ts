@@ -4,9 +4,17 @@ export interface FirebaseConfig {
   privateKey: string;
 }
 
+export interface DatabaseConfig {
+  host: string;
+  port: number;
+  username: string;
+  password: string;
+  name: string;
+}
+
 export interface AppConfig {
   port: number;
-  databaseUrl: string;
+  database: DatabaseConfig;
   dbSchema: string;
   /** Anticipacion del recordatorio en minutos */
   reminderLeadMinutes: number;
@@ -19,7 +27,13 @@ export interface AppConfig {
 
 export default (): AppConfig => ({
   port: parseInt(process.env.PORT ?? '3005', 10),
-  databaseUrl: process.env.DATABASE_URL as string,
+  database: {
+    host: process.env.DB_HOST ?? 'localhost',
+    port: parseInt(process.env.DB_PORT ?? '5432', 10),
+    username: process.env.DB_USERNAME ?? 'postgres',
+    password: process.env.DB_PASSWORD ?? 'postgres',
+    name: process.env.DB_NAME ?? 'vetconecta',
+  },
   dbSchema: process.env.DB_SCHEMA ?? 'notifications',
   reminderLeadMinutes: parseInt(process.env.REMINDER_LEAD_MINUTES ?? '1440', 10),
   reminderPollSeconds: parseInt(process.env.REMINDER_POLL_SECONDS ?? '300', 10),
