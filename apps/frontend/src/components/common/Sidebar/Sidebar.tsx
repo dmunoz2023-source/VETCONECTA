@@ -1,4 +1,5 @@
 import { Heart, PanelLeftClose, PanelLeftOpen } from "lucide-react";
+import { useAuth } from "../../../hooks/useAuth";
 import { NAV_ITEMS } from "../../../utils/navigation";
 import SidebarItem from "./SidebarItem";
 
@@ -10,6 +11,11 @@ interface SidebarProps {
 }
 
 export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
+  const { user } = useAuth();
+  const items = NAV_ITEMS.filter(
+    (item) => !item.allowedRoles || (user !== null && item.allowedRoles.includes(user.role)),
+  );
+
   return (
     <aside className={css.vc_sidebar + ` ${collapsed ? css.collapsed : ""}`}>
       <div className={css.vc_sidebar_brand}>
@@ -18,7 +24,7 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
       </div>
 
       <nav className={css.vc_nav}>
-        {NAV_ITEMS.map((item) => (
+        {items.map((item) => (
           <SidebarItem key={item.path} {...item} collapsed={collapsed} />
         ))}
       </nav>

@@ -13,6 +13,8 @@ const PERMISSIONS = {
   deactivatePet: ["admin"],
   /** POST /v1/clinical/events (I2) */
   registerClinicalEvent: ["vet"],
+  /** Configuración de agenda (L1): especialidades, horarios y bloqueos (endpoints de G3). */
+  manageAgenda: ["reception", "admin"],
 } as const satisfies Record<string, readonly Role[]>;
 
 export type Permission = keyof typeof PERMISSIONS;
