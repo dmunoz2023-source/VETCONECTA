@@ -2,7 +2,7 @@ import Button from "../../components/common/Button";
 import FormField from "../../components/common/FormField";
 import SelectField from "../../components/common/SelectField";
 import OwnerPicker from "../../components/clients/OwnerPicker";
-import { usePetForm } from "../../hooks/usePetForm";
+import { usePetForm } from "../../hooks/pets/usePetForm";
 import type { Pet, PetFormValues, PetOwner } from "../../types/pet.types";
 import { formatAge, toDateInputValue } from "../../utils/age";
 import { SEX_OPTIONS, SPECIES_OPTIONS } from "../../utils/petLabels";
