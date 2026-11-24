@@ -4,6 +4,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AvailabilitySlot } from '../modules/availability/entities/availability-slot.entity';
 import { Appointment } from '../modules/appointments/entities/appointment.entity';
 import { Rating } from '../modules/appointments/entities/rating.entity';
+import { AuditLog } from '../modules/appointments/entities/audit-log.entity';
 import { VetBlock } from '../modules/schedules/entities/vet-block.entity';
 import { VetSchedule } from '../modules/schedules/entities/vet-schedule.entity';
 
@@ -41,7 +42,7 @@ import { VetSchedule } from '../modules/schedules/entities/vet-schedule.entity';
         password: configService.get<string>('database.password'),
         database: configService.get<string>('database.name'),
         schema: 'scheduling',
-        entities: [AvailabilitySlot, Appointment, Rating, VetSchedule, VetBlock],
+        entities: [AvailabilitySlot, Appointment, Rating, AuditLog, VetSchedule, VetBlock],
         synchronize: false,
         logging: process.env.NODE_ENV !== 'production',
       }),

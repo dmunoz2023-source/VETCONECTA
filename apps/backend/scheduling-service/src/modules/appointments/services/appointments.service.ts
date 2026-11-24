@@ -23,7 +23,7 @@ export const ACTIVE_STATUSES = ['booked', 'confirmed'] as const;
 const UNIQUE_VIOLATION = '23505';
 
 /**
- * [C3] Logica de negocio de GET /v1/citas: el dueño solo puede ver sus
+ * [C3] Logica de negocio de GET /v1/scheduling/appointments/me: el dueño solo puede ver sus
  * propias citas (BR-8), asi que el clientId siempre sale del JWT
  * (request.user), nunca de un parametro que el cliente pueda manipular.
  *
@@ -66,7 +66,7 @@ export class AppointmentsService {
     };
   }
 
-  /** POST /v1/citas: reserva una hora para una mascota (FR-3, BR-5, BR-8). */
+  /** POST /v1/scheduling/appointments: reserva una hora para una mascota (FR-3, BR-5, BR-8). */
   async create(user: JwtPayload, dto: CreateCitaDto): Promise<Appointment> {
     const startTime = new Date(dto.startTime);
     if (startTime.getTime() <= Date.now()) {
@@ -160,7 +160,7 @@ export class AppointmentsService {
   }
 
   /**
-   * PATCH /v1/citas/:id/cancelar: el dueño cancela solo sus citas futuras (BR-8);
+   * PATCH /v1/scheduling/appointments/:id/cancel: el dueño cancela solo sus citas futuras (BR-8);
    * recepcion y admin pueden cancelar cualquiera. Libera el horario porque el
    * indice unico solo considera citas booked/confirmed.
    */
@@ -207,7 +207,7 @@ export class AppointmentsService {
   }
 
   /**
-   * PATCH /v1/citas/:id/estado: el personal cierra la cita como atendida o
+   * PATCH /v1/scheduling/appointments/:id/status: el personal cierra la cita como atendida o
    * inasistente. Un veterinario solo puede cerrar sus propias citas.
    */
   async updateStatus(user: JwtPayload, id: string, status: FinalStatus): Promise<Appointment> {
