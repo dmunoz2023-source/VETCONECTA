@@ -10,8 +10,16 @@ export interface PetInfo {
   id: string;
   name: string;
   clientId: string;
-  /** auth.users.id del dueño: a quien se envia el recordatorio. */
-  ownerUserId: string;
+  ownerUserId: string | null;
+  active: boolean;
+}
+
+/** Respuesta de GET /internal/pets/:id en clients-pets-service. */
+interface InternalPetResponse {
+  id: string;
+  name: string;
+  clientId: string;
+  userId: string;
   active: boolean;
 }
 
@@ -39,8 +47,8 @@ export class HttpPetsLookup extends PetsLookup {
   async findById(petId: string): Promise<PetInfo | null> {
     const baseUrl = this.config.get('clientsServiceUrl', { infer: true });
     try {
-      const { data } = await firstValueFrom(
-        this.http.get(`${baseUrl}/internal/pets/${petId}`, {
+      const { data }: { data: InternalPetResponse } = await firstValueFrom(
+        this.http.get<InternalPetResponse>(`${baseUrl}/internal/pets/${petId}`, {
           headers: { 'X-Internal-Key': this.config.get('internalKey', { infer: true }) },
           timeout: 5000,
         }),
@@ -52,7 +60,7 @@ export class HttpPetsLookup extends PetsLookup {
         ownerUserId: data.userId,
         active: data.active ?? true,
       };
-    } catch (error) {
+    } catch (error: unknown) {
       if (isAxiosError(error) && error.response?.status === 404) {
         return null;
       }

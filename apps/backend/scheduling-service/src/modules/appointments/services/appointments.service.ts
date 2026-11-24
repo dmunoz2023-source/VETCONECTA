@@ -3,6 +3,7 @@ import {
   ConflictException,
   ForbiddenException,
   Injectable,
+  Logger,
   NotFoundException,
 } from '@nestjs/common';
 import { DataSource, QueryFailedError } from 'typeorm';
@@ -34,6 +35,8 @@ const UNIQUE_VIOLATION = '23505';
  */
 @Injectable()
 export class AppointmentsService {
+  private readonly logger = new Logger(AppointmentsService.name);
+
   constructor(
     private readonly appointmentsRepository: AppointmentsRepository,
     private readonly auditLog: AuditLogRepository,
@@ -149,12 +152,18 @@ export class AppointmentsService {
     }
 
     // La cita ya esta confirmada: si el aviso falla no se revierte (queda registrado).
-    await this.reminders.schedule({
-      appointmentId: appointment.id,
-      ownerUserId: pet.ownerUserId,
-      petName: pet.name,
-      startsAt: appointment.startTime,
-    });
+    if (pet.ownerUserId) {
+      await this.reminders.schedule({
+        appointmentId: appointment.id,
+        ownerUserId: pet.ownerUserId,
+        petName: pet.name,
+        startsAt: appointment.startTime,
+      });
+    } else {
+      this.logger.warn(
+        `La mascota ${pet.id} no informa el userId del dueño: no se programó el recordatorio de la cita ${appointment.id}.`,
+      );
+    }
 
     return appointment;
   }
