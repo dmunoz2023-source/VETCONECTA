@@ -11,6 +11,7 @@ import Login from "../pages/auth/Login";
 import { useAuth } from "../hooks/auth/useAuth";
 import ProtectedRoute from "./ProtectedRoute";
 import { AgendPage } from "../pages/scheduling/AgendPage";
+import AgendaConfigPage from "../pages/scheduling/config/AgendaConfigPage";
 import { ROUTES } from "../utils/navigation";
 
 /**
@@ -64,6 +65,9 @@ export default function AppRouter() {
             
             {/* Módulos Principales */}
             <Route path={ROUTES.agend} element={<AgendPage />} />
+            <Route element={<ProtectedRoute allowedRoles={rolesFor("manageAgenda")} />}>
+              <Route path={ROUTES.agendaConfig} element={<AgendaConfigPage />} />
+            </Route>
             <Route path={ROUTES.reports} element={<PlaceholderPage title="Reportes" />} />
             <Route path={ROUTES.history} element={<PlaceholderPage title="Historial Clínico" />} />
             <Route path={ROUTES.config} element={<PlaceholderPage title="Configuración" />} />

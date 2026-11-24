@@ -1,0 +1,176 @@
+/* [L1] Configuración de agenda. */
+
+.vc-agenda-config {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+/* El formulario de bloqueo trae la vista previa: el modal crece y hace scroll. */
+.vc-agenda-config .vc-modal {
+  width: 480px;
+  max-height: calc(100vh - 48px);
+  overflow-y: auto;
+}
+
+.vc-agenda-config .vc-card-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.vc-row-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Selector + botón en una fila (asignar especialidad, elegir veterinario). */
+.vc-inline-form {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin: 12px 0;
+}
+.vc-inline-form .vc-field {
+  min-width: 260px;
+  flex: 0 1 360px;
+}
+
+/* Especialidades asignadas */
+.vc-chip-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.vc-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 4px 2px 12px;
+  border-radius: 999px;
+  background: #eef2ff;
+  color: #3730a3;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* Horario semanal */
+.vc-week {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 10px;
+}
+.vc-week-day {
+  border: 1px solid var(--vc-border, #e5e7eb);
+  border-radius: 10px;
+  padding: 10px;
+  font-size: 13px;
+}
+.vc-week-day.is-off {
+  background: #f9fafb;
+}
+.vc-week-day h3 {
+  margin: 0 0 6px;
+  font-size: 13px;
+  font-weight: 700;
+}
+.vc-week-off {
+  margin: 0;
+  color: var(--vc-text-muted, #6b7280);
+}
+.vc-shift {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 4px;
+}
+.vc-week-slots {
+  margin: 6px 0 0;
+  color: var(--vc-primary, #2563eb);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* Vista previa de bloques (turno y bloqueo) */
+.vc-preview {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  border-radius: 10px;
+  background: #f9fafb;
+  border: 1px dashed var(--vc-border, #e5e7eb);
+  font-size: 13px;
+}
+.vc-preview-title {
+  margin: 0;
+  font-weight: 700;
+}
+.vc-preview-row {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.vc-preview-slots {
+  color: var(--vc-text-muted, #6b7280);
+}
+.vc-preview-empty,
+.vc-preview-hint {
+  margin: 0;
+  color: var(--vc-text-muted, #6b7280);
+  font-size: 12px;
+}
+.vc-slot-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.vc-slot-list li {
+  padding: 2px 8px;
+  border-radius: 6px;
+  background: #ecfdf5;
+  color: #047857;
+  font-variant-numeric: tabular-nums;
+}
+.vc-slot-list li.is-blocked {
+  background: #fef2f2;
+  color: #b91c1c;
+  text-decoration: line-through;
+}
+
+.vc-check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+}
+
+/* Citas afectadas por un bloqueo */
+.vc-affected-list {
+  list-style: none;
+  margin: 0 0 12px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 13px;
+}
+.vc-affected-list li {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: #fffbeb;
+  color: #92400e;
+}

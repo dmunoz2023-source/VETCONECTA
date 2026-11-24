@@ -1,6 +1,13 @@
 import { api } from './http/client';
 import { getErrorBody, getErrorMessage, getErrorStatus } from './http/errors';
 import type { AppointmentStatus, CalendarEvent, NewBookingPayload } from '../types/scheduling.types';
+import type {
+  BlockFormValues,
+  ScheduleFormValues,
+  VetBlock,
+  VetBlockResult,
+  VetSchedule,
+} from '../types/agenda.types';
 
 /** Filtros de GET /v1/scheduling/appointments. */
 export interface AppointmentsFilter {
@@ -64,4 +71,64 @@ export async function updateAppointmentStatus(id: string, status: AttendanceStat
 /** PATCH /v1/scheduling/appointments/{id}/cancel. */
 export async function cancelAppointment(id: string): Promise<void> {
   await api.patch(`/v1/scheduling/appointments/${id}/cancel`);
+}
+
+/* ---------- Configuración de agenda (L1, endpoints de G3) ---------- */
+
+/** GET /v1/scheduling/vets/{vetId}/schedules: horario semanal. */
+export async function listVetSchedules(vetId: string): Promise<VetSchedule[]> {
+  const { data } = await api.get<VetSchedule[]>(`/v1/scheduling/vets/${vetId}/schedules`);
+  return data;
+}
+
+/** POST /v1/scheduling/vets/{vetId}/schedules: 409 si el turno se solapa con otro. */
+export async function createVetSchedule(vetId: string, values: ScheduleFormValues): Promise<VetSchedule> {
+  const { data } = await api.post<VetSchedule>(`/v1/scheduling/vets/${vetId}/schedules`, values);
+  return data;
+}
+
+/** PATCH /v1/scheduling/vets/{vetId}/schedules/{id}: 409 si el turno se solapa con otro. */
+export async function updateVetSchedule(vetId: string, id: string, values: ScheduleFormValues): Promise<VetSchedule> {
+  const { data } = await api.patch<VetSchedule>(`/v1/scheduling/vets/${vetId}/schedules/${id}`, values);
+  return data;
+}
+
+/** DELETE /v1/scheduling/vets/{vetId}/schedules/{id}. */
+export async function deleteVetSchedule(vetId: string, id: string): Promise<void> {
+  await api.delete(`/v1/scheduling/vets/${vetId}/schedules/${id}`);
+}
+
+/** GET /v1/scheduling/vets/{vetId}/blocks?from&to (fechas "AAAA-MM-DD", inclusivas). */
+export async function listVetBlocks(vetId: string, range?: { from?: string; to?: string }): Promise<VetBlock[]> {
+  const { data } = await api.get<VetBlock[]>(`/v1/scheduling/vets/${vetId}/blocks`, { params: range });
+  return data;
+}
+
+/**
+ * Cuerpo de POST/PATCH de bloqueos. `notes` solo viaja con el motivo "other":
+ * la API rechaza campos que no conoce, y fuera de "other" no se usa.
+ */
+function toBlockPayload(values: BlockFormValues) {
+  const { notes, ...rest } = values;
+  return values.reason === "other" ? { ...rest, notes } : rest;
+}
+
+/** POST /v1/scheduling/vets/{vetId}/blocks: devuelve el bloqueo y las citas que quedan dentro. */
+export async function createVetBlock(vetId: string, values: BlockFormValues): Promise<VetBlockResult> {
+  const { data } = await api.post<VetBlockResult>(`/v1/scheduling/vets/${vetId}/blocks`, toBlockPayload(values));
+  return data;
+}
+
+/** PATCH /v1/scheduling/vets/{vetId}/blocks/{id}: devuelve el bloqueo y las citas afectadas. */
+export async function updateVetBlock(vetId: string, id: string, values: BlockFormValues): Promise<VetBlockResult> {
+  const { data } = await api.patch<VetBlockResult>(
+    `/v1/scheduling/vets/${vetId}/blocks/${id}`,
+    toBlockPayload(values),
+  );
+  return data;
+}
+
+/** DELETE /v1/scheduling/vets/{vetId}/blocks/{id}. */
+export async function deleteVetBlock(vetId: string, id: string): Promise<void> {
+  await api.delete(`/v1/scheduling/vets/${vetId}/blocks/${id}`);
 }
