@@ -1,0 +1,12 @@
+/* Variante de error del aviso (la base .vc-notice está en pages/pets/Pets.css). */
+.vc-notice.vc-notice--error {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: #fef2f2;
+  color: #b91c1c;
+  font-size: 14px;
+}
