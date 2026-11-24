@@ -6,10 +6,10 @@ import SearchInput from "../../components/common/SearchInput";
 import Notice from "../../components/feedback/Notice";
 import PageHeader from "../../components/common/PageHeader/PageHeader";
 import PetsTable from "../../components/tables/PetsTable";
-import { useFlashNotice } from "../../hooks/useFlashNotice";
-import { usePermissions } from "../../hooks/usePermissions";
-import { usePets } from "../../hooks/usePets";
-import { useSearchPagination } from "../../hooks/useSearchPagination";
+import { useFlashNotice } from "../../hooks/common/useFlashNotice";
+import { usePermissions } from "../../hooks/auth/usePermissions";
+import { usePets } from "../../hooks/pets/usePets";
+import { useSearchPagination } from "../../hooks/common/useSearchPagination";
 import "./Pets.css";
 import { ROUTES } from "../../utils/navigation";
 

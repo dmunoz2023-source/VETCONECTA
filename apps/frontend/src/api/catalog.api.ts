@@ -1,4 +1,4 @@
-import { api } from "./axios";
+import { api } from "./http/client";
 import type { Specialty, SpecialtyFormValues, Vet } from "../types/agenda.types";
 
 /** GET /v1/catalog/specialties: especialidades activas con su duración. */

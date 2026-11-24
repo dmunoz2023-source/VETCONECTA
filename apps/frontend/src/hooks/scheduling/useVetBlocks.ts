@@ -1,8 +1,8 @@
 import { useCallback } from "react";
-import { createVetBlock, deleteVetBlock, listVetBlocks, updateVetBlock } from "../api/scheduling.api";
-import type { BlockFormValues, VetBlock, VetBlockResult } from "../types/agenda.types";
-import { clinicToday } from "../utils/agenda";
-import { useVetResource } from "./useVetResource";
+import { createVetBlock, deleteVetBlock, listVetBlocks, updateVetBlock } from "../../api/scheduling.api";
+import type { BlockFormValues, VetBlock, VetBlockResult } from "../../types/agenda.types";
+import { clinicToday } from "../../utils/agenda";
+import { useVetResource } from "../common/useVetResource";
 
 /** Bloqueos desde hoy (la fecha se toma en cada carga). */
 const listUpcomingBlocks = (vetId: string) => listVetBlocks(vetId, { from: clinicToday() });

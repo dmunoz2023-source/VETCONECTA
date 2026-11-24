@@ -1,7 +1,7 @@
 import { useCallback } from "react";
-import { assignVetSpecialty, listVetSpecialties, unassignVetSpecialty } from "../api/catalog.api";
-import type { Specialty } from "../types/agenda.types";
-import { useVetResource } from "./useVetResource";
+import { assignVetSpecialty, listVetSpecialties, unassignVetSpecialty } from "../../api/catalog.api";
+import type { Specialty } from "../../types/agenda.types";
+import { useVetResource } from "../common/useVetResource";
 
 /**
  * Especialidades que atiende un veterinario. La API también devuelve las

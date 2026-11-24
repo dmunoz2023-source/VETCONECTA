@@ -1,7 +1,7 @@
 import { useCallback } from "react";
-import { createSpecialty, deactivateSpecialty, listSpecialties, updateSpecialty } from "../api/catalog.api";
-import type { Specialty, SpecialtyFormValues } from "../types/agenda.types";
-import { useAsync } from "./useAsync";
+import { createSpecialty, deactivateSpecialty, listSpecialties, updateSpecialty } from "../../api/catalog.api";
+import type { Specialty, SpecialtyFormValues } from "../../types/agenda.types";
+import { useAsync } from "../common/useAsync";
 
 /** Catálogo de especialidades activas (GET /v1/catalog/specialties) con alta, edición y baja lógica. */
 export function useSpecialties() {

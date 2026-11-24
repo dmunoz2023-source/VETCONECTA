@@ -6,7 +6,7 @@ import IconButton from "../../../components/common/IconButton";
 import SelectField from "../../../components/common/SelectField";
 import ConfirmDialog from "../../../components/feedback/ConfirmDialog";
 import StatusText from "../../../components/feedback/StatusText";
-import { useCrudDialogs } from "../../../hooks/useCrudDialogs";
+import { useCrudDialogs } from "../../../hooks/common/useCrudDialogs";
 import type { ScheduleFormValues, Specialty, VetSchedule } from "../../../types/agenda.types";
 import { WEEKDAY_LABELS, WEEKDAY_ORDER, slotsForWeekday } from "../../../utils/agenda";
 import ScheduleFormModal from "./ScheduleFormModal";

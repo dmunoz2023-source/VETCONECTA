@@ -1,8 +1,9 @@
-import axios from 'axios';
-import { api, getErrorMessage } from './axios';
+import { api } from './http/client';
+import { getErrorMessage, getErrorStatus } from './http/errors';
 import { STAFF_ROLES } from '../types/auth.types';
 import type { AuthUser, LoginCredentials, Role } from '../types/auth.types';
 import { decodeToken } from '../utils/jwt';
+import type { TokenPayload } from '../utils/jwt';
 
 /** Respuesta de POST /v1/auth/login: datos del usuario más el access token. */
 interface LoginResponse {
@@ -39,12 +40,18 @@ function messageForStatus(status: number): string {
 }
 
 function toLoginError(error: unknown): LoginError {
-  if (!axios.isAxiosError(error) || !error.response) return new LoginError(MESSAGES.network);
-  return new LoginError(getErrorMessage(error, messageForStatus(error.response.status)));
+  const status = getErrorStatus(error);
+  if (status === null) return new LoginError(MESSAGES.network);
+  return new LoginError(getErrorMessage(error, messageForStatus(status)));
 }
 
 function isStaffRole(role: string): role is Role {
   return (STAFF_ROLES as readonly string[]).includes(role);
+}
+
+/** Usuario del panel a partir del payload, o null si el rol no es del personal clínico. */
+function toStaffUser({ sub, email, role }: TokenPayload): AuthUser | null {
+  return isStaffRole(role) ? { id: sub, email, role } : null;
 }
 
 /**
@@ -53,8 +60,7 @@ function isStaffRole(role: string): role is Role {
  */
 export function getSessionUser(token: string): AuthUser | null {
   const payload = decodeToken(token);
-  if (!payload || !isStaffRole(payload.role)) return null;
-  return { id: payload.sub, email: payload.email, role: payload.role };
+  return payload ? toStaffUser(payload) : null;
 }
 
 /** POST /v1/auth/login (FR-13). Solo admite cuentas del personal clínico. */
@@ -70,12 +76,10 @@ export async function login({ identifier, password }: LoginCredentials): Promise
   }
 
   const token = data?.accessToken;
-  if (typeof token !== 'string') throw new LoginError(MESSAGES.invalidResponse);
-
-  const payload = decodeToken(token);
+  const payload = typeof token === 'string' ? decodeToken(token) : null;
   if (!payload) throw new LoginError(MESSAGES.invalidResponse);
 
-  const user = getSessionUser(token);
+  const user = toStaffUser(payload);
   if (!user) throw new LoginError(MESSAGES.notStaff);
   return { token, user };
 }

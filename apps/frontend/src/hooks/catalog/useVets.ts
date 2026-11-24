@@ -1,5 +1,5 @@
-import { listVets } from "../api/catalog.api";
-import { useAsync } from "./useAsync";
+import { listVets } from "../../api/catalog.api";
+import { useAsync } from "../common/useAsync";
 
 /** Veterinarios activos de la clínica (GET /v1/catalog/vets). */
 export function useVets() {

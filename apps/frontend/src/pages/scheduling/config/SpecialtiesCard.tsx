@@ -4,7 +4,7 @@ import Card from "../../../components/common/Card";
 import IconButton from "../../../components/common/IconButton";
 import ConfirmDialog from "../../../components/feedback/ConfirmDialog";
 import DataTable, { type TableColumn } from "../../../components/tables/DataTable";
-import { useCrudDialogs } from "../../../hooks/useCrudDialogs";
+import { useCrudDialogs } from "../../../hooks/common/useCrudDialogs";
 import type { Specialty, SpecialtyFormValues } from "../../../types/agenda.types";
 import SpecialtyFormModal from "./SpecialtyFormModal";
 

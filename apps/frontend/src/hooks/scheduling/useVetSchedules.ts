@@ -1,7 +1,7 @@
 import { useCallback } from "react";
-import { createVetSchedule, deleteVetSchedule, listVetSchedules, updateVetSchedule } from "../api/scheduling.api";
-import type { ScheduleFormValues, VetSchedule } from "../types/agenda.types";
-import { useVetResource } from "./useVetResource";
+import { createVetSchedule, deleteVetSchedule, listVetSchedules, updateVetSchedule } from "../../api/scheduling.api";
+import type { ScheduleFormValues, VetSchedule } from "../../types/agenda.types";
+import { useVetResource } from "../common/useVetResource";
 
 /** Horario semanal de un veterinario con alta, edición y borrado de turnos. */
 export function useVetSchedules(vetId: string | null) {

@@ -1,5 +1,5 @@
 import { Heart, PanelLeftClose, PanelLeftOpen } from "lucide-react";
-import { useAuth } from "../../../hooks/useAuth";
+import { useAuth } from "../../../hooks/auth/useAuth";
 import { NAV_ITEMS } from "../../../utils/navigation";
 import SidebarItem from "./SidebarItem";
 

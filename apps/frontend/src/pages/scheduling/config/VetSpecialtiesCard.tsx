@@ -5,7 +5,7 @@ import Card from "../../../components/common/Card";
 import IconButton from "../../../components/common/IconButton";
 import SelectField from "../../../components/common/SelectField";
 import StatusText from "../../../components/feedback/StatusText";
-import { getErrorMessage } from "../../../api/axios";
+import { getErrorMessage } from "../../../api/http/errors";
 import type { Specialty } from "../../../types/agenda.types";
 
 interface VetSpecialtiesCardProps {

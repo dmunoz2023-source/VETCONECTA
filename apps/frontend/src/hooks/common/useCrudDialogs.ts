@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { getErrorMessage } from "../api/axios";
+import { getErrorMessage } from "../../api/http/errors";
 
 interface CrudMutations<T, V, R> {
   /** Crea (sin `item`) o edita (con `item`). Si la API falla, la promesa se rechaza. */
