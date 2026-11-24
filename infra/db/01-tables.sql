@@ -243,6 +243,20 @@ CREATE TABLE notifications.device_tokens (
     last_used_at TIMESTAMPTZ
 );
 
+CREATE TABLE notifications.user_notifications (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID NOT NULL,
+    pet_id UUID,
+    title VARCHAR(150),
+    body TEXT,
+    is_read BOOLEAN NOT NULL DEFAULT FALSE,
+    read_at TIMESTAMPTZ,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX idx_user_notifications_user_created_at
+    ON notifications.user_notifications (user_id, created_at DESC);
+
 CREATE TABLE notifications.scheduled_reminders (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     type VARCHAR(50),

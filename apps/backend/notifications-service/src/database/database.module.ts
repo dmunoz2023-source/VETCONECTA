@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { DeviceTokenEntity } from '../modules/devices/entities/device-token.entity';
+import { UserNotificationEntity } from '../modules/notifications/entities/user-notification.entity';
 
 @Module({
   imports: [
@@ -16,7 +17,7 @@ import { DeviceTokenEntity } from '../modules/devices/entities/device-token.enti
         password: configService.get<string>('DB_PASSWORD', 'postgres'),
         database: configService.get<string>('DB_NAME', 'vetconecta'),
         schema: 'notifications',
-        entities: [DeviceTokenEntity],
+        entities: [DeviceTokenEntity, UserNotificationEntity],
         synchronize: false,
       }),
     }),
