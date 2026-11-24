@@ -1,8 +1,10 @@
 import {
   Body,
   Controller,
+  Delete,
   HttpCode,
   HttpStatus,
+  Param,
   Post,
   UseGuards,
 } from '@nestjs/common';
@@ -10,6 +12,8 @@ import {
   ApiBearerAuth,
   ApiBadRequestResponse,
   ApiCreatedResponse,
+  ApiNoContentResponse,
+  ApiNotFoundResponse,
   ApiOperation,
   ApiTags,
   ApiUnauthorizedResponse,
@@ -39,5 +43,20 @@ export class DevicesController {
     @CurrentUser() user: JwtPayload,
   ): Promise<DeviceTokenEntity> {
     return this.devicesService.register(user.sub, device);
+  }
+
+  @Delete(':token')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({ summary: 'Desvincular un token FCM propio' })
+  @ApiNoContentResponse({ description: 'Token desvinculado correctamente.' })
+  @ApiNotFoundResponse({
+    description: 'El token no existe o no pertenece al usuario autenticado.',
+  })
+  @ApiUnauthorizedResponse({ description: 'Falta autenticación válida.' })
+  remove(
+    @Param('token') token: string,
+    @CurrentUser() user: JwtPayload,
+  ): Promise<void> {
+    return this.devicesService.remove(user.sub, token);
   }
 }

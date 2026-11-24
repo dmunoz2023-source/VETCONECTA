@@ -1,3 +1,4 @@
+import { NotFoundException } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { RegisterDeviceDto, DevicePlatform } from '../dto/register-device.dto';
 import { DeviceTokenEntity } from '../entities/device-token.entity';
@@ -7,6 +8,7 @@ describe('DeviceTokensRepository', () => {
   const repository = {
     upsert: jest.fn(),
     findOneBy: jest.fn(),
+    delete: jest.fn(),
   };
   const deviceTokens = new DeviceTokensRepository(
     repository as unknown as Repository<DeviceTokenEntity>,
@@ -45,5 +47,31 @@ describe('DeviceTokensRepository', () => {
       ['token'],
     );
     expect(repository.findOneBy).toHaveBeenCalledWith({ token: dto.token });
+  });
+
+  it('deletes only a token owned by the authenticated user', async () => {
+    repository.delete.mockResolvedValue({ affected: 1 });
+
+    await expect(
+      deviceTokens.remove('authenticated-user-id', 'fcm-registration-token'),
+    ).resolves.toBeUndefined();
+
+    expect(repository.delete).toHaveBeenCalledWith({
+      userId: 'authenticated-user-id',
+      token: 'fcm-registration-token',
+    });
+  });
+
+  it('returns 404 when the token is missing or belongs to another user', async () => {
+    repository.delete.mockResolvedValue({ affected: 0 });
+
+    await expect(
+      deviceTokens.remove('authenticated-user-id', 'foreign-token'),
+    ).rejects.toThrow(NotFoundException);
+
+    expect(repository.delete).toHaveBeenCalledWith({
+      userId: 'authenticated-user-id',
+      token: 'foreign-token',
+    });
   });
 });

@@ -1,4 +1,8 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { RegisterDeviceDto } from '../dto/register-device.dto';
@@ -36,5 +40,14 @@ export class DeviceTokensRepository {
     }
 
     return registeredDevice;
+  }
+
+  async remove(userId: string, token: string): Promise<void> {
+    const result = await this.repository.delete({ userId, token });
+    if (!result.affected) {
+      throw new NotFoundException(
+        'El token no existe o no pertenece al usuario autenticado.',
+      );
+    }
   }
 }

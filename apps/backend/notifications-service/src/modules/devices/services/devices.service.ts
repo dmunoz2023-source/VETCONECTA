@@ -13,4 +13,8 @@ export class DevicesService {
   ): Promise<DeviceTokenEntity> {
     return this.deviceTokens.register(userId, device);
   }
+
+  remove(userId: string, token: string): Promise<void> {
+    return this.deviceTokens.remove(userId, token);
+  }
 }
