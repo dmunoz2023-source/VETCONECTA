@@ -25,10 +25,10 @@ describe('Conflictos de horario en citas [J2]', () => {
   let ctx: TestContext;
 
   const book = (headers: Record<string, string>, body: ReturnType<typeof citaBody>) =>
-    request(ctx.app.getHttpServer()).post('/v1/citas').set(headers).send(body);
+    request(ctx.app.getHttpServer()).post('/v1/scheduling/appointments').set(headers).send(body);
 
   const cancel = (headers: Record<string, string>, appointmentId: string) =>
-    request(ctx.app.getHttpServer()).patch(`/v1/citas/${appointmentId}/cancelar`).set(headers);
+    request(ctx.app.getHttpServer()).patch(`/v1/scheduling/appointments/${appointmentId}/cancel`).set(headers);
 
   const bodyFor = (
     petId: string,

@@ -19,6 +19,10 @@ if (!databaseName.endsWith('_test')) {
   );
 }
 
-process.env.DATABASE_URL = testDatabaseUrl;
-process.env.DB_SCHEMA = 'scheduling';
+const parsed = new URL(testDatabaseUrl);
+process.env.DB_HOST = parsed.hostname;
+process.env.DB_PORT = parsed.port || '5432';
+process.env.DB_USERNAME = decodeURIComponent(parsed.username);
+process.env.DB_PASSWORD = decodeURIComponent(parsed.password);
+process.env.DB_NAME = databaseName;
 process.env.INTERNAL_KEY = 'clave_interna_de_pruebas';

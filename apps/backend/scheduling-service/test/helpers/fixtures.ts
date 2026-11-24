@@ -62,7 +62,7 @@ export function withOffset(date: Date, offsetHours: number): string {
   return `${local}${sign}${hours}:00`;
 }
 
-/** Cuerpo de POST /v1/citas. */
+/** Cuerpo de POST /v1/scheduling/appointments. */
 export function citaBody(params: {
   petId: string;
   vetUserId: string;
