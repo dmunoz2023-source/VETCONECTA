@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { FindOptionsWhere, Repository } from 'typeorm';
 import { GetNotificationsQueryDto } from '../dto/get-notifications-query.dto';
@@ -29,5 +29,28 @@ export class UserNotificationsRepository {
       skip: (query.page - 1) * query.limit,
       take: query.limit,
     });
+  }
+
+  async markAsRead(
+    userId: string,
+    notificationId: string,
+  ): Promise<UserNotificationEntity> {
+    const result = await this.repository.update(
+      { id: notificationId, userId },
+      { isRead: true, readAt: new Date() },
+    );
+    if (!result.affected) {
+      throw new NotFoundException('No se encontró la notificación.');
+    }
+
+    const notification = await this.repository.findOneBy({
+      id: notificationId,
+      userId,
+    });
+    if (!notification) {
+      throw new NotFoundException('No se encontró la notificación.');
+    }
+
+    return notification;
   }
 }

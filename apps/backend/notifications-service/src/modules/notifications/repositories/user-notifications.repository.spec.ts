@@ -6,6 +6,8 @@ import { UserNotificationsRepository } from './user-notifications.repository';
 describe('UserNotificationsRepository', () => {
   const repository = {
     findAndCount: jest.fn(),
+    update: jest.fn(),
+    findOneBy: jest.fn(),
   };
   const notifications = new UserNotificationsRepository(
     repository as unknown as Repository<UserNotificationEntity>,
@@ -52,5 +54,52 @@ describe('UserNotificationsRepository', () => {
       skip: 0,
       take: 10,
     });
+  });
+
+  it('marks a notification as read only for its owner', async () => {
+    const notification = {
+      id: '22222222-2222-4222-8222-222222222222',
+      userId: 'authenticated-user-id',
+      isRead: true,
+      readAt: new Date(),
+    } as UserNotificationEntity;
+    repository.update.mockResolvedValue({ affected: 1 });
+    repository.findOneBy.mockResolvedValue(notification);
+
+    await expect(
+      notifications.markAsRead(
+        'authenticated-user-id',
+        notification.id,
+      ),
+    ).resolves.toBe(notification);
+
+    expect(repository.update).toHaveBeenCalledWith(
+      { id: notification.id, userId: 'authenticated-user-id' },
+      { isRead: true, readAt: expect.any(Date) },
+    );
+    expect(repository.findOneBy).toHaveBeenCalledWith({
+      id: notification.id,
+      userId: 'authenticated-user-id',
+    });
+  });
+
+  it('returns 404 without reading a notification owned by another user', async () => {
+    repository.update.mockResolvedValue({ affected: 0 });
+
+    await expect(
+      notifications.markAsRead(
+        'authenticated-user-id',
+        '33333333-3333-4333-8333-333333333333',
+      ),
+    ).rejects.toMatchObject({ status: 404 });
+
+    expect(repository.update).toHaveBeenCalledWith(
+      {
+        id: '33333333-3333-4333-8333-333333333333',
+        userId: 'authenticated-user-id',
+      },
+      { isRead: true, readAt: expect.any(Date) },
+    );
+    expect(repository.findOneBy).not.toHaveBeenCalled();
   });
 });

@@ -3,6 +3,9 @@ import {
   Get,
   HttpCode,
   HttpStatus,
+  Param,
+  ParseUUIDPipe,
+  Patch,
   Query,
   UseGuards,
 } from '@nestjs/common';
@@ -11,7 +14,9 @@ import {
   ApiBearerAuth,
   ApiOkResponse,
   ApiOperation,
+  ApiParam,
   ApiQuery,
+  ApiNotFoundResponse,
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
@@ -20,6 +25,7 @@ import { JwtHeadersGuard } from '@app/shared/guards/jwt-headers.guard';
 import { JwtPayload } from '@app/shared/types/jwt-payload.interface';
 import { GetNotificationsQueryDto } from '../dto/get-notifications-query.dto';
 import { NotificationsPageDto } from '../dto/notifications-page.dto';
+import { UserNotificationEntity } from '../entities/user-notification.entity';
 import { NotificationsService } from '../services/notifications.service';
 
 @Controller('v1/notifications')
@@ -59,5 +65,22 @@ export class NotificationsController {
     @Query() query: GetNotificationsQueryDto,
   ): Promise<NotificationsPageDto> {
     return this.notificationsService.findForUser(user.sub, query);
+  }
+
+  @Patch(':id/read')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Marcar una notificación como leída' })
+  @ApiParam({ name: 'id', description: 'UUID de la notificación' })
+  @ApiOkResponse({ type: UserNotificationEntity })
+  @ApiBadRequestResponse({ description: 'El ID debe ser un UUID válido.' })
+  @ApiNotFoundResponse({
+    description: 'La notificación no existe o no pertenece al usuario autenticado.',
+  })
+  @ApiUnauthorizedResponse({ description: 'Falta autenticación válida.' })
+  markAsRead(
+    @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() user: JwtPayload,
+  ): Promise<UserNotificationEntity> {
+    return this.notificationsService.markAsRead(user.sub, id);
   }
 }
