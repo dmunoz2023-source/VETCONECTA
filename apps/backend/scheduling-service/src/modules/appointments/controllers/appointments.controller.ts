@@ -30,16 +30,16 @@ import { CreateCitaDto } from '../dto/create-cita.dto';
 import { UpdateEstadoDto } from '../dto/update-estado.dto';
 
 /**
- * [C3] GET /v1/citas — el dueño consulta sus propias citas agendadas,
+ * [C3] GET /v1/scheduling/appointments/me — el dueño consulta sus propias citas agendadas,
  * historicas y canceladas (FR-3, BR-8). Requiere las cabeceras del
  * Gateway (JwtHeadersGuard) y esta reservado al rol owner (RolesGuard).
  */
 @ApiTags('appointments')
-@Controller('v1/appointments')
+@Controller('v1/scheduling/appointments')
 export class AppointmentsController {
   constructor(private readonly appointmentsService: AppointmentsService) {}
 
-  @Get()
+  @Get('me')
   @UseGuards(JwtHeadersGuard, RolesGuard)
   @Roles('owner')
   @ApiBearerAuth()
@@ -58,7 +58,7 @@ export class AppointmentsController {
   }
 
   /**
-   * [G2] POST /v1/appointments — reserva una hora (FR-3, BR-5). El dueño solo puede
+   * [G2] POST /v1/scheduling/appointments — reserva una hora (FR-3, BR-5). El dueño solo puede
    * reservar para sus mascotas (BR-8); recepcion y admin para cualquiera.
    */
   @Post()
@@ -68,7 +68,7 @@ export class AppointmentsController {
     return this.appointmentsService.create(user, dto);
   }
 
-  /** [G2] PATCH /v1/citas/:id/cancel — cancela y libera el horario. */
+  /** [G2] PATCH /v1/scheduling/appointments/:id/cancel — cancela y libera el horario. */
   @Patch(':id/cancel')
   @UseGuards(JwtHeadersGuard, RolesGuard)
   @Roles('owner', 'reception', 'admin')
@@ -76,7 +76,7 @@ export class AppointmentsController {
     return this.appointmentsService.cancel(user, id);
   }
 
-  /** [G2] PATCH /v1/citas/:id/status — marca la cita como atendida o inasistente. */
+  /** [G2] PATCH /v1/scheduling/appointments/:id/status — marca la cita como atendida o inasistente. */
   @Patch(':id/status')
   @UseGuards(JwtHeadersGuard, RolesGuard)
   @Roles('vet', 'reception', 'admin')

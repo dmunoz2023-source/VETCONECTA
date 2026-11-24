@@ -8,7 +8,7 @@ import { IsISO8601, Matches } from 'class-validator';
 const UUID_FORMAT = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 /**
- * [G2] Cuerpo de POST /v1/citas. `startTime` debe incluir zona horaria
+ * [G2] Cuerpo de POST /v1/scheduling/appointments. `startTime` debe incluir zona horaria
  * (ej. 2026-11-02T15:00:00-03:00) para evitar ambiguedades de hora local.
  */
 export class CreateCitaDto {

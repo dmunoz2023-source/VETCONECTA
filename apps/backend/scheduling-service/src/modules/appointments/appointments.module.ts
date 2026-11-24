@@ -16,7 +16,7 @@ import { HttpPetsLookup, PetsLookup } from './clients/pets.lookup';
 import { HttpRemindersClient, RemindersClient } from './clients/reminders.client';
 
 /**
- * [A3][C3] Capa de datos (repositorios) mas el endpoint GET /v1/citas
+ * [A3][C3] Capa de datos (repositorios) mas el endpoint GET /v1/scheduling/appointments/me
  * (controller + service) que consume AppointmentsRepository.findByClient.
  */
 @Module({
