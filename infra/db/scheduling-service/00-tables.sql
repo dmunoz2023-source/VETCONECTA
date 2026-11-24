@@ -18,8 +18,6 @@ CREATE TABLE availability_slots (
     UNIQUE (vet_user_id, start_time)
 );
 
--- [G3] Horario semanal del veterinario. day_of_week: 0 = domingo ... 6 = sábado.
--- Las horas son locales de la clínica (America/Santiago).
 CREATE TABLE vet_schedules (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     vet_user_id UUID NOT NULL,
@@ -30,7 +28,6 @@ CREATE TABLE vet_schedules (
     UNIQUE (vet_user_id, day_of_week, start_time)
 );
 
--- [G3] Bloqueo puntual de agenda. Sin horas, bloquea el día completo.
 CREATE TABLE vet_blocks (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     vet_user_id UUID NOT NULL,
@@ -50,7 +47,7 @@ CREATE INDEX idx_vet_blocks_vet_date ON vet_blocks (vet_user_id, block_date);
 
 CREATE TABLE appointments (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    slot_id UUID NOT NULL UNIQUE,
+    slot_id UUID,
     pet_id UUID NOT NULL,
     client_id UUID NOT NULL,
     vet_user_id UUID NOT NULL,
@@ -63,6 +60,10 @@ CREATE TABLE appointments (
     cancelled_at TIMESTAMPTZ,
     CONSTRAINT fk_appointments_slot FOREIGN KEY (slot_id) REFERENCES availability_slots(id) ON DELETE RESTRICT
 );
+
+CREATE UNIQUE INDEX uq_appointments_vet_start_active
+    ON appointments (vet_user_id, start_time)
+    WHERE status IN ('booked', 'confirmed');
 
 CREATE TABLE ratings (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
