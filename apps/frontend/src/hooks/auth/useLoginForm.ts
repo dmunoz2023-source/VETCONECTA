@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import type { FormEvent } from 'react';
-import { LoginError } from '../api/auth.api';
-import type { AuthUser } from '../types/auth.types';
-import { validateEmail, validatePassword } from '../utils/validators';
+import { LoginError } from '../../api/auth.api';
+import type { AuthUser } from '../../types/auth.types';
+import { validateEmail, validatePassword } from '../../utils/validators';
 import { useAuth } from './useAuth';
 
 type LoginField = 'email' | 'password';
