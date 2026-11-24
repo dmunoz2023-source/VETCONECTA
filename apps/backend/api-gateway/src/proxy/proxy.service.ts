@@ -2,22 +2,34 @@ import { Injectable } from '@nestjs/common';
 import { createProxyMiddleware, Options } from 'http-proxy-middleware';
 import { Request, Response } from 'express';
 import { ClientRequest, IncomingMessage } from 'http';
+import { PROXY_ROUTES_CONFIG } from '../config/proxy.config';
+import { getHeaders, HEADERS_PROXY_CONFIG } from '../config/headers.proxy.config';
 
 interface RouteTarget {
   prefix: string;
   target: string;
 }
 
+const {
+  auth,
+  clients,
+  pets,
+  clinical,
+  scheduling,
+  notifications,
+  catalog
+} = PROXY_ROUTES_CONFIG
+
 @Injectable()
 export class ProxyService {
   private readonly routes: RouteTarget[] = [
-    { prefix: '/v1/auth', target: 'http://localhost:3001' },
-    { prefix: '/v1/clients', target: 'http://localhost:3002' },
-    { prefix: '/v1/pets', target: 'http://localhost:3002' },
-    { prefix: '/v1/clinical', target: 'http://localhost:3003' },
-    { prefix: '/v1/scheduling', target: 'http://localhost:3004' },
-    { prefix: '/v1/notifications', target: 'http://localhost:3005' },
-    { prefix: '/v1/catalog', target: 'http://localhost:3006' },
+    { prefix: auth.prefix.origin, target: auth.origin },
+    { prefix: clients.prefix.origin, target: clients.origin },
+    { prefix: pets.prefix.origin, target: pets.origin },
+    { prefix: clinical.prefix.origin, target: clinical.origin },
+    { prefix: scheduling.prefix.origin, target: scheduling.origin },
+    { prefix: notifications.prefix.origin, target: notifications.origin },
+    { prefix: catalog.prefix.origin , target: catalog.origin },
   ];
 
   public getProxyMiddleware(route: RouteTarget) {
@@ -27,7 +39,7 @@ export class ProxyService {
       on: {
         proxyReq: (proxyReq: ClientRequest, req: IncomingMessage) => {
           // 1. Inyección de traza y credenciales verificadas
-          const headersToForward = ['x-request-id', 'x-user-id', 'x-user-role', 'x-client-id'];
+          const headersToForward = getHeaders();
           for (const header of headersToForward) {
             if (req.headers[header]) {
               proxyReq.setHeader(header, req.headers[header] as string);
@@ -55,7 +67,7 @@ export class ProxyService {
             error: errorType,
             message: `Servicio no disponible o tiempo de espera agotado: ${route.target}`,
             path: expressReq.originalUrl || expressReq.url,
-            requestId: expressReq.headers?.['x-request-id'] || 'unknown',
+            requestId: expressReq.headers?.[HEADERS_PROXY_CONFIG.requestId] || 'unknown',
             timestamp: new Date().toISOString(),
           });
         },

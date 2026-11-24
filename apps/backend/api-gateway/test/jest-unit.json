@@ -4,5 +4,8 @@
   "transform": {
     "^.+\\.(t|j)s$": ["ts-jest", { "tsconfig": "<rootDir>/tsconfig.spec.json" }]
   },
-  "moduleFileExtensions": ["js", "json", "ts"]
+  "moduleFileExtensions": ["js", "json", "ts"],
+  "moduleNameMapper": {
+    "^@nestjs/(common|core)(/.*)?$": "<rootDir>/node_modules/@nestjs/$1$2"
+  }
 }

@@ -1,0 +1,59 @@
+import { useCallback } from "react";
+import { getOwner } from "../../api/clients.api";
+import { getPet } from "../../api/pets.api";
+import type { Pet, PetFormValues, PetOwner } from "../../types/pet.types";
+import { useAsync } from "../common/useAsync";
+
+export const EMPTY_PET_FORM: PetFormValues = {
+  clientId: "",
+  name: "",
+  species: "",
+  breed: "",
+  sex: "",
+  birthDate: "",
+  color: "",
+  microchip: "",
+};
+
+interface PetFormData {
+  initialValues: PetFormValues;
+  initialOwner: PetOwner | null;
+}
+
+/** Los campos nulos de la API se muestran como texto vacío en el formulario. */
+function toFormValues(pet: Pet): PetFormValues {
+  return {
+    clientId: pet.clientId,
+    name: pet.name,
+    species: pet.species,
+    breed: pet.breed ?? "",
+    sex: pet.sex ?? "",
+    birthDate: pet.birthDate ?? "",
+    color: pet.color ?? "",
+    microchip: pet.microchip ?? "",
+  };
+}
+
+async function loadFormData(petId?: string, presetClientId?: string): Promise<PetFormData> {
+  if (petId) {
+    const pet = await getPet(petId);
+    return { initialValues: toFormValues(pet), initialOwner: await getOwner(pet.clientId) };
+  }
+  if (presetClientId) {
+    const owner = await getOwner(presetClientId);
+    return { initialValues: { ...EMPTY_PET_FORM, clientId: owner.id }, initialOwner: owner };
+  }
+  return { initialValues: EMPTY_PET_FORM, initialOwner: null };
+}
+
+/**
+ * Datos iniciales del formulario de mascota:
+ * - edición (`petId`): la mascota y su dueño;
+ * - alta desde la ficha de un cliente (`presetClientId`): el dueño ya elegido (UC-05, paso 2);
+ * - alta sin dueño: formulario vacío.
+ */
+export function usePetFormData(petId?: string, presetClientId?: string) {
+  const load = useCallback(() => loadFormData(petId, presetClientId), [petId, presetClientId]);
+  const { data, error, loading } = useAsync(load, "No se pudieron cargar los datos de la mascota.");
+  return { data, error, loading };
+}

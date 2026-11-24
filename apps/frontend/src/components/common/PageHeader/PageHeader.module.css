@@ -1,0 +1,25 @@
+.vc_dash_header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 20px;
+}
+
+.vc_dash_header h1 {
+  font-size: 1.6rem;
+  line-height: 1.2;
+  margin: 0 0 4px;
+  color: var(--accent-secondary);
+  font-family: var(--heading);
+  font-weight: 700;
+}
+
+.vc_dash_header p {
+  margin: 0;
+  color: var(--text);
+  font-size: 0.875rem;
+}
+.vc_dash_actions {
+  display: flex;
+  gap: 10px;
+}

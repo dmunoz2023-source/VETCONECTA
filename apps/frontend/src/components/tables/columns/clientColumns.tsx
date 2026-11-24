@@ -1,4 +1,4 @@
-import { SquarePen, Trash2 } from "lucide-react";
+import { PawPrint, SquarePen, Trash2 } from "lucide-react";
 import type { Client } from "../../../types/client.types";
 import IconButton from "../../common/IconButton";
 import type { TableColumn } from "../DataTable";
@@ -6,10 +6,12 @@ import type { TableColumn } from "../DataTable";
 interface ClientColumnActions {
   onEdit: (client: Client) => void;
   onDelete: (client: Client) => void;
+  /** Si se entrega, muestra el botón "Agregar mascota" (UC-05, paso 2). */
+  onAddPet?: (client: Client) => void;
 }
 
 /** Columnas de la tabla de clientes. Las acciones las entrega la página (abren sus modales). */
-export const getClientColumns = ({ onEdit, onDelete }: ClientColumnActions): TableColumn<Client>[] => [
+export const getClientColumns = ({ onEdit, onDelete, onAddPet }: ClientColumnActions): TableColumn<Client>[] => [
   {
     key: "name",
     header: "Nombre",
@@ -27,6 +29,11 @@ export const getClientColumns = ({ onEdit, onDelete }: ClientColumnActions): Tab
     header: "",
     render: (c) => (
       <div className="vc-row-actions">
+        {onAddPet && (
+          <IconButton label={`Agregar mascota a ${c.firstName} ${c.lastName}`} onClick={() => onAddPet(c)}>
+            <PawPrint size={16} />
+          </IconButton>
+        )}
         <IconButton label={`Editar a ${c.firstName} ${c.lastName}`} onClick={() => onEdit(c)}>
           <SquarePen size={16} />
         </IconButton>

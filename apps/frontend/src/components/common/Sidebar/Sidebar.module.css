@@ -1,0 +1,71 @@
+.vc_sidebar {
+  width: 100%;
+  max-width: 240px;
+  height: 100%;
+  background: transparent;
+  padding: 20px 14px;
+  transition: width 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.vc_sidebar.collapsed {
+  width: 76px;
+}
+.vc_sidebar_brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  font-size: 18px;
+  color: #111827;
+  padding: 0 8px 20px;
+}
+.vc_brand_icon {
+  color: #f43f5e;
+}
+.vc_nav {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+.vc_nav_item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  color: var(--text);
+  text-decoration: none;
+  font-size: 14px;
+  white-space: nowrap;
+  transition: var(--transition-05-ease);
+  transition-property: background, color, font-weight;
+
+}
+.vc_nav_item:hover {
+  font-weight: 600;
+  background: var(--accent-bg);
+  color: var(--text-accent);
+  transition: var(--transition-05-ease);
+  transition-property: background, color, font-weight;
+}
+.vc_nav_item.active {
+  font-weight: 600;
+  background: var(--accent-bg);
+  color: var(--text-accent);
+  transition: var(--transition-05-ease);
+  transition-property: background, color, font-weight;
+}
+.vc_collapse_btn {
+  border: none;
+  background: transparent;
+  color: var(--vc-text-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+}

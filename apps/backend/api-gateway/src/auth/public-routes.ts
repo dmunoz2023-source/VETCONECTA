@@ -1,6 +1,13 @@
 // Rutas publicas exentas de validacion de JWT. Todo lo que no este aqui
 // exige un Bearer valido antes de reenviarse al microservicio destino.
 
+import { PROXY_ROUTES_CONFIG } from "../config/proxy.config";
+
+const {
+  auth,
+  catalog
+} = PROXY_ROUTES_CONFIG
+
 export interface PublicRoute {
   method: string;
   path: string;
@@ -8,9 +15,9 @@ export interface PublicRoute {
 
 // Coincidencia exacta metodo + path.
 export const PUBLIC_ROUTES: PublicRoute[] = [
-  { method: 'POST', path: '/v1/auth/login' },
-  { method: 'POST', path: '/v1/auth/register' },
-  { method: 'GET', path: '/v1/catalog/clinic' },
+  { method: 'POST', path: auth.prefix.login },
+  { method: 'POST', path: auth.prefix.register },
+  { method: 'GET', path: catalog.prefix.clinic },
 ];
 
 // Prefijos publicos (Swagger UI y el JSON del contrato): cualquier ruta que empiece asi.

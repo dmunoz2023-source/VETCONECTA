@@ -11,6 +11,7 @@ interface ClientsTableProps {
   pagination: TablePaginationProps;
   onEdit: (client: Client) => void;
   onDelete: (client: Client) => void;
+  onAddPet?: (client: Client) => void;
 }
 
 export default function ClientsTable({
@@ -21,10 +22,11 @@ export default function ClientsTable({
   pagination,
   onEdit,
   onDelete,
+  onAddPet,
 }: Readonly<ClientsTableProps>) {
   return (
     <DataTable
-      columns={getClientColumns({ onEdit, onDelete })}
+      columns={getClientColumns({ onEdit, onDelete, onAddPet })}
       rows={clients}
       getRowKey={(c) => c.id}
       loading={loading}

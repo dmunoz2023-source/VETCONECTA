@@ -8,7 +8,7 @@
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/apps/backend/scheduling-service/src/main.js",
-    "test:e2e": "jest --config test/jest-e2e.json --runInBand --silent"
+    "test": "jest"
   },
   "dependencies": {
     "@nestjs/axios": "^3.0.2",
@@ -36,5 +36,25 @@
     "supertest": "^7.3.1",
     "ts-jest": "^29.2.5",
     "typescript": "^5.4.0"
+  },
+  "jest": {
+    "moduleFileExtensions": [
+      "js",
+      "json",
+      "ts"
+    ],
+    "rootDir": "src",
+    "testRegex": ".*\\.spec\\.ts$",
+    "transform": {
+      "^.+\\.(t|j)s$": "ts-jest"
+    },
+    "collectCoverageFrom": [
+      "**/*.(t|j)s"
+    ],
+    "coverageDirectory": "../coverage",
+    "testEnvironment": "node",
+    "moduleNameMapper": {
+      "^@app/shared/(.*)$": "<rootDir>/../../../../libs/shared/src/$1"
+    }
   }
 }
