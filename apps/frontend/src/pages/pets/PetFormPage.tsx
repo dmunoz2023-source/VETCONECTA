@@ -2,7 +2,7 @@ import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import Card from "../../components/common/Card";
 import PageHeader from "../../components/common/PageHeader/PageHeader";
 import StatusText from "../../components/feedback/StatusText";
-import { usePetFormData } from "../../hooks/usePetFormData";
+import { usePetFormData } from "../../hooks/pets/usePetFormData";
 import type { Pet } from "../../types/pet.types";
 import PetForm from "./PetForm";
 import "./Pets.css";

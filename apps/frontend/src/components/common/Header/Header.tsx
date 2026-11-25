@@ -1,5 +1,5 @@
 import { Search, Bell, LogOut } from "lucide-react";
-import { useAuth } from "../../../hooks/useAuth";
+import { useAuth } from "../../../hooks/auth/useAuth";
 import { formatRole, getInitials } from "../../../utils/formatters";
 import IconButton from "../IconButton";
 
