@@ -46,7 +46,10 @@ describe('DeviceTokensRepository', () => {
       }),
       ['token'],
     );
-    expect(repository.findOneBy).toHaveBeenCalledWith({ token: dto.token });
+    expect(repository.findOneBy).toHaveBeenCalledWith({
+      userId: 'authenticated-user-id',
+      token: dto.token,
+    });
   });
 
   it('deletes only a token owned by the authenticated user', async () => {

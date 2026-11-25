@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEnum, IsNotEmpty, IsString } from 'class-validator';
+import { IsEnum, IsNotEmpty, IsString, MaxLength } from 'class-validator';
 
 export enum DevicePlatform {
   ANDROID = 'android',
@@ -8,9 +8,13 @@ export enum DevicePlatform {
 }
 
 export class RegisterDeviceDto {
-  @ApiProperty({ description: 'Firebase Cloud Messaging registration token' })
+  @ApiProperty({
+    description: 'Firebase Cloud Messaging registration token',
+    maxLength: 255,
+  })
   @IsString()
   @IsNotEmpty()
+  @MaxLength(255)
   token!: string;
 
   @ApiProperty({ enum: DevicePlatform, example: DevicePlatform.ANDROID })

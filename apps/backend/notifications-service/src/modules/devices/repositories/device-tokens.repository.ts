@@ -31,6 +31,7 @@ export class DeviceTokensRepository {
     );
 
     const registeredDevice = await this.repository.findOneBy({
+      userId,
       token: device.token,
     });
     if (!registeredDevice) {

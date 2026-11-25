@@ -8,7 +8,8 @@
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/apps/backend/notifications-service/src/main.js",
-    "test": "jest"
+    "test": "jest",
+    "test:integration": "jest --runInBand --testRegex=.*[.]e2e-spec[.]ts$"
   },
   "jest": {
     "moduleFileExtensions": [
@@ -23,7 +24,8 @@
     },
     "testEnvironment": "node",
     "moduleNameMapper": {
-      "^@app/shared/(.*)$": "<rootDir>/../../../../libs/shared/src/$1"
+      "^@app/shared/(.*)$": "<rootDir>/../../../../libs/shared/src/$1",
+      "^@nestjs/common$": "<rootDir>/../../../../apps/backend/notifications-service/node_modules/@nestjs/common"
     }
   },
   "dependencies": {
