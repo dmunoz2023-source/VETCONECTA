@@ -7,10 +7,10 @@ Objetivo: carnet y disponibilidad en menos de 2 s en el 95 % de los casos (NFR-1
 ## Estructura
 
 ```
-infra/db/optimizacion/
-├─ seed-volumen/   clinical.sql · scheduling.sql · notifications.sql   (datos de prueba de volumen alto)
-├─ explain/        clinical.sql · scheduling.sql · notifications.sql · medir.sh   (consultas medidas)
-└─ indices/        clinical.sql · scheduling.sql · notifications.sql · quitar-indices.sql
+infra/db/optimization/
+├─ volume-seed/   clinical.sql · scheduling.sql · notifications.sql   (datos de prueba de volumen alto)
+├─ explain/        clinical.sql · scheduling.sql · notifications.sql · measure.sh   (consultas medidas)
+└─ indexes/        clinical.sql · scheduling.sql · notifications.sql · drop-indexes.sql
 ```
 
 Cada script se ejecuta contra la base de su servicio (`clinical_db`, `scheduling_db`,
@@ -21,23 +21,23 @@ funcionan igual con la estructura anterior (un esquema por servicio) y con bases
 
 ```bash
 # 1. Base de pruebas de rendimiento (NO usar la de desarrollo): crear tablas con el DDL normal y cargar el volumen.
-psql -U postgres -d clinical_db      -f infra/db/optimizacion/seed-volumen/clinical.sql
-psql -U postgres -d scheduling_db    -f infra/db/optimizacion/seed-volumen/scheduling.sql
-psql -U postgres -d notifications_db -f infra/db/optimizacion/seed-volumen/notifications.sql
+psql -U postgres -d clinical_db      -f infra/db/optimization/volume-seed/clinical.sql
+psql -U postgres -d scheduling_db    -f infra/db/optimization/volume-seed/scheduling.sql
+psql -U postgres -d notifications_db -f infra/db/optimization/volume-seed/notifications.sql
 
 # 2. ANTES: medir sin los índices nuevos (mediana de 5 corridas por consulta).
-PGUSER=postgres ./infra/db/optimizacion/explain/medir.sh 5
+PGUSER=postgres ./infra/db/optimization/explain/measure.sh 5
 
 # 3. Crear los índices.
-psql -U postgres -d clinical_db      -f infra/db/optimizacion/indices/clinical.sql
-psql -U postgres -d scheduling_db    -f infra/db/optimizacion/indices/scheduling.sql
-psql -U postgres -d notifications_db -f infra/db/optimizacion/indices/notifications.sql
+psql -U postgres -d clinical_db      -f infra/db/optimization/indexes/clinical.sql
+psql -U postgres -d scheduling_db    -f infra/db/optimization/indexes/scheduling.sql
+psql -U postgres -d notifications_db -f infra/db/optimization/indexes/notifications.sql
 
-# 4. DESPUÉS: volver a medir. Para repetir el "antes": quitar-indices.sql en cada base.
-PGUSER=postgres ./infra/db/optimizacion/explain/medir.sh 5
+# 4. DESPUÉS: volver a medir. Para repetir el "antes": drop-indexes.sql en cada base.
+PGUSER=postgres ./infra/db/optimization/explain/measure.sh 5
 ```
 
-`medir.sh` usa las variables `DB_CLINICAL`, `DB_SCHEDULING`, `DB_NOTIFICATIONS` y `PGHOST/PGPORT/PGUSER` si las bases
+`measure.sh` usa las variables `DB_CLINICAL`, `DB_SCHEDULING`, `DB_NOTIFICATIONS` y `PGHOST/PGPORT/PGUSER` si las bases
 tienen otros nombres. Para ver el plan completo de una consulta, ejecutar su archivo de `explain/` directamente con `psql`.
 
 ## Volumen del seed

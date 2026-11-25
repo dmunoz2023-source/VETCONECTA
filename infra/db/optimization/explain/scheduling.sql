@@ -1,6 +1,6 @@
 -- [M2] EXPLAIN ANALYZE de los endpoints de scheduling (base scheduling_db).
---   psql -U postgres -d scheduling_db -f infra/db/optimizacion/explain/scheduling.sql
--- o todos juntos con infra/db/optimizacion/explain/medir.sh
+--   psql -U postgres -d scheduling_db -f infra/db/optimization/explain/scheduling.sql
+-- o todos juntos con infra/db/optimization/explain/measure.sh
 
 SET search_path TO scheduling, public;
 \set vet       '''55555555-5555-5555-5555-555555555551'''
@@ -65,7 +65,7 @@ LIMIT 20 OFFSET 0;
 
 \echo >> Q7 resumen de calificaciones por veterinario (K2: GET /calificaciones/resumen)
 EXPLAIN (ANALYZE, BUFFERS)
-SELECT a.vet_user_id, round(avg(r.stars), 2) AS promedio, count(*) AS total
+SELECT a.vet_user_id, round(avg(r.stars), 2) AS average, count(*) AS total
 FROM ratings r
 JOIN appointments a ON a.id = r.appointment_id
 GROUP BY a.vet_user_id;

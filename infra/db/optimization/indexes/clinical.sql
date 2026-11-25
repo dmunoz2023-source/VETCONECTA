@@ -1,5 +1,5 @@
 -- [M2] Índices de clinical (base clinical_db).
---   psql -U postgres -d clinical_db -f infra/db/optimizacion/indices/clinical.sql
+--   psql -U postgres -d clinical_db -f infra/db/optimization/indexes/clinical.sql
 --
 -- Idempotente (IF NOT EXISTS).
 --

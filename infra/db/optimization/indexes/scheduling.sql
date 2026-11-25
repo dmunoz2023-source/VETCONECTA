@@ -1,5 +1,5 @@
 -- [M2] Índices de scheduling (base scheduling_db).
---   psql -U postgres -d scheduling_db -f infra/db/optimizacion/indices/scheduling.sql
+--   psql -U postgres -d scheduling_db -f infra/db/optimization/indexes/scheduling.sql
 --
 -- Idempotente (IF NOT EXISTS). En una base con tráfico real conviene crearlos con
 -- CREATE INDEX CONCURRENTLY, pero ese modo no puede ir dentro de un script transaccional.

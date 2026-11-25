@@ -1,5 +1,5 @@
 -- [M2] Seed de volumen alto para clinical (base clinical_db).
---   psql -U postgres -d clinical_db -f infra/db/optimizacion/seed-volumen/clinical.sql
+--   psql -U postgres -d clinical_db -f infra/db/optimization/volume-seed/clinical.sql
 --
 -- SOLO para una base de pruebas de rendimiento: inserta cientos de miles de filas.
 -- No toca el seed normal. Es idempotente (no duplica si ya se cargó).

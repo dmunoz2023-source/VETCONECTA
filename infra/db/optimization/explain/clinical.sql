@@ -1,6 +1,6 @@
 -- [M2] EXPLAIN ANALYZE de los endpoints de clinical (base clinical_db).
---   psql -U postgres -d clinical_db -f infra/db/optimizacion/explain/clinical.sql
--- o todos juntos con infra/db/optimizacion/explain/medir.sh
+--   psql -U postgres -d clinical_db -f infra/db/optimization/explain/clinical.sql
+-- o todos juntos con infra/db/optimization/explain/measure.sh
 --
 -- Cada consulta es la que generan los repositorios (TypeORM) para ese endpoint.
 -- Mascota "caliente" (5.000 eventos) = peor caso; mascota normal (100 eventos) = caso típico.

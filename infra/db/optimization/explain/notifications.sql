@@ -1,6 +1,6 @@
 -- [M2] EXPLAIN ANALYZE de los endpoints de notifications (base notifications_db).
---   psql -U postgres -d notifications_db -f infra/db/optimizacion/explain/notifications.sql
--- o todos juntos con infra/db/optimizacion/explain/medir.sh
+--   psql -U postgres -d notifications_db -f infra/db/optimization/explain/notifications.sql
+-- o todos juntos con infra/db/optimization/explain/measure.sh
 --
 -- user_notifications: H2 (feat/H2-notifications-engine) y X3 la definen; "no leído" = read_at IS NULL.
 

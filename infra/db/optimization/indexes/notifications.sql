@@ -1,5 +1,5 @@
 -- [M2] Índices de notifications (base notifications_db).
---   psql -U postgres -d notifications_db -f infra/db/optimizacion/indices/notifications.sql
+--   psql -U postgres -d notifications_db -f infra/db/optimization/indexes/notifications.sql
 --
 -- Idempotente (IF NOT EXISTS).
 --

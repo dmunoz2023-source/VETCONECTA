@@ -2,7 +2,7 @@
 # [M2] Mide las consultas críticas: por cada Q muestra el tipo de scan principal y el
 # "Execution Time" (mediana de N corridas, por defecto 5).
 #
-#   Uso:  PGHOST=localhost PGPORT=5432 PGUSER=postgres ./medir.sh [corridas]
+#   Uso:  PGHOST=localhost PGPORT=5432 PGUSER=postgres ./measure.sh [corridas]
 #
 # Usa estas bases (cámbielas con las variables si su estructura es distinta):
 #   DB_CLINICAL=clinical_db  DB_SCHEDULING=scheduling_db  DB_NOTIFICATIONS=notifications_db

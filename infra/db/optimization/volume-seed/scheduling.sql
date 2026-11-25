@@ -1,5 +1,5 @@
 -- [M2] Seed de volumen alto para scheduling (base scheduling_db).
---   psql -U postgres -d scheduling_db -f infra/db/optimizacion/seed-volumen/scheduling.sql
+--   psql -U postgres -d scheduling_db -f infra/db/optimization/volume-seed/scheduling.sql
 --
 -- SOLO para una base de pruebas de rendimiento. Es idempotente.
 --

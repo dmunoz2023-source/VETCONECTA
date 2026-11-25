@@ -1,5 +1,5 @@
 -- [M2] Seed de volumen alto para notifications (base notifications_db).
---   psql -U postgres -d notifications_db -f infra/db/optimizacion/seed-volumen/notifications.sql
+--   psql -U postgres -d notifications_db -f infra/db/optimization/volume-seed/notifications.sql
 --
 -- SOLO para una base de pruebas de rendimiento. Es idempotente.
 --
