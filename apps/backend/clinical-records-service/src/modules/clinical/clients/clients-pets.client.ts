@@ -39,7 +39,7 @@ export class ClientsPetsClient {
   }
 
   private async get(path: string): Promise<AxiosResponse> {
-    const internalKey =
+    const internalKey = this.configService.get<string>('INTERNAL_KEY');
       this.configService.get<string>('internalApiKey') ||
       this.configService.get<string>('INTERNAL_API_KEY') ||
       this.configService.get<string>('INTERNAL_KEY');

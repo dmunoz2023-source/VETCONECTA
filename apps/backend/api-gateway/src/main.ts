@@ -1,14 +1,12 @@
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { HttpExceptionFilter } from '@app/shared/filters/http-exception.filter';
 import { AppModule } from './app.module';
 import { aggregateServiceDocs } from './swagger/swagger-aggregator';
 import { exportOpenApiSpec } from './swagger/export-openapi-spec';
 import { HEADERS_PROXY_CONFIG } from './config/headers.proxy.config';
-
-const web_url = process.env.FRONTEND_WEB_ORIGIN_URL || 'http://localhost:5173'
-const movile_url = process.env.FRONTEND_MOVILE_ORIGIN_URL || 'http://127.0.0.1:5173'
 
 const {
   requestId
@@ -17,12 +15,18 @@ const {
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  const config = app.get(ConfigService);
+  const origins = config
+    .getOrThrow<string>('CORS_ORIGIN')
+    .split(',')
+    .map((o) => o.trim());
+
   // [J3] Formato de error único en todas las respuestas (Diseño §3.3).
   app.useGlobalFilters(new HttpExceptionFilter());
 
   // Configuración de CORS para Frontend Web y Mobile
   app.enableCors({
-    origin: [web_url, movile_url],
+    origin: origins,
     methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Authorization', 'Content-Type', requestId],
     exposedHeaders: [requestId],
@@ -47,7 +51,7 @@ async function bootstrap() {
 
   exportOpenApiSpec(document);
 
-  const port = process.env.PORT || 3000;
+  const port = config.getOrThrow<number>('PORT');
   await app.listen(port);
   console.log(`API Gateway ejecutándose en http://localhost:${port}`);
 }

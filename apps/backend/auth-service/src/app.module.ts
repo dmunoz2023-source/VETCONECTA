@@ -12,6 +12,7 @@ import { AuthModule } from './modules/auth/auth.module';
       isGlobal: true,
       load: [configuration],
       validationSchema,
+      validationOptions: { abortEarly: false },
     }),
     DatabaseModule,
     AuthModule,

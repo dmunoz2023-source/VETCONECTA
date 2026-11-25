@@ -3,6 +3,7 @@ import { ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { HttpExceptionFilter } from '@app/shared/filters/http-exception.filter';
 import { AppModule } from './app.module';
+import { ConfigService } from '@nestjs/config';
 
 (async function () {
   const app = await NestFactory.create(AppModule);
@@ -31,7 +32,7 @@ import { AppModule } from './app.module';
     swaggerUiEnabled: false,
   });
 
-  const port = process.env.PORT || 3001;
+  const port = app.get(ConfigService).getOrThrow<number>('PORT');
   await app.listen(port);
   console.log(`Microservicio ejecutándose en el puerto: ${port}`);
 })();
