@@ -33,7 +33,7 @@ servicio comprueba que el recurso pertenezca al usuario del token (BR-8, BR-12).
 
 | NFR | Dónde se resuelve | Evidencia |
 | --- | --- | --- |
-| NFR-1: respuesta < 2 s en el 95 % | Índices en carnet, agenda y disponibilidad; llamadas internas locales | [`infra/db/optimizacion/README.md`](../db/optimizacion/README.md) (medición SQL antes/después). El p95 extremo a extremo lo mide N2 |
+| NFR-1: respuesta < 2 s en el 95 % | Índices en carnet, agenda y disponibilidad; llamadas internas locales | [`infra/db/optimization/README.md`](../db/optimization/README.md) (medición SQL antes/después). El p95 extremo a extremo lo mide N2 |
 | NFR-2: 99 % de disponibilidad | PM2 reinicia cualquier proceso que caiga; un fallo en notificaciones no tumba la agenda | Despliegue pendiente (M5) |
 | NFR-3: seguridad con JWT | JWT verificado una vez en el gateway; `RolesGuard` por endpoint; `/internal` con `X-Internal-Key` | Revisión endpoint × rol: pendiente (M3) |
 | NFR-4: privacidad | `owner*` compara el dueño del recurso con el usuario del token | Pruebas de acceso a recursos ajenos: pendiente (M3) |

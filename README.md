@@ -155,7 +155,7 @@ apps/
 ├─ frontend/                  panel web (React + Vite + TypeScript)
 infra/
 ├─ db/                        00-databases.sql y una carpeta por servicio con 00-tables.sql y 01-seed.sql
-│  └─ optimizacion/           seed de volumen, índices y mediciones EXPLAIN ANALYZE (M2)
+│  └─ optimization/           seed de volumen, índices y mediciones EXPLAIN ANALYZE (M2)
 └─ docs/                      modelo de datos, trazabilidad, guion de demo y openapi generado
 libs/shared/                  guards, filtros, decoradores y tipos comunes a los servicios
 ```

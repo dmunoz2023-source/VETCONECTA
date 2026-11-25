@@ -12,7 +12,7 @@ por HTTP a una ruta `/internal` del servicio dueño del dato.
 | 1 | `infra/db/00-databases.sql` | Crea los 6 roles y las 6 bases, las extensiones y los permisos por defecto. Idempotente. |
 | 2 | `infra/db/<servicio>/00-tables.sql` | DDL del servicio: tablas, restricciones e índices. |
 | 3 | `infra/db/<servicio>/01-seed.sql` | Datos iniciales de desarrollo (usuarios de prueba por rol, clínica, especialidades, mascotas). |
-| — | `infra/db/optimizacion/` | Solo para pruebas de rendimiento: seed de volumen alto, índices adicionales y mediciones (M2). |
+| — | `infra/db/optimization/` | Solo para pruebas de rendimiento: seed de volumen alto, índices adicionales y mediciones (M2). |
 
 Orden y comandos completos en el [README principal](../../README.md#instalación).
 
@@ -252,4 +252,4 @@ erDiagram
 
 Los índices de negocio están en cada `00-tables.sql` (por ejemplo `idx_clinical_events_pet_date` para el carnet y
 `idx_reminders_pending_fire_at` para el despachador). Los índices adicionales de rendimiento, con su medición antes y después,
-están en [`infra/db/optimizacion/`](../db/optimizacion/README.md).
+están en [`infra/db/optimization/`](../db/optimization/README.md).
