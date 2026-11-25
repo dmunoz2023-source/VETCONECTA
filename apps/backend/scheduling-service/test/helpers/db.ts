@@ -52,3 +52,63 @@ export async function countAllActive(dataSource: DataSource, vetUserId: string):
   );
   return rows[0].total as number;
 }
+
+export interface AppointmentSeed {
+  petId: string;
+  clientId: string;
+  vetUserId: string;
+  specialtyId: string;
+  start: Date;
+  status: 'booked' | 'confirmed' | 'completed' | 'cancelled' | 'no_show';
+}
+
+/** [K2] Inserta una cita directamente (sin pasar por la reserva) y devuelve su id. */
+export async function seedAppointment(
+  dataSource: DataSource,
+  appointment: AppointmentSeed,
+): Promise<string> {
+  const end = new Date(appointment.start.getTime() + 30 * 60_000);
+  const rows = await dataSource.query(
+    `INSERT INTO scheduling.appointments
+       (pet_id, client_id, vet_user_id, specialty_id, start_time, end_time, status)
+     VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id`,
+    [
+      appointment.petId,
+      appointment.clientId,
+      appointment.vetUserId,
+      appointment.specialtyId,
+      appointment.start,
+      end,
+      appointment.status,
+    ],
+  );
+  return rows[0].id as string;
+}
+
+export interface RatingSeed {
+  appointmentId: string;
+  clientId: string;
+  stars: number;
+  comment?: string | null;
+  createdAt: Date;
+}
+
+/** [K2] Inserta una calificación con la fecha indicada (para probar filtros y orden). */
+export async function seedRating(dataSource: DataSource, rating: RatingSeed): Promise<void> {
+  await dataSource.query(
+    `INSERT INTO scheduling.ratings (appointment_id, client_id, stars, comment, created_at)
+     VALUES ($1, $2, $3, $4, $5)`,
+    [rating.appointmentId, rating.clientId, rating.stars, rating.comment ?? null, rating.createdAt],
+  );
+}
+
+/** [K2] Calificaciones guardadas de una cita. */
+export async function ratingsOf(
+  dataSource: DataSource,
+  appointmentId: string,
+): Promise<Array<{ stars: number; comment: string | null; client_id: string }>> {
+  return dataSource.query(
+    `SELECT stars, comment, client_id FROM scheduling.ratings WHERE appointment_id = $1`,
+    [appointmentId],
+  );
+}
