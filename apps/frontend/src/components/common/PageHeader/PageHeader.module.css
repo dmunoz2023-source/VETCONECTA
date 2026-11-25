@@ -2,7 +2,14 @@
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
+  /* En pantallas angostas las acciones bajan debajo del título en vez de apretarlo. */
+  flex-wrap: wrap;
+  gap: 12px 16px;
   margin-bottom: 20px;
+}
+
+.vc_dash_header > div:first-child {
+  flex: 1 1 280px;
 }
 
 .vc_dash_header h1 {
@@ -21,5 +28,7 @@
 }
 .vc_dash_actions {
   display: flex;
+  flex-wrap: wrap;
+  align-items: center;
   gap: 10px;
 }

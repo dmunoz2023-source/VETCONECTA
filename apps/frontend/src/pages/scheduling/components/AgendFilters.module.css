@@ -1,5 +1,6 @@
 .container {
   display: flex;
+  flex-wrap: wrap;
   gap: 12px;
   align-items: center;
   justify-content: space-between;
@@ -10,8 +11,9 @@
   box-shadow: var(--shadow);
 }
 
+/* En tablet el buscador ocupa su propia fila en vez de encogerse hasta desaparecer. */
 .searchBox {
-  flex: 1;
+  flex: 1 1 240px;
   max-width: 400px;
 }
 
@@ -36,5 +38,11 @@
 
 .filterGroup {
   display: flex;
+  flex-wrap: wrap;
   gap: 8px;
+}
+
+.filterGroup .selectInput {
+  width: auto;
+  flex: 1 1 160px;
 }
