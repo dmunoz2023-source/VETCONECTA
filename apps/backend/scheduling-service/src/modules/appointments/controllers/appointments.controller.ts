@@ -47,9 +47,10 @@ export class AppointmentsController {
     summary: 'Listar mis citas',
     description:
       'Solo owner. Devuelve las citas del dueño autenticado (agendadas, históricas y ' +
-      'canceladas), con filtro opcional por estado y paginación (FR-3, BR-8).',
+      'canceladas), con filtro opcional por estado y paginación (FR-3, BR-8). Cada cita ' +
+      'incluye `rated`: true si ya fue calificada (K2), para que la app oculte el botón de calificar.',
   })
-  @ApiOkResponse({ description: 'Listado de citas del dueño.' })
+  @ApiOkResponse({ description: 'Listado de citas del dueño; cada cita trae el campo booleano `rated`.' })
   @ApiBadRequestResponse({ description: 'VALIDATION_ERROR: filtros o paginación inválidos.', schema: ERROR_RESPONSE_SCHEMA })
   @ApiUnauthorizedResponse({ description: 'UNAUTHORIZED: falta el token o expiró.', schema: ERROR_RESPONSE_SCHEMA })
   @ApiForbiddenResponse({ description: 'FORBIDDEN: el rol no es owner o no tiene client_id (BR-8, BR-14).', schema: ERROR_RESPONSE_SCHEMA })
