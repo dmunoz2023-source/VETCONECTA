@@ -8,7 +8,6 @@ import {
   ParseUUIDPipe,
   Post,
   Put,
-  Query,
   UseGuards,
 } from '@nestjs/common';
 import {
@@ -29,7 +28,6 @@ import {
   CreateClinicalEventDto,
   UpdateClinicalEventDto,
 } from '../dto/create-clinical-event.dto';
-import { GetClinicalHistoryQueryDto } from '../dto/get-clinical-history-query.dto';
 import { ClinicalEventEntity } from '../entities/clinical-event.entity';
 import { CurrentUser } from '@app/shared/decorators/current-user.decorator';
 import { Roles } from '@app/shared/decorators/roles.decorator';
@@ -94,19 +92,5 @@ export class ClinicalEventController {
     @CurrentUser() user: JwtPayload,
   ): Promise<ClinicalEventEntity[]> {
     return this.clinicalEventService.findByPetId(petId, user);
-  }
-
-  @Get('pets/:petId/history')
-  @HttpCode(HttpStatus.OK)
-  @Roles('vet', 'reception')
-  @ApiOperation({ summary: 'Obtener historial clínico paginado' })
-  @ApiParam({ name: 'petId', description: 'UUID de la mascota' })
-  @ApiOkResponse({ description: 'Eventos clínicos y metadatos de paginación.' })
-  @ApiForbiddenResponse({ description: 'Rol sin permiso para consultar el historial.' })
-  async getHistory(
-    @Param('petId', ParseUUIDPipe) petId: string,
-    @Query() query: GetClinicalHistoryQueryDto,
-  ) {
-    return this.clinicalEventService.findHistoryByPetId(petId, query);
   }
 }

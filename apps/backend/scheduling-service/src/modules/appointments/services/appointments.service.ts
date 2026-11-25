@@ -17,6 +17,7 @@ import { RemindersClient } from '../clients/reminders.client';
 import { GetCitasQueryDto } from '../dto/get-citas-query.dto';
 import { CreateCitaDto } from '../dto/create-cita.dto';
 import { FinalStatus } from '../dto/update-estado.dto';
+import { PastAppointmentsQueryDto } from '../dto/past-appointments-query.dto';
 
 /** Estados en los que una cita ocupa el horario del veterinario. */
 export const ACTIVE_STATUSES = ['booked', 'confirmed'] as const;
@@ -252,5 +253,28 @@ export class AppointmentsService {
 
   private isActive(status: string): boolean {
     return (ACTIVE_STATUSES as readonly string[]).includes(status);
+  }
+
+  /**
+   * [F3] Citas pasadas de una mascota con su estado, para el historial clínico
+   * (FR-8). Solo expone los campos que clinical necesita, no los datos internos.
+   */
+  async findPastByPet(query: PastAppointmentsQueryDto, now: Date = new Date()) {
+    const appointments = await this.appointmentsRepository.findPastByPet(query.petId, {
+      from: query.from ? new Date(query.from) : undefined,
+      toExclusive: query.to ? new Date(query.to) : undefined,
+      now,
+    });
+
+    return {
+      data: appointments.map((appointment) => ({
+        id: appointment.id,
+        startTime: appointment.startTime,
+        endTime: appointment.endTime,
+        status: appointment.status,
+        vetUserId: appointment.vetUserId,
+        specialtyId: appointment.specialtyId,
+      })),
+    };
   }
 }

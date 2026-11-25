@@ -24,5 +24,6 @@ import { ClinicalEventService } from './services/clinical-event.service';
     ClinicalEventRepository,
     ClinicalEventService,
   ],
+  exports: [ClientsPetsClient],
 })
 export class ClinicalEventModule {}

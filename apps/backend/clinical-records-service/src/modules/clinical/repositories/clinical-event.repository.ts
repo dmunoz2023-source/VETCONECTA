@@ -157,18 +157,4 @@ export class ClinicalEventRepository {
       relations: { vaccinationDetails: true },
     });
   }
-
-  findHistoryByPetId(
-    petId: string,
-    page: number,
-    limit: number,
-  ): Promise<[ClinicalEventEntity[], number]> {
-    return this.repository.findAndCount({
-      where: { petId },
-      order: { date: 'DESC' },
-      skip: (page - 1) * limit,
-      take: limit,
-      relations: { vaccinationDetails: true },
-    });
-  }
 }
