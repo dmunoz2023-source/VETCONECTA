@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { CreateUserNotificationDto } from '../dto/create-user-notification.dto';
 import { GetNotificationsQueryDto } from '../dto/get-notifications-query.dto';
 import { NotificationsPageDto } from '../dto/notifications-page.dto';
 import { UserNotificationsRepository } from '../repositories/user-notifications.repository';
@@ -9,6 +10,12 @@ export class NotificationsService {
   constructor(
     private readonly userNotifications: UserNotificationsRepository,
   ) {}
+
+  create(
+    notification: CreateUserNotificationDto,
+  ): Promise<UserNotificationEntity> {
+    return this.userNotifications.create(notification);
+  }
 
   async findForUser(
     userId: string,

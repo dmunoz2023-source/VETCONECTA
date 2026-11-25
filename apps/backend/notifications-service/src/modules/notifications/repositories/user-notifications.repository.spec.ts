@@ -8,6 +8,8 @@ describe('UserNotificationsRepository', () => {
     findAndCount: jest.fn(),
     update: jest.fn(),
     findOneBy: jest.fn(),
+    create: jest.fn((entity) => entity),
+    save: jest.fn(),
   };
   const notifications = new UserNotificationsRepository(
     repository as unknown as Repository<UserNotificationEntity>,
@@ -15,6 +17,40 @@ describe('UserNotificationsRepository', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+  });
+
+  it('persists new notifications as unread records', async () => {
+    const notification = {
+      userId: 'authenticated-user-id',
+      title: 'Recordatorio',
+      body: 'La vacuna de tu mascota está próxima.',
+    };
+    const savedNotification = {
+      id: 'notification-id',
+      ...notification,
+      petId: null,
+      isRead: false,
+      readAt: null,
+    };
+    const newNotification = {
+      ...notification,
+      petId: null,
+      isRead: false,
+      readAt: null,
+    };
+    repository.save.mockResolvedValue(savedNotification);
+
+    await expect(notifications.create(notification)).resolves.toBe(
+      savedNotification,
+    );
+
+    expect(repository.create).toHaveBeenCalledWith({
+      ...notification,
+      petId: null,
+      isRead: false,
+      readAt: null,
+    });
+    expect(repository.save).toHaveBeenCalledWith(newNotification);
   });
 
   it('scopes results to the user and applies filters, ordering, and pagination', async () => {

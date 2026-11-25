@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { FindOptionsWhere, Repository } from 'typeorm';
+import { CreateUserNotificationDto } from '../dto/create-user-notification.dto';
 import { GetNotificationsQueryDto } from '../dto/get-notifications-query.dto';
 import { UserNotificationEntity } from '../entities/user-notification.entity';
 
@@ -29,6 +30,21 @@ export class UserNotificationsRepository {
       skip: (query.page - 1) * query.limit,
       take: query.limit,
     });
+  }
+
+  create(
+    notification: CreateUserNotificationDto,
+  ): Promise<UserNotificationEntity> {
+    const entity = this.repository.create({
+      userId: notification.userId,
+      petId: notification.petId ?? null,
+      title: notification.title,
+      body: notification.body,
+      isRead: false,
+      readAt: null,
+    });
+
+    return this.repository.save(entity);
   }
 
   async markAsRead(
