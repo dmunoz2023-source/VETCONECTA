@@ -25,6 +25,7 @@
     "testEnvironment": "node",
     "moduleNameMapper": {
       "^@app/shared/(.*)$": "<rootDir>/../../../../libs/shared/src/$1",
+      "^@nestjs/config$": "<rootDir>/../../../../apps/backend/notifications-service/node_modules/@nestjs/config",
       "^@nestjs/common$": "<rootDir>/../../../../apps/backend/notifications-service/node_modules/@nestjs/common"
     }
   },

@@ -1,8 +1,8 @@
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
-import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { HttpExceptionFilter } from '@app/shared/filters/http-exception.filter';
 import { AppModule } from './app.module';
+import { setupNotificationsSwagger } from './swagger/setup-swagger';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -19,17 +19,7 @@ async function bootstrap() {
     }),
   );
 
-  const swaggerConfig = new DocumentBuilder()
-    .setTitle('VetConecta - Notifications Service')
-    .setDescription('API para vincular dispositivos y gestionar notificaciones.')
-    .setVersion('0.1.0')
-    .addBearerAuth()
-    .build();
-  const document = SwaggerModule.createDocument(app, swaggerConfig);
-  SwaggerModule.setup('docs', app, document, {
-    jsonDocumentUrl: 'docs-json',
-    swaggerUiEnabled: false,
-  });
+  setupNotificationsSwagger(app);
 
   const port = process.env.PORT || 3005;
   await app.listen(port);
