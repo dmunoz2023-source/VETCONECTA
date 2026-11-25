@@ -1,10 +1,13 @@
-# Pruebas de integración de scheduling-service (J2)
+# Pruebas de integración de scheduling-service (J2 y K2)
 
 Prueban la reserva de citas de punta a punta (HTTP → controlador → servicio → PostgreSQL) y
 verifican que **nunca quedan dos citas activas en el mismo horario de un veterinario** (BR-5).
 
-Solo se sustituyen los servicios externos: la consulta de mascotas (clients-pets) y los
-recordatorios (notifications) se reemplazan por dobles en memoria (`helpers/fakes.ts`).
+También prueban las calificaciones de citas (K2, ver el final de los casos).
+
+Solo se sustituyen los servicios externos: la consulta de mascotas y la verificación del dueño
+(clients-pets) y los recordatorios (notifications) se reemplazan por dobles en memoria
+(`helpers/fakes.ts`).
 La base de datos es real, porque lo que se prueba es el bloqueo por veterinario y el índice
 único parcial `uq_appointments_vet_start_active`.
 
@@ -91,6 +94,58 @@ La cita larga empieza a las 23:30 (-03:00) y termina a las 00:30 del día siguie
 | Bloque que empieza a las 00:00 locales, dentro de la cita que cruza la medianoche | 409 |
 | Bloque que empieza a las 00:30 locales, justo cuando termina | 201 |
 | La misma hora de reloj (23:30) pero con `+00:00` | 404: es otro instante, tres horas después |
+
+## Calificaciones de citas (K2)
+
+Archivo: `calificaciones.e2e-spec.ts`. La verificación de dueño (`GET /internal/pets/:id/owner/:userId`
+de clients-pets) se sustituye por `FakePetOwnerCheck`; el resto (guards, validación, servicio y
+PostgreSQL) es real. Las citas y calificaciones se siembran directamente en la base.
+
+### `POST /v1/scheduling/appointments/:id/rating` (solo owner)
+| Caso | Resultado esperado |
+|---|---|
+| Dueño califica su cita realizada (`completed`) | 201; queda una fila con `stars`, `comment` y el `client_id` de la cita. La respuesta no incluye `clientId` |
+| Sin comentario / comentario de exactamente 500 caracteres | 201; el comentario ausente se guarda como `null` |
+| Segunda calificación de la misma cita | 409 `RATING_ALREADY_EXISTS`; la primera no cambia |
+| 5 calificaciones simultáneas de la misma cita | Una 201 y 4 con 409; una sola fila (`appointment_id` UNIQUE) |
+| Cita `booked`, `confirmed`, `cancelled` o `no_show` | 422 `APPOINTMENT_NOT_COMPLETED`; no se guarda nada |
+| Dueño que califica la cita de otro (también si no está realizada) | 403 (BR-8) |
+| Rol recepción, administrador o veterinario | 403 |
+| Cita inexistente | 404 |
+| Sin cabeceras del Gateway | 401 |
+| Id que no es UUID; `stars` 0, 6, decimal, texto o ausente; comentario de 501 caracteres; campos desconocidos | 400 |
+| clients-pets no responde | 503; no se guarda nada |
+
+### Campo `rated` en `GET /v1/scheduling/appointments/me`
+| Caso | Resultado esperado |
+|---|---|
+| Citas calificadas y no calificadas del dueño | `rated` es `true` solo en las calificadas |
+| Dueño sin citas | Lista vacía |
+| Otro dueño calificó su propia cita | No marca las citas del primero |
+
+### `GET /v1/scheduling/ratings` (vet, reception, admin)
+Datos: cinco calificaciones de dos veterinarios, del 10 de noviembre al 2 de diciembre de 2026.
+
+| Caso | Resultado esperado |
+|---|---|
+| Rol vet, reception o admin / rol owner / sin cabeceras | 200 / 403 / 401 |
+| Orden | De la más reciente a la más antigua; cada ítem trae `vetUserId` y `appointmentStartTime` |
+| `?page=2&limit=2` | `meta` con total 5 y 3 páginas; la última página trae 1 ítem |
+| `?vetUserId=` | Solo las del veterinario |
+| `?from=2026-11-15&to=2026-11-30` | Incluye el 30 completo (una calificación a las 23:30Z) |
+| Veterinario y fechas a la vez | Intersección de ambos filtros |
+| Sin coincidencias | 200 con lista vacía |
+| `from` posterior a `to`, fecha inválida, `vetUserId` que no es UUID, `limit` mayor a 50, `page=0`, parámetro desconocido | 400 |
+
+### `GET /v1/scheduling/ratings/summary` (solo admin)
+| Caso | Resultado esperado |
+|---|---|
+| Resumen general | Promedio 3,8 y distribución 1:0, 2:1, 3:1, 4:1, 5:2; coincide con `AVG(stars)` y `COUNT(*)` de la base |
+| Con `vetUserId` o con fechas | Mismos filtros que el listado |
+| Sin calificaciones | `average: null`, total 0 y distribución en ceros |
+| Promedio no exacto (11 / 3) | Redondeado a 2 decimales: 3,67 |
+| Rol vet, reception u owner / sin cabeceras | 403 / 401 |
+| Filtros inválidos | 400 |
 
 ## Estructura
 

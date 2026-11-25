@@ -15,6 +15,7 @@ export const OWNER_2 = {
   clientId: 'cccccccc-0000-4000-8000-000000000002',
 };
 export const RECEPTION_USER_ID = '55555555-5555-5555-5555-555555555552';
+export const ADMIN_USER_ID = '55555555-5555-5555-5555-555555555551';
 
 export const PET_OWNER_1: PetInfo = {
   id: 'aaaaaaaa-0000-4000-8000-000000000001',
@@ -38,6 +39,14 @@ export function asOwner(owner: { userId: string; clientId: string }): Record<str
 
 export function asReception(): Record<string, string> {
   return { 'X-User-Id': RECEPTION_USER_ID, 'X-User-Role': 'reception' };
+}
+
+export function asAdmin(): Record<string, string> {
+  return { 'X-User-Id': ADMIN_USER_ID, 'X-User-Role': 'admin' };
+}
+
+export function asVet(vetUserId: string): Record<string, string> {
+  return { 'X-User-Id': vetUserId, 'X-User-Role': 'vet' };
 }
 
 /**

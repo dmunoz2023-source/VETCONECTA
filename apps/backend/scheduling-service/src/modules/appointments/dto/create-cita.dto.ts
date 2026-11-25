@@ -5,7 +5,7 @@ import { IsISO8601, Matches } from 'class-validator';
  * variante RFC 4122 y rechazaria los ids del seed (55555555-5555-5555-...),
  * que PostgreSQL si acepta en columnas uuid.
  */
-const UUID_FORMAT = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+export const UUID_FORMAT =/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 /**
  * [G2] Cuerpo de POST /v1/scheduling/appointments. `startTime` debe incluir zona horaria

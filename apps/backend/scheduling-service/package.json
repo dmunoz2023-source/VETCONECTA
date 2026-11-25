@@ -55,7 +55,9 @@
     "coverageDirectory": "../coverage",
     "testEnvironment": "node",
     "moduleNameMapper": {
-      "^@app/shared/(.*)$": "<rootDir>/../../../../libs/shared/src/$1"
+      "^@app/shared/(.*)$": "<rootDir>/../../../../libs/shared/src/$1",
+      "^@nestjs/common(.*)$": "<rootDir>/../node_modules/@nestjs/common$1",
+      "^@nestjs/core(.*)$": "<rootDir>/../node_modules/@nestjs/core$1"
     }
   }
 }
