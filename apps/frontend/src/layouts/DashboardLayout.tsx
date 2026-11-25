@@ -4,11 +4,19 @@ import Sidebar from "../components/common/Sidebar/Sidebar";
 import Header from "../components/common/Header/Header";
 import Notice from "../components/feedback/Notice";
 import { useForbiddenAlert } from "../hooks/auth/useForbiddenAlert";
+import { useMediaQuery } from "../hooks/common/useMediaQuery";
 import "./DashboardLayout.css";
 import { ROUTES } from "../utils/navigation";
 
+// En tablet y laptop chica el menú parte colapsado para dejarle espacio al contenido.
+const COMPACT_QUERY = "(max-width: 1024px)";
+
 export default function DashboardLayout() {
-  const [collapsed, setCollapsed] = useState(false);
+  const compact = useMediaQuery(COMPACT_QUERY);
+  // Lo que eligió el usuario vale solo mientras no se cruce el corte; al cruzarlo, se vuelve al valor por defecto.
+  const [manual, setManual] = useState<{ compact: boolean; collapsed: boolean } | null>(null);
+  const collapsed = manual?.compact === compact ? manual.collapsed : compact;
+  const toggleSidebar = () => setManual({ compact, collapsed: !collapsed });
   const { pathname } = useLocation();
   const forbidden = useForbiddenAlert();
 
@@ -18,7 +26,7 @@ export default function DashboardLayout() {
 
   return (
     <div className="vc-layout">
-      <Sidebar collapsed={collapsed} onToggle={() => setCollapsed((c) => !c)} />
+      <Sidebar collapsed={collapsed} onToggle={toggleSidebar} />
 
       <div className="vc-content">
         <Header />
