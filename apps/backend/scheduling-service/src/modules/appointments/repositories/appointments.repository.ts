@@ -2,6 +2,10 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, LessThan, MoreThan, Repository } from 'typeorm';
 import { Appointment, AppointmentStatus } from '../entities/appointment.entity';
+import { Rating } from '../entities/rating.entity';
+
+/** [K2] Cita del listado del dueño, con la marca de si ya fue calificada. */
+export type AppointmentWithRated = Appointment & { rated: boolean };
 
 export interface FindByClientOptions {
   status?: AppointmentStatus[];
@@ -42,7 +46,7 @@ export class AppointmentsRepository {
   async findByClient(
     clientId: string,
     { status, page, limit }: FindByClientOptions,
-  ): Promise<[Appointment[], number]> {
+  ): Promise<[AppointmentWithRated[], number]> {
     const qb = this.repo
       .createQueryBuilder('appointment')
       .where('appointment.clientId = :clientId', { clientId })
@@ -54,6 +58,20 @@ export class AppointmentsRepository {
       qb.andWhere('appointment.status IN (:...status)', { status });
     }
 
-    return qb.getManyAndCount();
+    const [items, total] = await qb.getManyAndCount();
+    return [await this.markRated(items), total];
+  }
+
+  /** [K2] Agrega `rated` (true si la cita ya tiene calificación) con una sola consulta por página. */
+  private async markRated(items: Appointment[]): Promise<AppointmentWithRated[]> {
+    if (items.length === 0) {
+      return [];
+    }
+    const ratings = await this.repo.manager.getRepository(Rating).find({
+      select: { appointmentId: true },
+      where: { appointmentId: In(items.map((item) => item.id)) },
+    });
+    const rated = new Set(ratings.map((rating) => rating.appointmentId));
+    return items.map((item) => Object.assign(item, { rated: rated.has(item.id) }));
   }
 }

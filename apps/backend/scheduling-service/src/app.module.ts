@@ -5,6 +5,7 @@ import { validationSchema } from './config/validation.schema';
 import { DatabaseModule } from './database/database.module';
 import { AvailabilityModule } from './modules/availability/availability.module';
 import { AppointmentsModule } from './modules/appointments/appointments.module';
+import { RatingsModule } from './modules/ratings/ratings.module';
 import { SchedulesModule } from './modules/schedules/schedules.module';
 import { HealthController } from './common/health.controller';
 
@@ -18,6 +19,7 @@ import { HealthController } from './common/health.controller';
     DatabaseModule,
     AvailabilityModule,
     AppointmentsModule,
+    RatingsModule,
     SchedulesModule,
   ],
   controllers: [HealthController],
