@@ -8,6 +8,7 @@ import { TreatmentEntity } from './entities/treatment.entity';
 import { VaccinationDetailsEntity } from './entities/vaccination-details.entity';
 import { ClinicalEventRepository } from './repositories/clinical-event.repository';
 import { ClinicalEventService } from './services/clinical-event.service';
+import { NotificationsClient } from './clients/notifications.client';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { ClinicalEventService } from './services/clinical-event.service';
   controllers: [ClinicalEventController],
   providers: [
     ClientsPetsClient,
+    NotificationsClient,
     ClinicalEventRepository,
     ClinicalEventService,
   ],

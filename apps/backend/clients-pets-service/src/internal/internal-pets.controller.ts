@@ -26,6 +26,17 @@ export class InternalPetsController {
     return this.petsService.findInternalById(id);
   }
 
+  @Get(':id/owner')
+  async getPetOwner(@Param('id') id: string) {
+    const pet = await this.petsService.findInternalById(id);
+    const client = await this.clientsRepository.findById(pet.clientId);
+    if (!client) {
+      throw new NotFoundException('No se encontró el dueño de la mascota.');
+    }
+
+    return { userId: client.userId };
+  }
+
   @Get(':id/owner/:userId')
   async verifyPetOwner(
     @Param('id') id: string,

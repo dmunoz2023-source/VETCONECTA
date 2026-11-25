@@ -3,6 +3,8 @@ export default () => ({
   port: parseInt(process.env.PORT || '3003', 10),
   clientsServiceUrl:
     process.env.CLIENTS_SERVICE_URL || 'http://localhost:3002',
+  notificationsServiceUrl:
+    process.env.NOTIFICATIONS_SERVICE_URL || 'http://localhost:3005',
   internalApiKey:
     process.env.INTERNAL_API_KEY || process.env.INTERNAL_KEY,
   database: {

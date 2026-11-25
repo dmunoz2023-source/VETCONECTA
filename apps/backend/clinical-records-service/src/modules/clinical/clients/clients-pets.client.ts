@@ -38,7 +38,23 @@ export class ClientsPetsClient {
     }
   }
 
-  private async get(path: string): Promise<AxiosResponse> {
+  async getPetOwnerId(petId: string): Promise<string> {
+    const response = await this.get<{ userId: string }>(
+      `/internal/pets/${encodeURIComponent(petId)}/owner`,
+    );
+    if (response.status === 404) {
+      throw new NotFoundException(`No existe una mascota con el ID ${petId}.`);
+    }
+    if (typeof response.data?.userId !== 'string') {
+      throw new ServiceUnavailableException(
+        'No fue posible obtener el dueño de la mascota.',
+      );
+    }
+
+    return response.data.userId;
+  }
+
+  private async get<T = unknown>(path: string): Promise<AxiosResponse<T>> {
     const internalKey =
       this.configService.get<string>('internalApiKey') ||
       this.configService.get<string>('INTERNAL_API_KEY') ||
@@ -58,7 +74,7 @@ export class ClientsPetsClient {
     let response: AxiosResponse;
     try {
       response = await firstValueFrom(
-        this.httpService.get(`${baseUrl}${path}`, {
+        this.httpService.get<T>(`${baseUrl}${path}`, {
           headers: { 'X-Internal-Key': internalKey },
           validateStatus: () => true,
         }),

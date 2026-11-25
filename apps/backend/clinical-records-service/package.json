@@ -10,6 +10,22 @@
     "start:prod": "node dist/apps/backend/clinical-records-service/src/main.js",
     "test": "jest"
   },
+  "jest": {
+    "moduleFileExtensions": [
+      "js",
+      "json",
+      "ts"
+    ],
+    "rootDir": "src",
+    "testRegex": ".*\\.spec\\.ts$",
+    "transform": {
+      "^.+\\.(t|j)s$": "ts-jest"
+    },
+    "testEnvironment": "node",
+    "moduleNameMapper": {
+      "^@app/shared/(.*)$": "<rootDir>/../../../../libs/shared/src/$1"
+    }
+  },
   "dependencies": {
     "@nestjs/common": "^10.0.0",
     "@nestjs/axios": "^3.0.2",

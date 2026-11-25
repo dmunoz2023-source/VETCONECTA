@@ -14,19 +14,26 @@ import {
 import { GetClinicalHistoryQueryDto } from '../dto/get-clinical-history-query.dto';
 import { ClinicalEventRepository } from '../repositories/clinical-event.repository';
 import { ClientsPetsClient } from '../clients/clients-pets.client';
+import { NotificationsClient } from '../clients/notifications.client';
 
 @Injectable()
 export class ClinicalEventService {
   constructor(
     private readonly clinicalEventRepository: ClinicalEventRepository,
     private readonly clientsPetsClient: ClientsPetsClient,
+    private readonly notificationsClient: NotificationsClient,
   ) {}
 
   async create(createDto: CreateClinicalEventDto, veterinarianId: string): Promise<ClinicalEventEntity> {
-    await this.clientsPetsClient.assertPetExists(createDto.petId);
+    let ownerUserId: string | undefined;
+    if (createDto.type === ClinicalEventType.VACCINE) {
+      ownerUserId = await this.clientsPetsClient.getPetOwnerId(createDto.petId);
+    } else {
+      await this.clientsPetsClient.assertPetExists(createDto.petId);
+    }
     const { eventData, vaccinationData } = this.prepareEventData(createDto);
 
-    return this.clinicalEventRepository.save(
+    const event = await this.clinicalEventRepository.save(
       {
         ...eventData,
         veterinarianId,
@@ -34,6 +41,17 @@ export class ClinicalEventService {
       veterinarianId,
       vaccinationData,
     );
+
+    if (vaccinationData && ownerUserId) {
+      await this.notificationsClient.create({
+        userId: ownerUserId,
+        petId: createDto.petId,
+        title: `Próxima dosis de ${vaccinationData.vaccine}`,
+        body: `La próxima dosis de ${vaccinationData.vaccine} está programada para el ${vaccinationData.boosterDate}.`,
+      });
+    }
+
+    return event;
   }
 
   async update(

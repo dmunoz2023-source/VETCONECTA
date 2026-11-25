@@ -9,6 +9,9 @@ export const validationSchema = Joi.object({
   DB_PASSWORD: Joi.string().required(),
   DB_NAME: Joi.string().required(),
   CLIENTS_SERVICE_URL: Joi.string().uri().default('http://localhost:3002'),
+  NOTIFICATIONS_SERVICE_URL: Joi.string()
+    .uri()
+    .default('http://localhost:3005'),
   INTERNAL_API_KEY: Joi.string().optional(),
   INTERNAL_KEY: Joi.string().optional(),
 });

@@ -1,6 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsNotEmpty,
+  Matches,
   IsOptional,
   IsString,
   IsUUID,
@@ -12,7 +13,8 @@ export class CreateUserNotificationDto {
     format: 'uuid',
     description: 'Usuario destinatario del aviso.',
   })
-  @IsUUID()
+  // PostgreSQL accepts UUIDs with non-RFC version or variant bits.
+  @Matches(/^[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}$/i)
   userId!: string;
 
   @ApiPropertyOptional({
