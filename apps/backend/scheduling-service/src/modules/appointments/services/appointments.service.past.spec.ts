@@ -29,7 +29,16 @@ describe('AppointmentsService.findPastByPet [F3]', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    service = new AppointmentsService(repository as unknown as AppointmentsRepository);
+    // Solo importa el repositorio: findPastByPet no usa auditoría, mascotas, avisos ni disponibilidad.
+    const unused = {} as never;
+    service = new AppointmentsService(
+      repository as unknown as AppointmentsRepository,
+      unused,
+      unused,
+      unused,
+      unused,
+      unused,
+    );
   });
 
   it('devuelve solo los campos que necesita clinical, sin datos internos', async () => {
