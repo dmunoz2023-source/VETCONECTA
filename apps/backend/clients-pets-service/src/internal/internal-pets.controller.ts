@@ -5,10 +5,13 @@ import {
   Param,
   UseGuards,
 } from '@nestjs/common';
+import { ApiExcludeController } from '@nestjs/swagger';
 import { InternalKeyGuard } from '@app/shared/guards/internal-key.guard';
 import { ClientsRepository } from '../modules/clients/repositories/clients.repository';
 import { PetsService } from '../modules/pets/services/pets.service';
 
+// Rutas /internal: solo entre microservicios con X-Internal-Key; no forman parte del contrato público.
+@ApiExcludeController()
 @Controller('internal/pets')
 @UseGuards(InternalKeyGuard)
 export class InternalPetsController {
