@@ -1,6 +1,7 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
-import { IsInt, IsISO8601, IsOptional, IsUUID, Max, Min } from 'class-validator';
+import { IsInt, IsISO8601, IsOptional, Matches, Max, Min } from 'class-validator';
+import { UUID_FORMAT } from '../../appointments/dto/create-cita.dto';
 
 /**
  * [K2] Filtros comunes de GET /v1/scheduling/ratings y /ratings/summary.
@@ -9,7 +10,7 @@ import { IsInt, IsISO8601, IsOptional, IsUUID, Max, Min } from 'class-validator'
 export class RatingsFilterDto {
   @ApiPropertyOptional({ format: 'uuid', description: 'Solo calificaciones de las citas de este veterinario.' })
   @IsOptional()
-  @IsUUID('all')
+  @Matches(UUID_FORMAT, { message: 'vetUserId debe ser un UUID valido' })
   vetUserId?: string;
 
   @ApiPropertyOptional({
