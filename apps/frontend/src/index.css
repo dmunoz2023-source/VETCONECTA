@@ -8,6 +8,8 @@
   --other-bg: #F8FAFC;
   --accent: #C3469D;
   --accent-secondary: #8E4EDB;
+  /* Darker shade of the secondary accent: text buttons such as "back" need more contrast than the main purple. */
+  --accent-dark: #5B2A9E;
   --accent-bg: #8E4EDB;
   --accent-bg-light: rgba(170, 59, 255, 0.1);
   --accent-border: rgba(170, 59, 255, 0.5);
