@@ -12,9 +12,13 @@ import {
 import {
   ApiBadRequestResponse,
   ApiBearerAuth,
+  ApiConflictResponse,
+  ApiCreatedResponse,
   ApiForbiddenResponse,
+  ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
+  ApiParam,
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
@@ -64,6 +68,14 @@ export class AppointmentsController {
   @Post()
   @UseGuards(JwtHeadersGuard, RolesGuard)
   @Roles('owner', 'reception', 'admin')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Reservar una hora', description: 'Roles: owner, reception, admin. Valida la mascota, el veterinario y el bloque dentro de una transacción con bloqueo de fila; programa el recordatorio de 24 h después del commit (FR-3, BR-4, BR-5, BR-7, BR-9).' })
+  @ApiCreatedResponse({ description: 'Cita reservada.' })
+  @ApiBadRequestResponse({ description: 'VALIDATION_ERROR: cuerpo inválido o fecha pasada.', schema: ERROR_RESPONSE_SCHEMA })
+  @ApiUnauthorizedResponse({ description: 'UNAUTHORIZED: falta el token o expiró.', schema: ERROR_RESPONSE_SCHEMA })
+  @ApiForbiddenResponse({ description: 'FORBIDDEN: el usuario no tiene client_id o la mascota no es suya (BR-8).', schema: ERROR_RESPONSE_SCHEMA })
+  @ApiNotFoundResponse({ description: 'NOT_FOUND: la mascota no existe o el veterinario no tiene un bloque disponible a esa hora.', schema: ERROR_RESPONSE_SCHEMA })
+  @ApiConflictResponse({ description: 'CONFLICT: el horario ya fue reservado por otra persona (BR-5).', schema: ERROR_RESPONSE_SCHEMA })
   async create(@CurrentUser() user: JwtPayload, @Body() dto: CreateCitaDto) {
     return this.appointmentsService.create(user, dto);
   }
@@ -72,6 +84,15 @@ export class AppointmentsController {
   @Patch(':id/cancel')
   @UseGuards(JwtHeadersGuard, RolesGuard)
   @Roles('owner', 'reception', 'admin')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Cancelar una cita', description: 'Roles: owner (solo las suyas), reception, admin. Libera el horario y anula el recordatorio asociado (BR-7, BR-9).' })
+  @ApiParam({ name: 'id', description: 'UUID de la cita.' })
+  @ApiOkResponse({ description: 'Cita cancelada.' })
+  @ApiBadRequestResponse({ description: 'VALIDATION_ERROR: la cita ya comenzó y no se puede cancelar.', schema: ERROR_RESPONSE_SCHEMA })
+  @ApiUnauthorizedResponse({ description: 'UNAUTHORIZED: falta el token o expiró.', schema: ERROR_RESPONSE_SCHEMA })
+  @ApiForbiddenResponse({ description: 'FORBIDDEN: la cita no pertenece al dueño (BR-8).', schema: ERROR_RESPONSE_SCHEMA })
+  @ApiNotFoundResponse({ description: 'NOT_FOUND: la cita no existe.', schema: ERROR_RESPONSE_SCHEMA })
+  @ApiConflictResponse({ description: 'CONFLICT: la cita ya no se puede cancelar (ya cancelada o realizada).', schema: ERROR_RESPONSE_SCHEMA })
   async cancel(@CurrentUser() user: JwtPayload, @Param('id', ParseUUIDPipe) id: string) {
     return this.appointmentsService.cancel(user, id);
   }
@@ -80,6 +101,15 @@ export class AppointmentsController {
   @Patch(':id/status')
   @UseGuards(JwtHeadersGuard, RolesGuard)
   @Roles('vet', 'reception', 'admin')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Marcar una cita como realizada o no asistida', description: 'Roles: vet, reception, admin. completed habilita la calificación de la cita (BR-9, BR-13).' })
+  @ApiParam({ name: 'id', description: 'UUID de la cita.' })
+  @ApiOkResponse({ description: 'Cita actualizada.' })
+  @ApiBadRequestResponse({ description: 'VALIDATION_ERROR: status debe ser completed o no_show.', schema: ERROR_RESPONSE_SCHEMA })
+  @ApiUnauthorizedResponse({ description: 'UNAUTHORIZED: falta el token o expiró.', schema: ERROR_RESPONSE_SCHEMA })
+  @ApiForbiddenResponse({ description: 'FORBIDDEN: el rol no puede cambiar el estado (BR-14) o un veterinario intenta actualizar la cita de otro.', schema: ERROR_RESPONSE_SCHEMA })
+  @ApiNotFoundResponse({ description: 'NOT_FOUND: la cita no existe.', schema: ERROR_RESPONSE_SCHEMA })
+  @ApiConflictResponse({ description: 'CONFLICT: transición de estado no permitida (por ejemplo, de cancelled a completed).', schema: ERROR_RESPONSE_SCHEMA })
   async updateStatus(
     @CurrentUser() user: JwtPayload,
     @Param('id', ParseUUIDPipe) id: string,
