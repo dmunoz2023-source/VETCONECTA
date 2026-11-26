@@ -1,4 +1,4 @@
-import * as Joi from 'joi';
+﻿import * as Joi from 'joi';
 
 export const validationSchema = Joi.object({
   PORT: Joi.number().default(3002),
@@ -6,4 +6,5 @@ export const validationSchema = Joi.object({
     .uri({ scheme: ['postgresql', 'postgres'] })
     .required(),
   DB_SCHEMA: Joi.string().valid('clients_pets').default('clients_pets'),
+  INTERNAL_KEY: Joi.string().min(8).required(),
 });
