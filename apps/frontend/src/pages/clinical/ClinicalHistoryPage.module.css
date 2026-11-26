@@ -1,5 +1,7 @@
+/* Fills the content area like the patient file, so the carnet is aligned with the header and does not float in a narrow column. */
 .page {
-  max-width: 860px;
+  width: 100%;
+  min-width: 0;
   text-align: left;
   color: var(--text);
 }
