@@ -2,6 +2,16 @@
   background: #fee2e2;
   color: #9001c0;
 }
+/* Icon + short text: a bordered button so it reads as an action, not as a decoration. */
+.vc-icon-btn-text {
+  gap: 6px;
+  padding: 6px 10px;
+  border: 1px solid var(--accent-border);
+  color: var(--accent-dark);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
 .vc-row-actions {
   display: flex;
   align-items: center;

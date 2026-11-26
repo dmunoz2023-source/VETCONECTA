@@ -48,7 +48,7 @@ export const getPetColumns = ({ onView }: PetColumnActions): TableColumn<Pet>[] 
     header: "",
     render: (p) => (
       <div className="vc-row-actions">
-        <IconButton label={`Ver ficha de ${p.name}`} onClick={() => onView(p)}>
+        <IconButton label={`Ver ficha de ${p.name}`} text="Ver ficha" onClick={() => onView(p)}>
           <Eye size={16} />
         </IconButton>
       </div>
