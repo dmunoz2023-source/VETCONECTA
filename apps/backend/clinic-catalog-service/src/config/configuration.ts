@@ -20,7 +20,7 @@ export default (): AppConfig => ({
     port: parseInt(process.env.DB_PORT || '5432', 10),
     username: process.env.DB_USERNAME || 'postgres',
     password: process.env.DB_PASSWORD || 'postgres',
-    name: process.env.DB_NAME || 'vetconecta',
+    name: process.env.DB_NAME || 'catalog_db',
   },
   dbSchema: 'catalog',
   internalKey: process.env.INTERNAL_KEY as string,
