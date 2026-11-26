@@ -10,6 +10,8 @@
 
 .vc-content {
   width: 100%;
+  /* Sin esto, una tabla o un calendario anchos empujan el contenido fuera de la pantalla. */
+  min-width: 0;
   display: flex;
   flex-direction: column;
   overflow-y: auto;

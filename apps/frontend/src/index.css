@@ -17,6 +17,16 @@
 
   --transition-05-ease: 0.5s ease;
 
+  /* Alias --vc-*: los usan tablas, tarjetas, paginación y el minicalendario.
+     Se definían en DashboardLayout.css y quedaron sin definir al cambiar el tema,
+     así que apuntan a la paleta actual (sin ellos, p. ej., el día de hoy del minicalendario no se veía). */
+  --vc-primary: var(--accent-secondary);
+  --vc-primary-light: var(--accent-bg-light);
+  --vc-bg: var(--bg);
+  --vc-text: var(--text-h);
+  --vc-text-muted: var(--text);
+  --vc-border: var(--border);
+
   --sans: 'Inter', Roboto, sans-serif, system-ui, 'Segoe UI';
   --heading: 'Inter', Roboto, sans-serif, system-ui, 'Segoe UI';
   --mono: ui-monospace, Consolas, monospace;

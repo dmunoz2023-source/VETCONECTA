@@ -12,6 +12,9 @@ export default function SidebarItem({ label, path, icon: Icon, collapsed }: Side
     <NavLink
       to={path}
       end={path === "/"}
+      // Colapsado solo queda el icono: el nombre va como tooltip y para lectores de pantalla.
+      title={collapsed ? label : undefined}
+      aria-label={collapsed ? label : undefined}
       className={({ isActive }) => css.vc_nav_item + ` ${isActive ? css.active : ""}`}
     >
       <Icon size={18} />
