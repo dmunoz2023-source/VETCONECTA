@@ -5,6 +5,13 @@ export type PetFormErrors = Partial<Record<keyof PetFormValues, string>>;
 
 const MAX_SPECIES_LENGTH = 50;
 
+/** Fields validated in each step of the pet form, in order: owner, patient data, optional details. */
+export const PET_FORM_STEPS: (keyof PetFormValues)[][] = [
+  ["clientId"],
+  ["name", "species", "otherSpecies", "breed", "sex", "birthDate"],
+  [],
+];
+
 /**
  * Same rules as CrearMascotaDto / ActualizarMascotaDto (F1): name, species,
  * breed, sex, birth date and owner are required; the date cannot be in the future.
