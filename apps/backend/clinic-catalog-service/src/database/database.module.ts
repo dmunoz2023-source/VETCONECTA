@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { Clinic } from '../modules/clinic/entities/clinic.entity';
 import { Specialty } from '../modules/specialties/entities/specialty.entity';
 import { Vet } from '../modules/vets/entities/vet.entity';
 import { VetSpecialty } from '../modules/vets/entities/vet-specialty.entity';
@@ -22,7 +23,7 @@ import { VetSpecialty } from '../modules/vets/entities/vet-specialty.entity';
         password: configService.get<string>('database.password'),
         database: configService.get<string>('database.name'),
         schema: 'catalog',
-        entities: [Specialty, Vet, VetSpecialty],
+        entities: [Clinic, Specialty, Vet, VetSpecialty],
         synchronize: false,
       }),
     }),

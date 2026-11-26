@@ -13,6 +13,7 @@ const specialty = { id: 'e1', name: 'Vacunación', durationMinutes: 15, active: 
 describe('VetsService', () => {
   const repo = {
     findById: jest.fn(),
+    findActive: jest.fn(),
     findSpecialties: jest.fn(),
     hasSpecialty: jest.fn(),
     addSpecialty: jest.fn(),
@@ -69,5 +70,12 @@ describe('VetsService', () => {
       active: true,
       specialties: [{ id: 'e1', name: 'Vacunación', durationMinutes: 15 }],
     });
+  });
+
+  it('pasa el filtro de especialidad al listar veterinarios', async () => {
+    repo.findActive.mockResolvedValue([{ userId: VET }]);
+
+    await expect(service.findActive('e1')).resolves.toEqual([{ userId: VET }]);
+    expect(repo.findActive).toHaveBeenCalledWith('e1');
   });
 });

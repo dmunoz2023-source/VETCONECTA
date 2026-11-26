@@ -35,6 +35,15 @@ export function clinicTimeToDate(date: string, time: string): Date {
   return new Date(wallClock - clinicOffsetMs(firstGuess));
 }
 
+/** Formatea un instante en ISO 8601 con el desfase de la clínica, ej. 2026-11-09T09:00:00-03:00. */
+export function formatClinicDateTime(instant: Date): string {
+  const offset = clinicOffsetMs(instant.getTime());
+  const local = new Date(instant.getTime() + offset).toISOString().slice(0, 19);
+  const offsetMinutes = Math.abs(offset) / 60000;
+  const sign = offset < 0 ? '-' : '+';
+  return `${local}${sign}${fromMinutes(offsetMinutes)}`;
+}
+
 /** Día de la semana de una fecha 'YYYY-MM-DD': 0 = domingo ... 6 = sábado. */
 export function dayOfWeek(date: string): number {
   return new Date(`${date}T00:00:00Z`).getUTCDay();

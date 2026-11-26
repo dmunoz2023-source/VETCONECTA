@@ -11,7 +11,7 @@ import { CreateVetBlockDto } from '../dto/create-vet-block.dto';
 import { UpdateVetBlockDto } from '../dto/update-vet-block.dto';
 import { VetBlock } from '../entities/vet-block.entity';
 import { VetBlocksRepository } from '../repositories/vet-blocks.repository';
-import { clinicTimeToDate, nextDate } from '../utils/clinic-time';
+import { vetBlockRange } from '../utils/vet-block-range';
 
 export interface AffectedAppointment {
   id: string;
@@ -94,10 +94,7 @@ export class VetBlocksService {
   }
 
   private async withAffectedAppointments(block: VetBlock): Promise<VetBlockResult> {
-    const from = clinicTimeToDate(block.date, block.startTime ?? '00:00');
-    const to = block.endTime
-      ? clinicTimeToDate(block.date, block.endTime)
-      : clinicTimeToDate(nextDate(block.date), '00:00');
+    const { from, to } = vetBlockRange(block);
     const appointments = await this.appointments.findActiveByVetBetween(block.vetUserId, from, to);
 
     return {
