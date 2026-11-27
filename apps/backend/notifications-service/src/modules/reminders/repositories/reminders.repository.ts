@@ -36,6 +36,22 @@ export class RemindersRepository {
     });
   }
 
+  /**
+   * Reclamo atómico: un UPDATE condicional pasa el recordatorio de 'pending'
+   * a 'processing'. Si dos procesos lo intentan a la vez, solo uno obtiene
+   * affected = 1 y es el único que lo envía.
+   */
+  async claim(id: string): Promise<boolean> {
+    const result = await this.repo.update({ id, status: 'pending' }, { status: 'processing' });
+    return (result.affected ?? 0) === 1;
+  }
+
+  /** Al arrancar el servicio: devuelve a 'pending' los que quedaron en 'processing' por una caída. */
+  async resetProcessing(): Promise<number> {
+    const result = await this.repo.update({ status: 'processing' }, { status: 'pending' });
+    return result.affected ?? 0;
+  }
+
   async markSent(id: string): Promise<void> {
     await this.repo.update(id, { status: 'sent' });
   }
@@ -54,18 +70,21 @@ export class RemindersRepository {
 
   /**
    * Registra un intento fallido. Si `giveUp` es true queda en 'error'
-   * (se acabaron los reintentos); si no, vuelve a 'pending' para reintentar.
+   * (se acabaron los reintentos); si no, vuelve a 'pending' con `fireAt`
+   * movido a `retryAt` (backoff entre reintentos).
    */
   async registerFailure(
     id: string,
     message: string,
     attempts: number,
     giveUp: boolean,
+    retryAt?: Date,
   ): Promise<void> {
     await this.repo.update(id, {
       attempts,
       lastError: message,
       status: giveUp ? 'error' : 'pending',
+      ...(!giveUp && retryAt ? { fireAt: retryAt } : {}),
     });
   }
 }

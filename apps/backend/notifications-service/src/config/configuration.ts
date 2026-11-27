@@ -21,6 +21,8 @@ export interface AppConfig {
   reminderPollSeconds: number;
   /** Intentos maximos de envio antes de dejar el recordatorio en estado "error". */
   reminderMaxAttempts: number;
+  /** Segundos base del backoff entre reintentos (se duplica en cada intento). */
+  reminderRetryBaseSeconds: number;
   internalKey: string;
   firebase: FirebaseConfig;
 }
@@ -38,6 +40,7 @@ export default (): AppConfig => ({
   reminderLeadMinutes: parseInt(process.env.REMINDER_LEAD_MINUTES ?? '1440', 10),
   reminderPollSeconds: parseInt(process.env.REMINDER_POLL_SECONDS ?? '300', 10),
   reminderMaxAttempts: parseInt(process.env.REMINDER_MAX_ATTEMPTS ?? '3', 10),
+  reminderRetryBaseSeconds: parseInt(process.env.REMINDER_RETRY_BASE_SECONDS ?? '30', 10),
   internalKey: process.env.INTERNAL_KEY as string,
   firebase: {
     projectId: process.env.FIREBASE_PROJECT_ID ?? '',

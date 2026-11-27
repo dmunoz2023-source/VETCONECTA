@@ -19,10 +19,12 @@ function reminder(overrides: Record<string, unknown> = {}) {
 
 const device = (id: string, token: string) => ({ id, token, userId: 'u1', active: true });
 
-function build(maxAttempts?: number) {
+function build(maxAttempts?: number, retryBaseSeconds?: number) {
   const reminders = {
     findDue: jest.fn(),
     findById: jest.fn(),
+    claim: jest.fn().mockResolvedValue(true),
+    resetProcessing: jest.fn().mockResolvedValue(0),
     markSent: jest.fn().mockResolvedValue(undefined),
     registerFailure: jest.fn().mockResolvedValue(undefined),
   };
@@ -35,7 +37,11 @@ function build(maxAttempts?: number) {
   const notifications = { createFromReminder: jest.fn().mockResolvedValue(undefined) };
   const push = { send: jest.fn() };
   const config = {
-    get: jest.fn((key: string) => (key === 'reminderMaxAttempts' ? maxAttempts : undefined)),
+    get: jest.fn((key: string) => {
+      if (key === 'reminderMaxAttempts') return maxAttempts;
+      if (key === 'reminderRetryBaseSeconds') return retryBaseSeconds;
+      return undefined;
+    }),
   };
   const service = new ReminderDispatcherService(
     reminders as any,
@@ -73,6 +79,20 @@ describe('ReminderDispatcherService', () => {
       reminders.findDue.mockResolvedValue([]);
       await expect(service.dispatchDue()).resolves.toBe(0);
       expect(push.send).not.toHaveBeenCalled();
+    });
+
+    it('devuelve solo los que logro reclamar', async () => {
+      const { service, reminders, tokens, push } = build();
+      reminders.findDue.mockResolvedValue([reminder({ id: 'r1' }), reminder({ id: 'r2' })]);
+      reminders.claim.mockResolvedValueOnce(true).mockResolvedValueOnce(false);
+      tokens.findActiveByUser.mockResolvedValue([device('d1', 'tok-1')]);
+      push.send.mockResolvedValue({ ok: true });
+
+      const taken = await service.dispatchDue();
+
+      expect(taken).toBe(1);
+      expect(reminders.markSent).toHaveBeenCalledTimes(1);
+      expect(reminders.markSent).toHaveBeenCalledWith('r1');
     });
   });
 
@@ -146,7 +166,13 @@ describe('ReminderDispatcherService', () => {
 
       expect(tokens.removeByTokens).toHaveBeenCalledWith(['invalid-1']);
       expect(reminders.markSent).not.toHaveBeenCalled();
-      expect(reminders.registerFailure).toHaveBeenCalledWith('r1', expect.any(String), 1, false);
+      expect(reminders.registerFailure).toHaveBeenCalledWith(
+        'r1',
+        expect.any(String),
+        1,
+        false,
+        expect.any(Date),
+      );
     });
   });
 
@@ -159,7 +185,13 @@ describe('ReminderDispatcherService', () => {
       await service.dispatchById('r1');
 
       expect(push.send).not.toHaveBeenCalled();
-      expect(reminders.registerFailure).toHaveBeenCalledWith('r1', expect.any(String), 1, false);
+      expect(reminders.registerFailure).toHaveBeenCalledWith(
+        'r1',
+        expect.any(String),
+        1,
+        false,
+        expect.any(Date),
+      );
     });
 
     it('usa 3 intentos por defecto: el tercer fallo deja el recordatorio en error', async () => {
@@ -170,7 +202,13 @@ describe('ReminderDispatcherService', () => {
 
       await service.dispatchById('r1');
 
-      expect(reminders.registerFailure).toHaveBeenCalledWith('r1', expect.any(String), 3, true);
+      expect(reminders.registerFailure).toHaveBeenCalledWith(
+        'r1',
+        expect.any(String),
+        3,
+        true,
+        undefined,
+      );
     });
 
     it('respeta REMINDER_MAX_ATTEMPTS configurado', async () => {
@@ -181,7 +219,13 @@ describe('ReminderDispatcherService', () => {
 
       await service.dispatchById('r1');
 
-      expect(reminders.registerFailure).toHaveBeenCalledWith('r1', expect.any(String), 3, false);
+      expect(reminders.registerFailure).toHaveBeenCalledWith(
+        'r1',
+        expect.any(String),
+        3,
+        false,
+        expect.any(Date),
+      );
     });
 
     it('si el sender lanza una excepcion la captura y registra el fallo', async () => {
@@ -192,17 +236,80 @@ describe('ReminderDispatcherService', () => {
 
       await expect(service.dispatchById('r1')).resolves.toBeUndefined();
 
-      expect(reminders.registerFailure).toHaveBeenCalledWith('r1', 'network down', 1, false);
+      expect(reminders.registerFailure).toHaveBeenCalledWith(
+        'r1',
+        'network down',
+        1,
+        false,
+        expect.any(Date),
+      );
+    });
+  });
+
+  describe('backoff entre reintentos', () => {
+    const NOW = 1_700_000_000_000;
+
+    beforeEach(() => {
+      jest.spyOn(Date, 'now').mockReturnValue(NOW);
+    });
+
+    it('primer fallo: reintenta despues de la base configurada', async () => {
+      const { service, reminders, tokens } = build(3, 30);
+      reminders.findById.mockResolvedValue(reminder({ attempts: 0 }));
+      tokens.findActiveByUser.mockResolvedValue([]);
+
+      await service.dispatchById('r1');
+
+      expect(reminders.registerFailure).toHaveBeenCalledWith(
+        'r1',
+        expect.any(String),
+        1,
+        false,
+        new Date(NOW + 30_000),
+      );
+    });
+
+    it('segundo fallo: espera el doble', async () => {
+      const { service, reminders, tokens } = build(3, 30);
+      reminders.findById.mockResolvedValue(reminder({ attempts: 1 }));
+      tokens.findActiveByUser.mockResolvedValue([]);
+
+      await service.dispatchById('r1');
+
+      expect(reminders.registerFailure).toHaveBeenCalledWith(
+        'r1',
+        expect.any(String),
+        2,
+        false,
+        new Date(NOW + 60_000),
+      );
+    });
+
+    it('al agotar los intentos no programa nuevo reintento', async () => {
+      const { service, reminders, tokens } = build(3, 30);
+      reminders.findById.mockResolvedValue(reminder({ attempts: 2 }));
+      tokens.findActiveByUser.mockResolvedValue([]);
+
+      await service.dispatchById('r1');
+
+      expect(reminders.registerFailure).toHaveBeenCalledWith(
+        'r1',
+        expect.any(String),
+        3,
+        true,
+        undefined,
+      );
     });
   });
 
   describe('dispatchById', () => {
-    it.each([['cancelled'], ['sent'], ['error']])(
+    it.each([['cancelled'], ['sent'], ['error'], ['processing']])(
       'ignora un recordatorio en estado %s',
       async (status) => {
         const { service, reminders, push } = build();
         reminders.findById.mockResolvedValue(reminder({ status }));
         await service.dispatchById('r1');
+        expect(reminders.claim).not.toHaveBeenCalled();
         expect(push.send).not.toHaveBeenCalled();
       },
     );
@@ -215,10 +322,25 @@ describe('ReminderDispatcherService', () => {
     });
   });
 
-  describe('control inFlight', () => {
+  describe('reclamo atomico', () => {
+    it('si otro proceso ya lo reclamo, no hace nada', async () => {
+      const { service, reminders, push, notifications } = build();
+      reminders.findById.mockResolvedValue(reminder());
+      reminders.claim.mockResolvedValue(false);
+
+      await service.dispatchById('r1');
+
+      expect(reminders.claim).toHaveBeenCalledWith('r1');
+      expect(notifications.createFromReminder).not.toHaveBeenCalled();
+      expect(push.send).not.toHaveBeenCalled();
+      expect(reminders.markSent).not.toHaveBeenCalled();
+      expect(reminders.registerFailure).not.toHaveBeenCalled();
+    });
+
     it('dos despachos simultaneos del mismo recordatorio envian una sola vez', async () => {
       const { service, reminders, tokens, push } = build();
       reminders.findById.mockResolvedValue(reminder());
+      reminders.claim.mockResolvedValueOnce(true).mockResolvedValueOnce(false);
       tokens.findActiveByUser.mockResolvedValue([device('d1', 'tok')]);
 
       let release!: () => void;
@@ -234,6 +356,17 @@ describe('ReminderDispatcherService', () => {
 
       expect(push.send).toHaveBeenCalledTimes(1);
       expect(reminders.markSent).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('arranque', () => {
+    it('devuelve a pending los recordatorios que quedaron en processing', async () => {
+      const { service, reminders } = build();
+      reminders.resetProcessing.mockResolvedValue(2);
+
+      await service.onModuleInit();
+
+      expect(reminders.resetProcessing).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -271,7 +404,13 @@ describe('ReminderDispatcherService', () => {
       await service.dispatchById('r1');
 
       expect(push.send).not.toHaveBeenCalled();
-      expect(reminders.registerFailure).toHaveBeenCalledWith('r1', 'db caida', 1, false);
+      expect(reminders.registerFailure).toHaveBeenCalledWith(
+        'r1',
+        'db caida',
+        1,
+        false,
+        expect.any(Date),
+      );
     });
   });
 });

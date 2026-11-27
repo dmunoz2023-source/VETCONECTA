@@ -11,6 +11,7 @@ export const validationSchema = Joi.object({
   REMINDER_LEAD_MINUTES: Joi.number().integer().min(1).default(1440),
   REMINDER_POLL_SECONDS: Joi.number().integer().min(1).default(300),
   REMINDER_MAX_ATTEMPTS: Joi.number().integer().min(1).default(3),
+  REMINDER_RETRY_BASE_SECONDS: Joi.number().integer().min(0).default(30),
   INTERNAL_KEY: Joi.string().required(),
   // Opcionales: si no están, el servicio usa el envío simulado.
   FIREBASE_PROJECT_ID: Joi.string().allow('').optional(),

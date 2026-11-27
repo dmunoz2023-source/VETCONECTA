@@ -1,6 +1,6 @@
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
-export type ReminderStatus = 'pending' | 'sent' | 'cancelled' | 'error';
+export type ReminderStatus = 'pending' | 'processing' | 'sent' | 'cancelled' | 'error';
 
 /**
  * [H1] Mapea notifications.scheduled_reminders.
