@@ -24,7 +24,11 @@ import { PetEntity } from '../modules/pets/entities/pet.entity';
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({
         type: 'postgres',
-        url: config.get<string>('databaseUrl'),
+        host: config.get<string>('database.host'),
+        port: config.get<number>('database.port'),
+        username: config.get<string>('database.username'),
+        password: config.get<string>('database.password'),
+        database: config.get<string>('database.name'),
         schema: config.get<string>('dbSchema'),
         entities: [Client, PetEntity],
         synchronize: false,

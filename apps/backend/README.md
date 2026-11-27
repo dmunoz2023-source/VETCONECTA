@@ -28,18 +28,18 @@ Guía oficial de desarrollo, arquitectura y ejecución local para los servicios 
 
 ## Mapeo de Servicios, Puertos y Esquemas de Base de Datos
 
-Cada servicio corre de forma aislada en un puerto dedicado sobre una única instancia de PostgreSQL particionada en esquemas lógicos:
+Cada servicio corre de forma aislada en un puerto dedicado y se conecta a **su propia base de datos** PostgreSQL (`DB_NAME` en su `.env`). Dentro de esa base, sus tablas viven en el esquema del servicio:
 
-|                          |        |                       |               |                                                                               |
-| ------------------------ | ------ | --------------------- | ------------- | ----------------------------------------------------------------------------- |
-| Servicio                 | Puerto | Prefijo / Ruta Base   | Esquema DB    | Responsabilidad Principal                                                     |
-| api-gateway              | :3000  | /v1/*                 | —             | Terminación de JWT, ruteo 1:1, traza de peticiones y Swagger consolidado      |
-| auth-service             | :3001  | /v1/auth              | auth          | Identidad, credenciales (bcrypt), emisión de JWT y gestión de roles           |
-| clients-pets-service     | :3002  | /v1/clients, /v1/pets | clients_pets  | Fichas de dueños y pacientes, cálculo dinámico de edad y baja lógica          |
-| clinical-records-service | :3003  | /v1/clinical          | clinical      | Carnet digital de solo lectura, eventos médicos e historial de tratamientos   |
-| scheduling-service       | :3004  | /v1/scheduling        | scheduling    | Bloques de disponibilidad, agenda de citas transaccional y calificaciones     |
-| notifications-service    | :3005  | /v1/notifications     | notifications | Registro de tokens push (FCM/APNs), recordatorios 24 h y correo institucional |
-| clinic-catalog-service   | :3006  | /v1/catalog           | catalog       | Información institucional, teléfono de urgencias y catálogo de especialidades |
+|                          |        |                       |                          |               |                                                                               |
+| ------------------------ | ------ | --------------------- | ------------------------ | ------------- | ----------------------------------------------------------------------------- |
+| Servicio                 | Puerto | Prefijo / Ruta Base   | Base de datos            | Esquema DB    | Responsabilidad Principal                                                     |
+| api-gateway              | :3000  | /v1/*                 | —                        | —             | Terminación de JWT, ruteo 1:1, traza de peticiones y Swagger consolidado      |
+| auth-service             | :3001  | /v1/auth              | auth_db                  | auth          | Identidad, credenciales (bcrypt), emisión de JWT y gestión de roles           |
+| clients-pets-service     | :3002  | /v1/clients, /v1/pets | clients_pets_db          | clients_pets  | Fichas de dueños y pacientes, cálculo dinámico de edad y baja lógica          |
+| clinical-records-service | :3003  | /v1/clinical          | clinical_db              | clinical      | Carnet digital de solo lectura, eventos médicos e historial de tratamientos   |
+| scheduling-service       | :3004  | /v1/scheduling        | scheduling_db            | scheduling    | Bloques de disponibilidad, agenda de citas transaccional y calificaciones     |
+| notifications-service    | :3005  | /v1/notifications     | notifications_db         | notifications | Registro de tokens push (FCM/APNs), recordatorios 24 h y correo institucional |
+| clinic-catalog-service   | :3006  | /v1/catalog           | catalog_db               | catalog       | Información institucional, teléfono de urgencias y catálogo de especialidades |
 
 ## Comandos de Ejecución Local (Desde la Raíz)
 

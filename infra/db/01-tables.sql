@@ -113,26 +113,30 @@ CREATE TABLE scheduling.vet_schedules (
 );
 
 -- [G3] Bloqueo puntual de agenda. Sin horas, bloquea el día completo.
+-- reason es una lista fija; con 'other' se exige notes para explicar el motivo.
 CREATE TABLE scheduling.vet_blocks (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     vet_user_id UUID NOT NULL,
     block_date DATE NOT NULL,
     start_time TIME,
     end_time TIME,
-    reason VARCHAR(200) NOT NULL,
+    reason VARCHAR(20) NOT NULL
+        CHECK (reason IN ('vacation', 'holiday', 'sick_leave', 'training', 'other')),
+    notes VARCHAR(200),
     created_by UUID,
     created_at TIMESTAMPTZ DEFAULT NOW(),
     CHECK (
         (start_time IS NULL AND end_time IS NULL)
         OR (start_time IS NOT NULL AND end_time IS NOT NULL AND end_time > start_time)
-    )
+    ),
+    CHECK (reason <> 'other' OR notes IS NOT NULL)
 );
 
 CREATE INDEX idx_vet_blocks_vet_date ON scheduling.vet_blocks (vet_user_id, block_date);
 
 CREATE TABLE scheduling.appointments (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    slot_id UUID NOT NULL UNIQUE,
+    slot_id UUID,
     pet_id UUID NOT NULL,
     client_id UUID NOT NULL,
     vet_user_id UUID NOT NULL,
@@ -145,6 +149,13 @@ CREATE TABLE scheduling.appointments (
     cancelled_at TIMESTAMPTZ,
     CONSTRAINT fk_appointments_slot FOREIGN KEY (slot_id) REFERENCES scheduling.availability_slots(id) ON DELETE RESTRICT
 );
+
+-- BR-5: un veterinario no puede tener dos citas activas con la misma hora de inicio.
+-- Es parcial (solo booked/confirmed) para que una cita cancelada libere el horario.
+-- slot_id es opcional: la disponibilidad puede calcularse sin bloques guardados (G1/G3).
+CREATE UNIQUE INDEX uq_appointments_vet_start_active
+    ON scheduling.appointments (vet_user_id, start_time)
+    WHERE status IN ('booked', 'confirmed');
 
 CREATE TABLE scheduling.ratings (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),

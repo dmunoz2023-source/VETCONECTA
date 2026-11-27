@@ -9,9 +9,9 @@ import { AppointmentsRepository } from '../../appointments/repositories/appointm
 import { CatalogClient } from '../clients/catalog.client';
 import { CreateVetBlockDto } from '../dto/create-vet-block.dto';
 import { UpdateVetBlockDto } from '../dto/update-vet-block.dto';
-import { VetBlock } from '../entities/vet-block.entity';
+import { VetBlock, VetBlockReason } from '../entities/vet-block.entity';
 import { VetBlocksRepository } from '../repositories/vet-blocks.repository';
-import { clinicTimeToDate, nextDate } from '../utils/clinic-time';
+import { vetBlockRange } from '../utils/vet-block-range';
 
 export interface AffectedAppointment {
   id: string;
@@ -54,6 +54,7 @@ export class VetBlocksService {
       throw new UnprocessableEntityException('El veterinario está inactivo.');
     }
     this.assertValidRange(dto.startTime, dto.endTime);
+    this.assertNotesForOther(dto.reason, dto.notes);
     const block = await this.blocks.save({ ...dto, vetUserId, createdBy });
     return this.withAffectedAppointments(block);
   }
@@ -62,6 +63,7 @@ export class VetBlocksService {
     const block = await this.findOne(vetUserId, id);
     const updated = { ...block, ...dto };
     this.assertValidRange(updated.startTime, updated.endTime);
+    this.assertNotesForOther(updated.reason, updated.notes);
     return this.withAffectedAppointments(await this.blocks.save(updated));
   }
 
@@ -93,11 +95,15 @@ export class VetBlocksService {
     }
   }
 
+  /** Con motivo "other" hay que explicar el bloqueo en notes. */
+  private assertNotesForOther(reason?: VetBlockReason, notes?: string | null): void {
+    if (reason === 'other' && !notes) {
+      throw new BadRequestException('Indica el detalle del bloqueo en notes cuando el motivo es other.');
+    }
+  }
+
   private async withAffectedAppointments(block: VetBlock): Promise<VetBlockResult> {
-    const from = clinicTimeToDate(block.date, block.startTime ?? '00:00');
-    const to = block.endTime
-      ? clinicTimeToDate(block.date, block.endTime)
-      : clinicTimeToDate(nextDate(block.date), '00:00');
+    const { from, to } = vetBlockRange(block);
     const appointments = await this.appointments.findActiveByVetBetween(block.vetUserId, from, to);
 
     return {
