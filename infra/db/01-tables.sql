@@ -278,6 +278,26 @@ CREATE TABLE notifications.notification_log (
     CONSTRAINT fk_notification_log_reminder FOREIGN KEY (reminder_id) REFERENCES notifications.scheduled_reminders(id) ON DELETE SET NULL
 );
 
+CREATE TABLE notifications.user_notifications (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID NOT NULL,
+    pet_id UUID,
+    reminder_id UUID UNIQUE,
+    type VARCHAR(50),
+    ref_id UUID,
+    title VARCHAR(150),
+    body TEXT,
+    read_at TIMESTAMPTZ,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    CONSTRAINT fk_user_notifications_reminder FOREIGN KEY (reminder_id)
+        REFERENCES notifications.scheduled_reminders(id) ON DELETE SET NULL
+);
+
+CREATE INDEX idx_user_notifications_user_created
+    ON notifications.user_notifications (user_id, created_at DESC);
+CREATE INDEX idx_user_notifications_unread
+    ON notifications.user_notifications (user_id) WHERE read_at IS NULL;
+
 CREATE TABLE notifications.email_outbox (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     recipient VARCHAR(255),
