@@ -4,7 +4,8 @@ import { getErrorMessage } from "../api/axios";
 import { createClinicalEvent } from "../api/clinical.api";
 import type { ClinicalEvent, ClinicalEventFormValues } from "../types/clinical.types";
 import { toDateInputValue } from "../utils/age";
-import { validateClinicalEventForm } from "../utils/clinicalValidators";
+import { CLINICAL_FORM_STEPS, validateClinicalEventForm } from "../utils/clinicalValidators";
+import type { ClinicalEventFormErrors } from "../utils/clinicalValidators";
 
 interface UseClinicalEventFormOptions {
   petId: string;
@@ -24,26 +25,52 @@ const emptyValues = (): ClinicalEventFormValues => ({
 });
 
 /**
- * State and submission of the clinical event form (UC-06). Validates with the same
- * rules as the backend before sending; errors show after the first save attempt.
- * If the API answers with an error (400, 403, 404) the message goes to
+ * State and submission of the clinical event form (UC-06), filled in two steps (type, data).
+ * Validates with the same rules as the backend: the type is checked before moving on and
+ * the whole form again before sending. A field shows its error only after the user tried
+ * to leave its step, and it updates while they fix it. If the API answers with an error (400, 403, 404) the message goes to
  * `serverError` and the entered data is kept.
  */
 export function useClinicalEventForm({ petId, onSaved }: UseClinicalEventFormOptions) {
   const [values, setValues] = useState(emptyValues);
-  const [submitted, setSubmitted] = useState(false);
+  const [step, setStep] = useState(1);
+  const [attempted, setAttempted] = useState<(keyof ClinicalEventFormValues)[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
 
-  const errors = submitted ? validateClinicalEventForm(values) : {};
+  const allErrors = validateClinicalEventForm(values);
+  const errors: ClinicalEventFormErrors = {};
+  for (const field of attempted) {
+    if (allErrors[field]) errors[field] = allErrors[field];
+  }
+
+  /** Marks the fields of a step as attempted so their errors show; returns true if they are all valid. */
+  const checkStep = (stepNumber: number) => {
+    const fields = CLINICAL_FORM_STEPS[stepNumber - 1];
+    setAttempted((prev) => [...new Set([...prev, ...fields])]);
+    return fields.every((field) => !allErrors[field]);
+  };
+
+  const goNext = () => {
+    if (checkStep(step)) setStep((prev) => Math.min(prev + 1, CLINICAL_FORM_STEPS.length));
+  };
+
+  const goBack = () => setStep((prev) => Math.max(prev - 1, 1));
 
   const setValue = (field: keyof ClinicalEventFormValues, value: string) =>
     setValues((prev) => ({ ...prev, [field]: value }));
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setSubmitted(true);
-    if (Object.keys(validateClinicalEventForm(values)).length > 0) return;
+    // Before the last step the submit (Siguiente button or Enter) only advances; it never saves an unfinished form.
+    if (step < CLINICAL_FORM_STEPS.length) return goNext();
+
+    const firstInvalidStep = CLINICAL_FORM_STEPS.findIndex((fields) => fields.some((field) => allErrors[field]));
+    if (firstInvalidStep !== -1) {
+      setAttempted(CLINICAL_FORM_STEPS.flat());
+      setStep(firstInvalidStep + 1);
+      return;
+    }
 
     setSubmitting(true);
     setServerError(null);
@@ -55,5 +82,5 @@ export function useClinicalEventForm({ petId, onSaved }: UseClinicalEventFormOpt
     }
   };
 
-  return { values, errors, submitting, serverError, setValue, handleSubmit };
+  return { values, errors, step, submitting, serverError, setValue, goBack, handleSubmit };
 }

@@ -3,6 +3,12 @@ import { parseDateOnly } from "./age";
 
 export type ClinicalEventFormErrors = Partial<Record<keyof ClinicalEventFormValues, string>>;
 
+/** Fields validated in each step of the form, in order: event type, then the data of the attention. */
+export const CLINICAL_FORM_STEPS: (keyof ClinicalEventFormValues)[][] = [
+  ["type"],
+  ["date", "weightKg", "notes", "vaccineName", "batch", "diagnosis", "nextCheckup"],
+];
+
 /** Minimum weight accepted by CreateClinicalEventDto (`@IsPositive`; the form asks for at least 0.1 kg). */
 const MIN_WEIGHT_KG = 0.1;
 
