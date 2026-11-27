@@ -1,11 +1,24 @@
 export interface AppConfig {
   port: number;
-  databaseUrl: string;
+  database: {
+    host: string;
+    port: number;
+    username: string;
+    password: string;
+    name: string;
+  };
+  /** Esquema fijo del servicio: solo lee y escribe en `clients_pets`. */
   dbSchema: string;
 }
 
 export default (): AppConfig => ({
-  port: parseInt(process.env.PORT ?? '3002', 10),
-  databaseUrl: process.env.DATABASE_URL as string,
-  dbSchema: process.env.DB_SCHEMA ?? 'clients_pets',
+  port: parseInt(process.env.PORT || '3002', 10),
+  database: {
+    host: process.env.DB_HOST || 'localhost',
+    port: parseInt(process.env.DB_PORT || '5432', 10),
+    username: process.env.DB_USERNAME || 'postgres',
+    password: process.env.DB_PASSWORD || 'postgres',
+    name: process.env.DB_NAME || 'clients_pets_db',
+  },
+  dbSchema: 'clients_pets',
 });

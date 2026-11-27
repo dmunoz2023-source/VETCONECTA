@@ -1,9 +1,11 @@
 import * as Joi from 'joi';
 
+/** [X1] Falla al arrancar si falta la conexión a la base. */
 export const validationSchema = Joi.object({
   PORT: Joi.number().default(3002),
-  DATABASE_URL: Joi.string()
-    .uri({ scheme: ['postgresql', 'postgres'] })
-    .required(),
-  DB_SCHEMA: Joi.string().valid('clients_pets').default('clients_pets'),
+  DB_HOST: Joi.string().required(),
+  DB_PORT: Joi.number().default(5432),
+  DB_USERNAME: Joi.string().required(),
+  DB_PASSWORD: Joi.string().required(),
+  DB_NAME: Joi.string().required(),
 });
