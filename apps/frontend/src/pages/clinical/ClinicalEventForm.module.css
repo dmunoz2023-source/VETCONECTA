@@ -230,12 +230,45 @@
   outline-offset: 2px;
 }
 
+.progress {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+.bar {
+  height: 4px;
+  border-radius: 999px;
+  background: var(--border);
+  transition: background 0.2s ease;
+}
+
+.barDone {
+  background: var(--accent-secondary);
+}
+
+/* The numbered section badge already says the step; the text stays for screen readers only. */
+.stepLabel {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
 .actions {
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
   gap: 10px;
   padding-top: 16px;
   border-top: 1px solid var(--border);
+}
+
+.actionsRight {
+  display: flex;
+  gap: 10px;
+  margin-left: auto;
 }
 
 .error {
@@ -255,6 +288,11 @@
 @media (max-width: 600px) {
   .actions {
     flex-direction: column-reverse;
+  }
+
+  .actionsRight {
+    flex-direction: column-reverse;
+    margin-left: 0;
   }
 }
 
