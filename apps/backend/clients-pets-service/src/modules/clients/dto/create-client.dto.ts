@@ -6,6 +6,7 @@ import {
   IsUUID,
   Matches,
 } from 'class-validator';
+import { PrimaryGeneratedColumn } from 'typeorm';
 
 export class CreateClientDto {
   @IsString({ message: 'El RUT debe ser una cadena de texto' })
@@ -39,7 +40,9 @@ export class CreateClientDto {
   @IsOptional()
   district?: string;
 
+  @PrimaryGeneratedColumn('uuid')
   @IsUUID('4', { message: 'El userId debe ser un UUID v4 válido' })
   @IsOptional()
-  userId?: string;
+   userId?: string;
+  
 }

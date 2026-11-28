@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { Client as ClientEntity } from '../entities/client.entity';
 import { CreateClientDto } from '../dto/create-client.dto';
 import { UpdateClientDto } from '../dto/update-client.dto';
+import { randomUUID } from 'crypto';
 
 @Injectable()
 export class ClientsRepository {
@@ -77,7 +78,7 @@ export class ClientsRepository {
   }
 
   async create(createClientDto: CreateClientDto): Promise<ClientEntity> {
-    const client = this.repo.create(createClientDto);
+    const client = { ...this.repo.create(createClientDto), userId: randomUUID() };
     return this.repo.save(client);
   }
 
