@@ -15,7 +15,7 @@
     "rootDir": "src",
     "testRegex": ".*\\.spec\\.ts$",
     "transform": { "^.+\\.(t|j)s$": "ts-jest" },
-    "collectCoverageFrom": ["**/*.(t|j)s"],
+    "collectCoverageFrom": ["**/services/*.ts", "!**/*.spec.ts"],
     "coverageDirectory": "../coverage",
     "testEnvironment": "node",
     "moduleNameMapper": { "^@app/shared/(.*)$": "<rootDir>/../../../../libs/shared/src/$1" }
