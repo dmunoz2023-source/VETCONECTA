@@ -20,8 +20,8 @@ import { HttpModule } from '@nestjs/axios';
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
         // El JWT_SECRET se obtiene de las variables de entorno (.env)
-        secret: configService.get<string>('JWT_SECRET') || 'secretKeyPlaceholder', 
-        signOptions: { expiresIn: '15m' },
+        secret: configService.getOrThrow<string>('JWT_SECRET'),
+        signOptions: { expiresIn: configService.getOrThrow<string>('JWT_EXPIRES_IN') },
       }),
     }),
   ],

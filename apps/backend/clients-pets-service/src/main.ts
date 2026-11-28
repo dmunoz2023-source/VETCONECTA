@@ -2,6 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { HttpExceptionFilter } from '@app/shared/filters/http-exception.filter';
 import { AppModule } from './app.module';
+import { ConfigService } from '@nestjs/config';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -18,7 +19,7 @@ async function bootstrap() {
     }),
   );
 
-  const port = process.env.PORT || 3002;
+  const port = app.get(ConfigService).getOrThrow<number>('PORT');
   await app.listen(port);
   console.log(`Microservicio ejecutándose en el puerto: ${port}`);
 }
