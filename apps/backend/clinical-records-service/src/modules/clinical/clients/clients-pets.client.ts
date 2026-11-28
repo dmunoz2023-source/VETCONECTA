@@ -37,12 +37,9 @@ export class ClientsPetsClient {
       );
     }
   }
-
+  
   private async get(path: string): Promise<AxiosResponse> {
     const internalKey = this.configService.get<string>('INTERNAL_KEY');
-      this.configService.get<string>('internalApiKey') ||
-      this.configService.get<string>('INTERNAL_API_KEY') ||
-      this.configService.get<string>('INTERNAL_KEY');
     if (!internalKey) {
       throw new InternalServerErrorException(
         'La clave de comunicación interna no está configurada.',
