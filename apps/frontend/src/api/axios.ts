@@ -30,17 +30,26 @@ api.interceptors.response.use(
   },
 );
 
+/** Código de regla de negocio que el backend agrega al final del mensaje, p. ej. " (BR-14)". */
+const BUSINESS_RULE_CODE = /\s*\(BR-\d+\)/g;
+
+/** Quita los códigos "(BR-N)": son referencias internas y no deben verse en pantalla. */
+function stripRuleCodes(text: string): string {
+  return text.replace(BUSINESS_RULE_CODE, '');
+}
+
 /**
  * Mensaje legible del formato de error común (`message`), o `fallback` si no viene.
  * Los 400 de class-validator traen `message` como lista: se unen en un solo texto.
+ * Se oculta el código de regla de negocio "(BR-N)" que agrega el backend.
  */
 export function getErrorMessage(error: unknown, fallback: string): string {
   if (axios.isAxiosError(error)) {
     const message: unknown = error.response?.data?.message;
-    if (typeof message === 'string' && message.trim()) return message;
+    if (typeof message === 'string' && message.trim()) return stripRuleCodes(message);
     if (Array.isArray(message)) {
       const parts = message.filter((part): part is string => typeof part === 'string' && part.trim() !== '');
-      if (parts.length) return parts.join(' ');
+      if (parts.length) return stripRuleCodes(parts.join(' '));
     }
   }
   return fallback;
