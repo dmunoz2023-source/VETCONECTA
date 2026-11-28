@@ -1,4 +1,5 @@
 import * as Joi from 'joi';
+import { internalKeySchema } from '@app/shared/config/env-fragments';
 
 /**
  * [A3] Valida las variables de entorno al arrancar el servicio. Si falta la
@@ -16,5 +17,5 @@ export const validationSchema = Joi.object({
   CLIENTS_SERVICE_URL: Joi.string().uri().default('http://localhost:3002'),
   NOTIFICATIONS_SERVICE_URL: Joi.string().uri().default('http://localhost:3005'),
   CATALOG_SERVICE_URL: Joi.string().uri().default('http://localhost:3006'),
-  INTERNAL_KEY: Joi.string().min(8).required(),
+  INTERNAL_KEY: internalKeySchema,
 });
