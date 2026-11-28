@@ -6,7 +6,7 @@ tiene el mismo nombre que su servicio en `apps/backend/` y contiene:
 | Archivo | Contenido |
 | :--- | :--- |
 | `00-tables.sql` | DDL de las tablas, índices y restricciones del servicio |
-| `01-seed.sql` | Datos iniciales de desarrollo del servicio |
+| `00-seed.sql` | Datos iniciales de desarrollo del servicio |
 
 | Carpeta | Base de datos |
 | :--- | :--- |
@@ -20,7 +20,7 @@ tiene el mismo nombre que su servicio en `apps/backend/` y contiene:
 ## Orden de ejecución
 
 1. `00-databases.sql` (X2) crea las seis bases de datos.
-2. Por cada servicio, conectado a su base: `00-tables.sql` y luego `01-seed.sql`.
+2. Por cada servicio, conectado a su base: `00-tables.sql` y luego `00-seed.sql`.
 
 ```bash
 for pair in auth-service:auth_db clients-pets-service:clients_pets_db \
@@ -28,7 +28,7 @@ for pair in auth-service:auth_db clients-pets-service:clients_pets_db \
             notifications-service:notifications_db clinic-catalog-service:catalog_db; do
   svc=${pair%%:*}; db=${pair##*:}
   psql -U postgres -d "$db" -f "infra/db/$svc/00-tables.sql"
-  psql -U postgres -d "$db" -f "infra/db/$svc/01-seed.sql"
+  psql -U postgres -d "$db" -f "infra/db/$svc/00-seed.sql"
 done
 ```
 

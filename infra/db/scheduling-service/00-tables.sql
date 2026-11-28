@@ -28,19 +28,24 @@ CREATE TABLE vet_schedules (
     UNIQUE (vet_user_id, day_of_week, start_time)
 );
 
+-- [G3] Bloqueo puntual de agenda. Sin horas, bloquea el día completo.
+-- reason es una lista fija; con 'other' se exige notes para explicar el motivo.
 CREATE TABLE vet_blocks (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     vet_user_id UUID NOT NULL,
     block_date DATE NOT NULL,
     start_time TIME,
     end_time TIME,
-    reason VARCHAR(200) NOT NULL,
+    reason VARCHAR(20) NOT NULL
+        CHECK (reason IN ('vacation', 'holiday', 'sick_leave', 'training', 'other')),
+    notes VARCHAR(200),
     created_by UUID,
     created_at TIMESTAMPTZ DEFAULT NOW(),
     CHECK (
         (start_time IS NULL AND end_time IS NULL)
         OR (start_time IS NOT NULL AND end_time IS NOT NULL AND end_time > start_time)
-    )
+    ),
+    CHECK (reason <> 'other' OR notes IS NOT NULL)
 );
 
 CREATE INDEX idx_vet_blocks_vet_date ON vet_blocks (vet_user_id, block_date);
