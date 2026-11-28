@@ -1,15 +1,14 @@
 import { Column, Entity, PrimaryGeneratedColumn, Unique } from 'typeorm';
 
 /**
- * [A3] Mapea scheduling.availability_slots tal como está definida en
- * infra/db/01-tables.sql. `schema: 'scheduling'` es obligatorio: sin esto,
- * TypeORM buscaría la tabla en el esquema por defecto (public) y no la
- * encontraría, o peor, chocaría con una tabla de otro esquema con el mismo
- * nombre.
+ * [A3] Mapea la tabla availability_slots de scheduling_db, la base propia
+ * de scheduling-service (DDL en infra/db/scheduling-service/00-tables.sql).
+ * `schema: 'scheduling'` debe coincidir con el esquema donde ese DDL crea la
+ * tabla, igual que en database.module.ts y en el resto de las entidades.
  *
  * vetUserId y specialtyId son UUID planos, sin relación de TypeORM hacia
- * catalog-service: esa validación cruzada se hace por HTTP interno
- * (regla de oro de la arquitectura), nunca con un JOIN ni una FK física.
+ * catalog-service: catalog vive en otra base (catalog_db), así que esa
+ * validación cruzada se hace por HTTP interno, nunca con un JOIN ni una FK.
  */
 @Entity({ name: 'availability_slots', schema: 'scheduling' })
 @Unique('uq_slot_vet_start', ['vetUserId', 'startTime'])

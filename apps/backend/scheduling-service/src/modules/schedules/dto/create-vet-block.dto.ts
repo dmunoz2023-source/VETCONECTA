@@ -1,5 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsDateString, IsNotEmpty, IsOptional, IsString, Matches, MaxLength } from 'class-validator';
+import { IsDateString, IsIn, IsNotEmpty, IsOptional, IsString, Matches, MaxLength } from 'class-validator';
+import { VET_BLOCK_REASONS, VetBlockReason } from '../entities/vet-block.entity';
 import { TIME_MESSAGE, TIME_PATTERN } from './create-vet-schedule.dto';
 
 export class CreateVetBlockDto {
@@ -18,9 +19,14 @@ export class CreateVetBlockDto {
   @Matches(TIME_PATTERN, { message: `endTime ${TIME_MESSAGE}` })
   endTime?: string | null;
 
-  @ApiProperty({ example: 'Feriado' })
+  @ApiProperty({ enum: VET_BLOCK_REASONS, example: 'holiday' })
+  @IsIn(VET_BLOCK_REASONS, { message: `reason debe ser uno de: ${VET_BLOCK_REASONS.join(', ')}` })
+  reason: VetBlockReason;
+
+  @ApiPropertyOptional({ example: 'Congreso de medicina felina', description: 'Obligatorio cuando reason es other.' })
+  @IsOptional()
   @IsString()
   @IsNotEmpty()
   @MaxLength(200)
-  reason: string;
+  notes?: string | null;
 }
